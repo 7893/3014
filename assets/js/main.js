@@ -112,18 +112,18 @@ function updateSceneUI(state) {
   const city = state.scene === "city";
   document.querySelector("h1").textContent = city ? "京华入夜" : "山静日长";
   document.querySelector(".inscription p").innerHTML = city
-    ? "一舟穿灯火<br />今古共长流"
+    ? "亮马浮灯影<br />一舟渡古今"
     : "一水含天远<br />千山入梦深";
   document.querySelector(".seal").innerHTML = city
     ? "京<br />华"
     : "山<br />居";
   document.querySelector(".work-mark").textContent = city
-    ? "一舟过城　·　灯火可亲"
+    ? "亮马河畔　·　灯火可亲"
     : "山水无尽　·　心自闲";
   canvas.setAttribute(
     "aria-label",
     city
-      ? "北京入夜，中国尊与央视总部映入江水，车流经过桥面，同一舟人划入城中。"
+      ? "北京亮马河入夜，沿岸树影、步道与桥灯映入水中，一舟向右驶去，再循雾回到山水。"
       : "层山隐于云间，淡日映天，近岸松石，一舟浮于江上，游鱼点水。",
   );
   for (const button of sceneButtons)

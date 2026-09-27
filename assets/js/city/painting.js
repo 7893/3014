@@ -1,4 +1,4 @@
-// A compressed, imagined Beijing waterfront, generated from geometry and light.
+// An imagined Liangma River evening, drawn entirely from geometry and light.
 export const cityLayerNames = ["buildings", "lights", "bank"];
 export function createCity(width, height) {
   const portrait = width / height < 0.85,
@@ -7,262 +7,263 @@ export function createCity(width, height) {
   const layers = {},
     contexts = {};
   for (const name of cityLayerNames) {
-    const c = document.createElement("canvas");
-    c.width = width;
-    c.height = height;
-    const ctx = c.getContext("2d");
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
     ctx.scale(width / W, height / H);
-    layers[name] = c;
+    layers[name] = canvas;
     contexts[name] = ctx;
   }
   const { buildings: b, lights: l, bank: k } = contexts;
   let seed = 2873;
   const random = () =>
     (seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0) / 4294967296;
-  function polygon(ctx, points) {
+  function glow(ctx, x, y, r, color) {
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, color);
+    g.addColorStop(1, "transparent");
+    ctx.fillStyle = g;
+    ctx.fillRect(x - r, y - r, r * 2, r * 2);
+  }
+  function stroke(ctx, points, color, width = 1) {
     ctx.beginPath();
     points.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
-    ctx.closePath();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.stroke();
   }
-  function facade(path, x, y, w, h, depth = 1, diagonal = false) {
-    b.save();
-    b.clip(path);
-    const fill = b.createLinearGradient(x, y, x + w, y + h);
-    fill.addColorStop(0, depth < 0.5 ? "#52636b" : "#243845");
-    fill.addColorStop(0.45, depth < 0.5 ? "#3e545f" : "#142b39");
-    fill.addColorStop(1, "#0b202d");
-    b.fillStyle = fill;
-    b.fillRect(x - 5, y - 5, w + 10, h + 10);
-    b.strokeStyle = "rgba(179,190,184,.12)";
-    b.lineWidth = 0.6;
-    for (let yy = y + 5; yy < y + h; yy += 8) {
-      b.beginPath();
-      b.moveTo(x, yy);
-      b.lineTo(x + w, yy);
-      b.stroke();
-    }
-    for (let xx = x + 4; xx < x + w; xx += 6) {
-      b.strokeStyle = "rgba(161,183,189,.10)";
-      b.beginPath();
-      b.moveTo(xx, y);
-      b.lineTo(xx, y + h);
-      b.stroke();
-    }
-    if (diagonal) {
-      b.strokeStyle = "rgba(192,196,180,.32)";
-      b.lineWidth = 1.1;
-      for (let i = -h; i < w + h; i += 22) {
-        b.beginPath();
-        b.moveTo(x + i, y);
-        b.lineTo(x + i + h * 0.65, y + h);
-        b.stroke();
-        b.beginPath();
-        b.moveTo(x + i, y);
-        b.lineTo(x + i - h * 0.65, y + h);
-        b.stroke();
-      }
-    }
-    b.restore();
-    b.strokeStyle = depth < 0.5 ? "#78909244" : "#b0b3a45a";
-    b.lineWidth = 1;
-    b.stroke(path);
-    l.save();
-    l.clip(path);
-    for (let yy = y + 9; yy < y + h - 4; yy += 9)
-      for (let xx = x + 5; xx < x + w - 3; xx += 7) {
-        if (random() > 0.43) {
-          l.fillStyle =
-            random() > 0.22
-              ? `rgba(238,194,121,${0.22 + random() * 0.6})`
-              : `rgba(139,196,210,${0.2 + random() * 0.35})`;
-          l.fillRect(xx, yy, random() > 0.9 ? 5 : 2.8, 3.8);
+  // Low, recessed buildings: irregular occupied rooms, no outlined landmark icons.
+  for (let i = 0; i < 25; i++) {
+    const x = (i * W) / 24 - 30,
+      w = 24 + random() * 65,
+      h = H * (0.035 + random() * 0.14),
+      y = H * 0.59 - h;
+    const shade = b.createLinearGradient(x, y, x + w, H * 0.59);
+    shade.addColorStop(0, "#26343c");
+    shade.addColorStop(1, "#15292e");
+    b.fillStyle = shade;
+    b.fillRect(x, y, w, h);
+    b.fillStyle = "rgba(137,157,158,.05)";
+    b.fillRect(x, y, w, 2);
+    for (let yy = y + 8; yy < H * 0.585; yy += 7 + random() * 3) {
+      const occupied = random();
+      for (let xx = x + 4; xx < x + w - 4; xx += 5) {
+        if (random() > occupied * 0.8 + 0.26) {
+          l.fillStyle = `rgba(226,${164 + Math.floor(random() * 42)},115,${0.07 + random() * 0.32})`;
+          l.fillRect(xx, yy, 1.5 + random() * 2, 2.4);
         }
       }
-    l.restore();
-  }
-  const base = H * 0.635;
-  // Distant districts form a low skyline behind the two recognizable landmarks.
-  for (let i = 0; i < 42; i++) {
-    const x = (i / 41) * W - 20,
-      w = 18 + random() * 36,
-      h = H * (0.035 + random() * 0.15),
-      y = base - h;
-    const p = new Path2D();
-    p.rect(x, y, w, h);
-    facade(p, x, y, w, h, 0.3);
-  }
-  // China Zun: broad crown and base, a pinched waist, fine vertical ribs.
-  const zx = W * (portrait ? 0.34 : 0.405),
-    zt = H * (portrait ? 0.265 : 0.15),
-    zb = base,
-    zw = W * (portrait ? 0.14 : 0.065),
-    zh = zb - zt;
-  const zun = new Path2D();
-  zun.moveTo(zx - zw * 0.62, zt);
-  zun.lineTo(zx + zw * 0.62, zt);
-  zun.bezierCurveTo(
-    zx + zw * 0.41,
-    zt + zh * 0.22,
-    zx + zw * 0.27,
-    zt + zh * 0.57,
-    zx + zw * 0.63,
-    zb,
-  );
-  zun.lineTo(zx - zw * 0.63, zb);
-  zun.bezierCurveTo(
-    zx - zw * 0.27,
-    zt + zh * 0.57,
-    zx - zw * 0.41,
-    zt + zh * 0.22,
-    zx - zw * 0.62,
-    zt,
-  );
-  zun.closePath();
-  facade(zun, zx - zw * 0.65, zt, zw * 1.3, zh, 1);
-  b.save();
-  b.clip(zun);
-  b.strokeStyle = "rgba(204,194,151,.45)";
-  b.lineWidth = 0.8;
-  for (let i = -6; i <= 6; i++) {
-    const t = i / 6;
-    b.beginPath();
-    b.moveTo(zx + t * zw * 0.61, zt);
-    b.bezierCurveTo(
-      zx + t * zw * 0.41,
-      zt + zh * 0.22,
-      zx + t * zw * 0.27,
-      zt + zh * 0.57,
-      zx + t * zw * 0.62,
-      zb,
-    );
-    b.stroke();
-  }
-  b.restore();
-  l.strokeStyle = "#d8b56e";
-  l.lineWidth = 2;
-  l.beginPath();
-  l.moveTo(zx - zw * 0.57, zt + 3);
-  l.lineTo(zx + zw * 0.57, zt + 3);
-  l.stroke();
-  // CCTV headquarters: two leaning legs connected by an angular overhang.
-  const cx = W * (portrait ? 0.73 : 0.665),
-    cy = H * (portrait ? 0.415 : 0.34),
-    cw = W * (portrait ? 0.23 : 0.18),
-    ch = base - cy;
-  const pts = [
-    [-0.48, 1],
-    [-0.6, 0],
-    [-0.19, -0.07],
-    [0.58, 0.25],
-    [0.43, 0.91],
-    [0.11, 0.91],
-    [0.23, 0.4],
-    [-0.2, 0.21],
-    [-0.09, 1],
-  ].map(([x, y]) => [cx + x * cw, cy + y * ch]);
-  const cctv = new Path2D();
-  pts.forEach(([x, y], i) => (i ? cctv.lineTo(x, y) : cctv.moveTo(x, y)));
-  cctv.closePath();
-  facade(cctv, cx - cw * 0.61, cy - ch * 0.08, cw * 1.22, ch * 1.08, 1, true);
-  l.strokeStyle = "rgba(244,198,117,.55)";
-  l.lineWidth = 1.3;
-  l.stroke(cctv);
-  // Lower foreground blocks vary in height, setback and warm edge illumination.
-  for (let i = 0; i < 18; i++) {
-    const x = (i / 18) * W - 15,
-      w = 25 + random() * 45,
-      h = H * (0.025 + random() * 0.055),
-      y = base - h;
-    const p = new Path2D();
-    p.rect(x, y, w, h);
-    facade(p, x, y, w, h, 1);
-  }
-  // An elevated bridge crosses the water: structure stays still, traffic is rendered on GPU.
-  const deck = H * 0.69;
-  k.fillStyle = "#102735";
-  k.fillRect(0, deck, W, 9);
-  k.fillStyle = "#263c44";
-  k.fillRect(0, deck - 8, W, 5);
-  k.strokeStyle = "rgba(219,181,116,.62)";
-  k.lineWidth = 1.4;
-  k.beginPath();
-  k.moveTo(0, deck - 3);
-  k.lineTo(W, deck - 3);
-  k.stroke();
-  for (let x = -W * 0.1; x < W; x += W * 0.22) {
-    k.fillStyle = "#122936";
-    k.beginPath();
-    k.moveTo(x, deck + 7);
-    k.lineTo(x + 10, deck + 7);
-    k.lineTo(x + 6, H * 0.751);
-    k.lineTo(x - 3, H * 0.751);
-    k.closePath();
-    k.fill();
-  }
-  for (let x = 35; x < W; x += W * 0.105) {
-    k.strokeStyle = "#243c48";
-    k.lineWidth = 1.4;
-    k.beginPath();
-    k.moveTo(x, deck - 8);
-    k.lineTo(x, deck - 32);
-    k.lineTo(x + 10, deck - 34);
-    k.stroke();
-    l.fillStyle = "#f0c98a";
-    l.beginPath();
-    l.ellipse(x + 10, deck - 33, 3, 1.3, 0, 0, Math.PI * 2);
-    l.fill();
-  }
-  // A low waterside roof and willow silhouettes connect old Beijing with the modern city.
-  const by = H * 0.79;
-  k.fillStyle = "#0b202b";
-  polygon(k, [
-    [0, by],
-    [W * 0.09, by - 10],
-    [W * 0.18, by + 25],
-    [W * 0.22, H * 0.93],
-    [0, H * 0.97],
-  ]);
-  k.fill();
-  const rx = W * 0.095,
-    ry = H * 0.752,
-    rw = W * (portrait ? 0.105 : 0.065);
-  k.fillStyle = "#182c34";
-  k.fillRect(rx - rw * 0.6, ry, rw * 1.2, H * 0.035);
-  k.fillStyle = "#10232d";
-  polygon(k, [
-    [rx - rw, ry],
-    [rx - rw * 0.7, ry - 4],
-    [rx, ry - H * 0.031],
-    [rx + rw * 0.7, ry - 4],
-    [rx + rw, ry],
-    [rx + rw * 0.4, ry - 2],
-    [rx - rw * 0.4, ry - 2],
-  ]);
-  k.fill();
-  for (let i = -1; i <= 1; i++) {
-    k.fillStyle = "#bb8d4b88";
-    k.fillRect(rx + i * rw * 0.32 - rw * 0.08, ry + 5, rw * 0.16, H * 0.019);
-  }
-  k.strokeStyle = "#081e28";
-  k.lineCap = "round";
-  for (let i = 0; i < 3; i++) {
-    const tx = W * (0.025 + i * 0.035),
-      ty = H * (0.865 - i * 0.02),
-      th = H * (portrait ? 0.1 : 0.15);
-    k.lineWidth = 4 - i;
-    k.beginPath();
-    k.moveTo(tx, ty);
-    k.quadraticCurveTo(tx + 12, ty - th * 0.55, tx - 7, ty - th);
-    k.stroke();
-    for (let j = 0; j < 15; j++) {
-      k.lineWidth = 0.7;
-      const ex = tx + (j - 7) * 6,
-        ey = ty - th + Math.abs(j - 7) * 2;
-      k.beginPath();
-      k.moveTo(tx - 7, ty - th + 8);
-      k.quadraticCurveTo(ex, ey - 15, ex + 8, ey + th * 0.35);
-      k.stroke();
     }
+  }
+  // A quiet hotel frontage glimpsed through the trees, set back from the river.
+  const hx = W * 0.18,
+    hy = H * 0.425,
+    hw = W * 0.2,
+    hh = H * 0.16;
+  b.fillStyle = "#1c3037";
+  b.fillRect(hx, hy, hw, hh);
+  for (let floor = 0; floor < 12; floor++) {
+    const y = hy + 8 + (floor * hh) / 13;
+    stroke(
+      b,
+      [
+        [hx, y],
+        [hx + hw, y],
+      ],
+      "rgba(114,133,136,.11)",
+      1,
+    );
+    for (let x = hx + 5; x < hx + hw - 5; x += 6)
+      if (random() > 0.47) {
+        l.fillStyle = `rgba(236,190,130,${0.13 + random() * 0.3})`;
+        l.fillRect(x, y - 3, 2 + random() * 2, 2);
+      }
+  }
+  function tree(ctx, x, y, size, near = false) {
+    const crown = y - size * 0.76;
+    stroke(
+      ctx,
+      [
+        [x, y],
+        [x - size * 0.02, crown],
+        [x + size * 0.08, y - size],
+      ],
+      near ? "#091b20" : "#142a29",
+      Math.max(1, size * 0.025),
+    );
+    for (let j = 0; j < 110; j++) {
+      const angle = random() * Math.PI * 2,
+        rad = Math.sqrt(random());
+      const xx = x + Math.cos(angle) * size * 0.48 * rad,
+        yy = crown + Math.sin(angle) * size * 0.31 * rad;
+      const r = size * (0.015 + random() * 0.038);
+      ctx.fillStyle = near
+        ? `rgba(10,27,29,${0.35 + random() * 0.5})`
+        : `rgba(${18 + Math.floor(random() * 10)},${37 + Math.floor(random() * 12)},35,${0.35 + random() * 0.5})`;
+      ctx.beginPath();
+      ctx.ellipse(xx, yy, r, r * 0.6, angle, 0, Math.PI * 2);
+      ctx.fill();
+      if (!near) {
+        l.save();
+        l.globalCompositeOperation = "destination-out";
+        l.fillStyle = "rgba(0,0,0,.85)";
+        l.beginPath();
+        l.ellipse(xx, yy, r, r * 0.6, angle, 0, Math.PI * 2);
+        l.fill();
+        l.restore();
+      }
+    }
+    if (near)
+      for (let j = 0; j < 32; j++) {
+        const dx = (random() - 0.5) * size * 0.95;
+        ctx.beginPath();
+        ctx.moveTo(x, crown);
+        ctx.quadraticCurveTo(
+          x + dx,
+          crown - size * 0.16,
+          x + dx + size * 0.045,
+          crown + size * (0.25 + random() * 0.45),
+        );
+        ctx.strokeStyle = "rgba(16,37,34,.7)";
+        ctx.lineWidth = 0.65;
+        ctx.stroke();
+      }
+  }
+  // The opposite promenade lies behind the waterline, so its lights reflect naturally.
+  b.fillStyle = "#162b2d";
+  b.fillRect(0, H * 0.582, W, H * 0.058);
+  for (let i = 0; i < 58; i++)
+    tree(b, (i * W) / 57, H * 0.613, H * (0.035 + random() * 0.055));
+  for (let j = 0; j < 4; j++)
+    stroke(
+      b,
+      [
+        [0, H * (0.619 + j * 0.005)],
+        [W, H * (0.619 + j * 0.005)],
+      ],
+      j === 0 ? "#4a4940" : "#253734",
+      1.3,
+    );
+  stroke(
+    l,
+    [
+      [0, H * 0.63],
+      [W, H * 0.63],
+    ],
+    "rgba(229,180,103,.38)",
+    1.1,
+  );
+  for (let i = 0; i < 29; i++) {
+    const x = (i * W) / 28 + random() * 8,
+      y = H * 0.615;
+    stroke(
+      b,
+      [
+        [x, y],
+        [x, y - H * 0.026],
+      ],
+      "#53605b",
+      0.85,
+    );
+    glow(l, x, y - H * 0.026, 12, "rgba(246,202,128,.25)");
+    l.fillStyle = "#ead2a3";
+    l.fillRect(x - 1, y - H * 0.026, 2, 1.5);
+    // Tiny pedestrians, in pairs and alone.
+    if (i % 3 !== 0) {
+      const px = x + 11;
+      b.fillStyle = "#0b1c20";
+      b.beginPath();
+      b.arc(px, y - 6, 1.2, 0, Math.PI * 2);
+      b.fill();
+      stroke(
+        b,
+        [
+          [px, y - 4],
+          [px, y + 1],
+        ],
+        "#0b1c20",
+        1.5,
+      );
+    }
+  }
+  // A single shallow illuminated footbridge, recessed behind the boat's route.
+  const left = W * 0.42,
+    right = W * 0.92,
+    deck = H * 0.608,
+    arch = H * 0.031;
+  b.beginPath();
+  b.moveTo(left, deck + 8);
+  b.quadraticCurveTo((left + right) / 2, deck - arch, right, deck + 8);
+  b.lineTo(right, deck + 15);
+  b.quadraticCurveTo((left + right) / 2, deck - arch + 8, left, deck + 15);
+  b.closePath();
+  b.fillStyle = "#182c31";
+  b.fill();
+  for (let i = 0; i <= 60; i++) {
+    const t = i / 60,
+      x = left + (right - left) * t,
+      y = deck - 2 * arch * t * (1 - t);
+    stroke(
+      b,
+      [
+        [x, y - 7],
+        [x, y + 5],
+      ],
+      "rgba(132,143,131,.45)",
+      0.7,
+    );
+    glow(l, x, y + 6, 4, "rgba(235,183,113,.15)");
+  }
+  for (const [offset, color] of [
+    [-7, "rgba(209,199,161,.32)"],
+    [6, "rgba(246,185,99,.72)"],
+  ]) {
+    l.beginPath();
+    l.moveTo(left, deck + offset);
+    l.quadraticCurveTo(
+      (left + right) / 2,
+      deck - arch + offset,
+      right,
+      deck + offset,
+    );
+    l.strokeStyle = color;
+    l.lineWidth = 1.2;
+    l.stroke();
+  }
+  // A shaded near bank frames the water without crossing the boat's horizontal route.
+  k.beginPath();
+  k.moveTo(0, H * 0.89);
+  k.bezierCurveTo(W * 0.15, H * 0.92, W * 0.18, H * 0.97, W * 0.43, H);
+  k.lineTo(0, H);
+  k.closePath();
+  k.fillStyle = "#0a1c20";
+  k.fill();
+  k.beginPath();
+  k.moveTo(W, H * 0.895);
+  k.bezierCurveTo(W * 0.89, H * 0.93, W * 0.82, H * 0.98, W * 0.69, H);
+  k.lineTo(W, H);
+  k.closePath();
+  k.fill();
+  for (let i = 0; i < 4; i++) {
+    const x = W * (-0.035 + i * 0.033),
+      y = H * (0.91 + i * 0.015);
+    tree(k, x, y, H * (0.21 + random() * 0.045), true);
+  }
+  // Scattered grass blades and textured stones at the viewer's feet.
+  for (let i = 0; i < 500; i++) {
+    const x = random() * W,
+      y = H * (0.95 + random() * 0.05);
+    if (x > W * 0.25 && x < W * 0.83) continue;
+    stroke(
+      k,
+      [
+        [x, y],
+        [x + (random() - 0.5) * 7, y - random() * 10],
+      ],
+      "rgba(40,56,45,.38)",
+      0.6,
+    );
   }
   return { layers, width, height, portrait };
 }

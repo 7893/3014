@@ -23,7 +23,7 @@ vec3 stars(vec2 p){
   return mix(vec3(.65,.79,1.),vec3(1.,.88,.65),seed)*(core+glow)*twinkle*visible;
 }
 vec3 skyline(vec2 p){
-  vec3 top=vec3(.035,.085,.13),horizon=vec3(.23,.31,.36);
+  vec3 top=vec3(.025,.052,.079),horizon=vec3(.17,.22,.245);
   vec3 color=mix(top,horizon,pow(clamp(p.y/.72,0.,1.),1.7));
   float haze=fbm(vec2(p.x*4.-u_time*.012,p.y*8.));
   color+=vec3(.035,.035,.028)*haze*smoothstep(.2,.7,p.y);
@@ -41,15 +41,18 @@ void main(){
   vec3 color=skyline(p);
   if(p.y>.64){
     float depth=(p.y-.64)/.36;
-    float waves=sin(p.y*165.-u_time*1.8+p.x*8.)*.65+sin(p.y*321.+u_time*1.1)*.3;
-    vec2 reflected=vec2(p.x+waves*(.004+depth*.011),.635-(p.y-.64)*1.28+waves*.002);
+    float waves=sin(p.y*210.-u_time*1.25+p.x*9.)*.34+sin(p.y*437.+u_time*.9+p.x*23.)*.16;
+    waves+=(noise(vec2(p.x*85.,p.y*180.-u_time*.35))-.5)*.5;
+    vec2 reflected=vec2(p.x+waves*(.0015+depth*.005),.635-(p.y-.64)*1.28+waves*.002);
     vec4 lamps=sampleLayer(u_lights,reflected);
     vec3 reflectedCity=skyline(reflected);
     vec3 water=mix(vec3(.055,.13,.18),vec3(.025,.075,.12),depth);
-    float breaks=.45+.55*smoothstep(-.7,.8,sin(p.y*590.+waves*2.));
+    float breaks=.35+.65*noise(vec2(p.x*95.,p.y*640.-u_time*.9));
     color=mix(water,reflectedCity,.26*(1.-depth*.5));
-    color+=lamps.rgb*lamps.a*breaks*(.65-depth*.35);
-    color+=vec3(.13,.16,.17)*pow(max(0.,sin(p.y*485.+p.x*13.-u_time*1.6)),18.)*.14;
+    color+=lamps.rgb*lamps.a*breaks*(1.1-depth*.45);
+    vec4 spread=sampleLayer(u_lights,reflected+vec2(.002,0.))+sampleLayer(u_lights,reflected-vec2(.002,0.));
+    color+=spread.rgb*spread.a*breaks*.12;
+    color+=vec3(.13,.16,.17)*pow(max(0.,sin(p.y*485.+p.x*13.-u_time*1.6)),18.)*.055;
     vec2 boat=u_boatCenter+u_boat;
     float behind=boat.x-p.x,wy=abs(p.y-boat.y-.009);
     float wake=exp(-pow((wy-(.002+max(behind,0.)*.095))*400.,2.));
@@ -63,19 +66,6 @@ void main(){
   bankP.x+=sin(u_time*.85+p.y*15.)*.0013*clamp((.86-p.y)/.17,0.,1.)*(1.-smoothstep(.12,.23,p.x));
   vec4 bank=sampleLayer(u_bank,bankP);
   color=over(color,bank);
-  // A small stream of cars and a warm bus cross the bridge in opposite directions.
-  if(abs(p.y-.685)<.009){
-    for(int i=0;i<12;i++){
-      float fi=float(i),direction=mod(fi,2.)<.5?1.:-1.;
-      float x=fract(fi*.137+u_time*direction*(.020+mod(fi,3.)*.005));
-      vec2 q=abs(p-vec2(x,.685+direction*.002));
-      float w=i==2?.018:.008;
-      float body=(1.-smoothstep(w,w+.001,q.x))*(1.-smoothstep(.002,.003,q.y));
-      color=mix(color,i==2?vec3(.76,.50,.22):vec3(.15,.23,.28),body);
-      float lamp=exp(-pow((p.x-x-w*direction)*u_size.x/2.2,2.)-pow((p.y-.685-direction*.002)*u_size.y/1.5,2.));
-      color+=vec3(1.,.78,.42)*lamp*.9;
-    }
-  }
   vec4 boat=sampleLayer(u_boatLayer,p-u_boat);
   vec4 neighbor=sampleLayer(u_boatLayer,p-u_boat+vec2(0.,1.2/u_size.y));
   float rim=max(0.,neighbor.a-boat.a*(1.-bank.a));
@@ -87,6 +77,8 @@ void main(){
   color=mix(color,vec3(.68,.56,.35),oar*.8*(1.-bank.a));
   float lantern=exp(-dot((local-vec2(-5.,-5.))/vec2(2.5,3.),(local-vec2(-5.,-5.))/vec2(2.5,3.)));
   color+=vec3(.9,.51,.18)*lantern*.65*(1.-bank.a);
+  color*=1.-.18*pow(length((p-.5)*vec2(1.,.8)),2.);
+  color+=vec3((hash(gl_FragCoord.xy)-.5)*.006);
   outColor=vec4(color,1.);
 }
 `;
