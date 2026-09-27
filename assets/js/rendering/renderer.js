@@ -1,10 +1,7 @@
-import { createPasses } from "./passes.js";
-import { updateFish } from "./fish.js";
-import { uploadTextures } from "./textures.js";
-import { layerNames } from "../scene.js";
-import { FISH_COUNT } from "../motion/fish.js";
+import { createResources } from "./resources.js";
+import { createTargets } from "./targets.js";
+import { createCompositor } from "./compositor.js";
 import { createDevice } from "./device.js";
-import { cityLayerNames } from "../city/painting.js";
 
 export function createRenderer(canvas) {
   const gl = canvas.getContext("webgl2", {
@@ -15,28 +12,13 @@ export function createRenderer(canvas) {
     powerPreference: "low-power",
   });
   if (!gl) return null;
-  const fishData = new Float32Array(FISH_COUNT * 4),
-    rippleData = new Float32Array(FISH_COUNT * 4);
-  let passes = {},
-    textures = {},
-    targets = [],
-    framebuffers = [],
-    buffer,
-    vao,
-    scene;
-  const { program, texture } = createDevice(gl);
-  const names = {
-    ink: layerNames.map((n) => (n === "boat" ? "boatLayer" : n)),
-    city: cityLayerNames,
-    coast: ["foreground", "trunk0", "leaves0", "trunk1", "leaves1", "shore"],
-  };
+  const device = createDevice(gl);
+  let resources, targets, compositor, buffer, vao, scene;
   function initialize() {
-    passes = {};
-    textures = {};
-    targets = [];
-    framebuffers = [];
-    buffer = vao = null;
-    passes = createPasses(gl, program, names);
+    resources = targets = compositor = buffer = vao = null;
+    resources = createResources(gl, device);
+    targets = createTargets(gl, device);
+    compositor = createCompositor(gl, device);
     vao = gl.createVertexArray();
     gl.bindVertexArray(vao);
     buffer = gl.createBuffer();
@@ -48,34 +30,19 @@ export function createRenderer(canvas) {
     );
     gl.enableVertexAttribArray(0);
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-    for (const key of Object.keys(names))
-      textures[key] = names[key].map(() => texture());
-    for (let i = 0; i < 2; i++) {
-      targets.push(texture());
-      framebuffers.push(gl.createFramebuffer());
-    }
     canvas.dataset.renderer = "webgl2";
   }
   function upload(next) {
     scene = next;
-    uploadTextures(gl, canvas, scene, names, textures, targets, framebuffers);
+    resources.upload(next);
+    targets.resize(canvas.width, canvas.height);
   }
   function drawScene(key, slot, time, touch, x, wind) {
-    const pass = passes[key],
+    const pass = resources.prepare(key),
       u = pass.uniforms;
-    gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffers[slot]);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, targets.framebuffers[slot]);
     gl.useProgram(pass.program);
-    names[key].forEach((name, i) => {
-      gl.activeTexture(gl.TEXTURE0 + i);
-      gl.bindTexture(gl.TEXTURE_2D, textures[key][i]);
-      gl.uniform1i(u[name], i);
-    });
-    if (key !== "ink") {
-      const unit = names[key].length;
-      gl.activeTexture(gl.TEXTURE0 + unit);
-      gl.bindTexture(gl.TEXTURE_2D, textures.ink[layerNames.indexOf("boat")]);
-      gl.uniform1i(u.boatLayer, unit);
-    }
+    resources.bind(pass);
     gl.uniform2f(u.size, canvas.width, canvas.height);
     gl.uniform1f(u.time, time);
     gl.uniform3fv(u.touch, touch);
@@ -87,15 +54,10 @@ export function createRenderer(canvas) {
       Math.sin(time * 1.05) * 0.0022,
     );
     const W = scene.portrait ? 760 : 1600,
-      H = (W * canvas.height) / canvas.width,
-      scale = scene.portrait ? 1.35 : 1.6;
+      H = (W * canvas.height) / canvas.width;
+    const scale = scene.portrait ? 1.35 : 1.6;
     gl.uniform2f(u.actorScale, scale / W, scale / H);
-    if (key === "ink") {
-      updateFish(canvas, time, fishData, rippleData);
-      gl.uniform4fv(u["fish[0]"], fishData);
-      gl.uniform4fv(u["fishRipples[0]"], rippleData);
-      gl.uniform1f(u.boatOpacity, 1);
-    }
+    pass.update?.(gl, u, canvas, time);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
   function draw(time, touch, journey, wind = [0, 0, time, 0.65]) {
@@ -118,30 +80,12 @@ export function createRenderer(canvas) {
         journey.positions[journey.to],
         wind,
       );
-    const pass = passes.final,
-      u = pass.uniforms;
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    gl.useProgram(pass.program);
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, targets[0]);
-    gl.uniform1i(u.source, 0);
-    gl.activeTexture(gl.TEXTURE1);
-    gl.bindTexture(gl.TEXTURE_2D, targets[journey.transitioning ? 1 : 0]);
-    gl.uniform1i(u.destination, 1);
-    gl.uniform2f(u.size, canvas.width, canvas.height);
-    gl.uniform1f(u.time, time);
-    gl.uniform1f(u.blend, journey.blend);
-    gl.uniform1i(u.sourceInk, journey.from === "ink" ? 1 : 0);
-    gl.uniform1i(u.destinationInk, journey.to === "ink" ? 1 : 0);
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    compositor.draw(canvas, targets.textures, time, journey);
   }
   function dispose() {
-    Object.values(textures)
-      .flat()
-      .forEach((t) => gl.deleteTexture(t));
-    targets.forEach((t) => gl.deleteTexture(t));
-    framebuffers.forEach((f) => gl.deleteFramebuffer(f));
-    Object.values(passes).forEach((p) => gl.deleteProgram(p.program));
+    resources?.dispose();
+    targets?.dispose();
+    compositor?.dispose();
     gl.deleteBuffer(buffer);
     gl.deleteVertexArray(vao);
   }
@@ -155,8 +99,12 @@ export function createRenderer(canvas) {
   return {
     upload,
     draw,
-    restore: initialize,
     dispose,
+    restore: initialize,
+    prepare: (name) => resources.prepare(name),
+    get preparedScenes() {
+      return resources.preparedScenes;
+    },
     maxSize: Math.min(
       gl.getParameter(gl.MAX_TEXTURE_SIZE),
       gl.getParameter(gl.MAX_RENDERBUFFER_SIZE),

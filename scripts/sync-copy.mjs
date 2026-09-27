@@ -2,7 +2,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { copy } from "../assets/js/config/copy.js";
 
 const template = await readFile(
-  new URL("./page.html", import.meta.url),
+  new URL("../templates/index.html", import.meta.url),
   "utf8",
 );
 const output = new URL("../index.html", import.meta.url);
@@ -29,7 +29,7 @@ const html = template
   })
   .replace(
     "<!doctype html>",
-    "<!doctype html>\n<!-- Generated from scripts/page.html and assets/js/config/copy.js. Do not edit. -->",
+    "<!doctype html>\n<!-- Generated from templates/index.html and assets/js/config/copy.js. Do not edit. -->",
   );
 
 if (process.argv.includes("--check")) {

@@ -1,23 +1,10 @@
-import { canvasLayer } from "./painting/canvas.js";
-import { paintPaper, paintNear } from "./painting/ink-details.js";
-import { createCoast } from "./coast/painting.js";
-import { createCity } from "./city/painting.js";
-import { createBrush } from "./painting/brush.js";
-import { createMountains } from "./painting/mountains.js";
-import { createPines } from "./painting/pines.js";
-import { paintBoat } from "./painting/boat.js";
-export { drawStaticScene } from "./painting/static.js";
+import { canvasLayer } from "../../drawing/canvas.js";
+import { paintPaper, paintNear } from "./details.js";
+import { createBrush } from "../../drawing/brush.js";
+import { createMountains } from "./mountains.js";
+import { createPines } from "./pines.js";
 
-export const layerNames = [
-  "paper",
-  "far",
-  "middle",
-  "near",
-  "shore",
-  "pines",
-  "boat",
-];
-export function createScene(width, height) {
+export function createInk(width, height) {
   const portrait = width / height < 0.85,
     W = portrait ? 760 : 1600,
     H = (W * height) / width;
@@ -83,25 +70,5 @@ export function createScene(width, height) {
     },
     606,
   );
-  const boatCenter = [portrait ? 0.64 : 0.69, portrait ? 0.815 : 0.805];
-  layer(
-    "boat",
-    (tools) =>
-      paintBoat(
-        tools,
-        W * boatCenter[0],
-        H * boatCenter[1],
-        portrait ? 1.35 : 1.6,
-      ),
-    707,
-  );
-  return {
-    layers,
-    width,
-    height,
-    boatCenter,
-    portrait,
-    city: createCity(width, height),
-    coast: createCoast(width, height),
-  };
+  return { layers, width, height, portrait };
 }

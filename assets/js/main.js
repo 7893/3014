@@ -2,10 +2,9 @@ import { createAnimation } from "./app/animation.js";
 import { initializeCopy, updateSceneUI } from "./app/interface.js";
 import { arrivalText } from "./config/copy.js";
 import { createWind } from "./motion/wind.js";
-import { drawStaticCoast } from "./coast/painting.js";
-import { createJourney } from "./motion/journey.js";
-import { drawStaticCity } from "./city/painting.js";
-import { createScene, drawStaticScene } from "./scene.js";
+import { createJourney, scenes } from "./motion/journey.js";
+import { createScene } from "./scenes/index.js";
+import { createPreparation } from "./app/preparation.js";
 import { createRenderer } from "./rendering/renderer.js";
 
 let canvas = document.getElementById("landscape");
@@ -21,6 +20,14 @@ initializeCopy(sceneButtons);
 let dimensions = "";
 let touch = [0, 0, -100];
 const wind = createWind();
+const preparation = createPreparation((name) => {
+  if (!renderer || lost) return;
+  try {
+    renderer.prepare(name);
+  } catch (error) {
+    console.warn("Deferring scene preparation.", error);
+  }
+});
 const animation = createAnimation({
   active: () => !lost && !document.hidden && !!renderer,
   advance: (dt) => {
@@ -35,6 +42,7 @@ const animation = createAnimation({
 });
 
 function fallback() {
+  preparation.stop();
   renderer?.dispose();
   renderer = null;
   const replacement = canvas.cloneNode(false);
@@ -46,21 +54,23 @@ function fallback() {
 }
 
 function drawStatic(name) {
-  if (name === "city")
-    drawStaticCity(context, painting.city, painting.layers.boat);
-  else if (name === "coast")
-    drawStaticCoast(context, painting.coast, painting.layers.boat);
-  else drawStaticScene(context, painting);
+  painting.drawStatic(name, context);
 }
 function draw() {
   if (lost || !painting) return;
   const state = journey.state();
-  if (renderer) renderer.draw(time, touch, state, wind.value);
-  else drawStatic(state.scene);
+  try {
+    if (renderer) renderer.draw(time, touch, state, wind.value);
+    else drawStatic(state.scene);
+  } catch (error) {
+    console.warn("Using static scene.", error);
+    fallback();
+  }
   updateSceneUI(canvas, state, sceneButtons);
 }
 function resize() {
   if (lost) return;
+  preparation.stop();
   const w = innerWidth,
     h = innerHeight;
   const limit = renderer?.maxSize || 4096;
@@ -89,6 +99,10 @@ function resize() {
   }
   draw();
   canvas.dataset.ready = "true";
+  if (renderer)
+    preparation.start(
+      scenes.filter((name) => !renderer.preparedScenes.includes(name)),
+    );
 }
 for (const control of sceneButtons)
   control.addEventListener("click", () => {
@@ -99,12 +113,20 @@ for (const control of sceneButtons)
     );
   });
 if (!renderer) fallback();
-document.addEventListener("visibilitychange", animation.sync);
+document.addEventListener("visibilitychange", () => {
+  animation.sync();
+  if (document.hidden || !renderer || lost) preparation.stop();
+  else
+    preparation.start(
+      scenes.filter((name) => !renderer.preparedScenes.includes(name)),
+    );
+});
 window.addEventListener("resize", () => {
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(resize, 120);
 });
-canvas.addEventListener("pointerdown", (event) => {
+document.querySelector("main").addEventListener("pointerdown", (event) => {
+  if (event.target !== canvas) return;
   touch = [event.clientX / innerWidth, event.clientY / innerHeight, time];
   draw();
 });
@@ -113,6 +135,7 @@ canvas.addEventListener("webglcontextlost", (event) => {
   lost = true;
   canvas.dataset.renderer = "webgl-lost";
   animation.stop();
+  preparation.stop();
 });
 canvas.addEventListener("webglcontextrestored", () => {
   lost = false;

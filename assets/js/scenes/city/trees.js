@@ -1,4 +1,4 @@
-import { stroke } from "../painting/canvas.js";
+import { stroke } from "../../drawing/canvas.js";
 export function createTrees(random, l) {
   function tree(ctx, x, y, size, near = false) {
     const crown = y - size * 0.76;

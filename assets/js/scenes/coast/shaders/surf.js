@@ -1,5 +1,5 @@
-import { shoreline } from '../../coast/shore.js';
-export const surf=`
+import { shoreline } from "../shore.js";
+export const surf = `
 ${shoreline}
 vec3 paintSurf(vec3 color,vec2 p){
   if(p.y<.78)return color;

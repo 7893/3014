@@ -1,5 +1,5 @@
 import { beachPath } from "./shore.js";
-import { seededRandom, canvasLayer } from "../painting/canvas.js";
+import { seededRandom, canvasLayer } from "../../drawing/canvas.js";
 import { drawCoastDetails } from "./details.js";
 // A warm island cove: foreground palms and sand, with all water drawn on GPU.
 export function createCoast(width, height) {
@@ -116,23 +116,16 @@ export function createCoast(width, height) {
   }
   palm(W * 0.035, H * 0.965, H * 0.47, W * 0.055);
   palm(-W * 0.025, H * 0.945, H * 0.34, W * 0.17);
-  return { layer: canvas, shore: material.canvas, palms, width, height };
-}
-export function drawStaticCoast(ctx, coast, boatLayer) {
-  const { width: w, height: h } = coast;
-  const gradient = ctx.createLinearGradient(0, 0, 0, h);
-  gradient.addColorStop(0, "#78b7c4");
-  gradient.addColorStop(0.46, "#f7dfb1");
-  gradient.addColorStop(0.461, "#3b8f9a");
-  gradient.addColorStop(0.8, "#78cbb9");
-  gradient.addColorStop(1, "#bfd9b4");
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, w, h);
-  ctx.fillStyle = "#fff1c6";
-  ctx.beginPath();
-  ctx.arc(w * 0.32, h * 0.28, Math.min(w, h) * 0.037, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.drawImage(boatLayer, 0, 0);
-  ctx.drawImage(coast.layer, 0, 0);
-  for (const layer of coast.palms) ctx.drawImage(layer, 0, 0);
+  return {
+    layers: {
+      foreground: canvas,
+      trunk0: palms[0],
+      leaves0: palms[1],
+      trunk1: palms[2],
+      leaves1: palms[3],
+      shore: material.canvas,
+    },
+    width,
+    height,
+  };
 }

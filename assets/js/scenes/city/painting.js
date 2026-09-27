@@ -1,26 +1,18 @@
-import { createGlow } from "../painting/glow.js";
+import { createGlow } from "../../drawing/glow.js";
 import { roomMarker } from "./windows.js";
-import { seededRandom, canvasLayer } from "../painting/canvas.js";
-import { stroke } from "../painting/canvas.js";
+import { seededRandom, canvasLayer } from "../../drawing/canvas.js";
+import { stroke } from "../../drawing/canvas.js";
 import { createTrees } from "./trees.js";
 import { drawRiver } from "./river.js";
-export { drawStaticCity } from "./static.js";
 import { drawBeijingSkyline } from "./details.js";
 // An imagined Liangma River evening, drawn entirely from geometry and light.
-export const cityLayerNames = [
-  "buildings",
-  "lights",
-  "bank",
-  "glow",
-  "windows",
-];
 export function createCity(width, height) {
   const portrait = width / height < 0.85,
     W = portrait ? 760 : 1600,
     H = (W * height) / width;
   const layers = {},
     contexts = {};
-  for (const name of cityLayerNames.filter((name) => name !== "glow")) {
+  for (const name of ["buildings", "lights", "bank", "windows"]) {
     const { canvas, ctx } = canvasLayer(width, height, W);
     layers[name] = canvas;
     contexts[name] = ctx;

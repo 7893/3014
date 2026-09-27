@@ -1,6 +1,6 @@
-import { surface } from "./surface.js";
+import { surface } from "../../../rendering/shaders/surface.js";
 import { lights } from "./lights.js";
-import { noise } from "./common.js";
+import { noise } from "../../../rendering/shaders/common.js";
 export const fragment = `#version 300 es
 precision highp float;
 in vec2 v_uv;

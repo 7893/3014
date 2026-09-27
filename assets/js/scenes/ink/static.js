@@ -1,5 +1,5 @@
-import { fishState, FISH_COUNT } from "../motion/fish.js";
-export function drawStaticScene(ctx, scene) {
+import { fishState, FISH_COUNT } from "../../motion/fish.js";
+export function drawStaticInk(ctx, scene, boatLayer) {
   const { layers, width, height } = scene;
   ctx.clearRect(0, 0, width, height);
   ctx.drawImage(layers.paper, 0, 0);
@@ -48,6 +48,6 @@ export function drawStaticScene(ctx, scene) {
     ctx.fill();
     ctx.restore();
   }
-  for (const name of ["shore", "pines", "boat"])
-    ctx.drawImage(layers[name], 0, 0);
+  for (const name of ["shore", "pines"]) ctx.drawImage(layers[name], 0, 0);
+  ctx.drawImage(boatLayer, 0, 0);
 }

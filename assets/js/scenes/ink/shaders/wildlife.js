@@ -1,4 +1,4 @@
-import { LEAP_DURATION } from "../../motion/fish-leap.js";
+import { LEAP_DURATION } from "../../../motion/fish-leap.js";
 export const wildlife = `
 float fishInk(vec2 p,vec4 fish,float phase){
   vec2 q=(p-fish.xy)*vec2(u_size.x/u_size.y,1.);

@@ -2,8 +2,8 @@ import { sails } from "./sails.js";
 import { horizon } from "./horizon.js";
 import { surf } from "./surf.js";
 import { wind } from "./wind.js";
-import { surface } from "./surface.js";
-import { noise } from "./common.js";
+import { surface } from "../../../rendering/shaders/surface.js";
+import { noise } from "../../../rendering/shaders/common.js";
 export const fragment = `#version 300 es
 precision highp float;
 in vec2 v_uv;

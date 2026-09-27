@@ -1,5 +1,5 @@
-import { surface } from "./surface.js";
-import { noise } from "./common.js";
+import { surface } from "../../../rendering/shaders/surface.js";
+import { noise } from "../../../rendering/shaders/common.js";
 import { mist } from "./mist.js";
 import { water } from "./water.js";
 import { wildlife } from "./wildlife.js";

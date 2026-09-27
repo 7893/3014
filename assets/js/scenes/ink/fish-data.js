@@ -1,5 +1,5 @@
-import { FISH_COUNT, fishState } from "../motion/fish.js";
-import { LEAP_DURATION, leapingFish } from "../motion/fish-leap.js";
+import { FISH_COUNT, fishState } from "../../motion/fish.js";
+import { LEAP_DURATION, leapingFish } from "../../motion/fish-leap.js";
 export function updateFish(canvas, time, fishData, rippleData) {
   const aspect = canvas.width / canvas.height;
   for (let i = 0; i < FISH_COUNT; i++) {
