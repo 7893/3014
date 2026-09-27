@@ -46,6 +46,31 @@ export async function checkRendering(page) {
     for (const scene of ["ink", "city", "coast"]) {
       const first = frame(scene, 0),
         baseline = frame(scene, 3);
+      if (scene === "coast") {
+        let covered = 0,
+          columns = 0;
+        for (
+          let x = Math.floor(canvas.width * 0.51);
+          x < canvas.width * 0.63;
+          x++
+        ) {
+          let foam = false;
+          for (
+            let y = Math.floor(canvas.height * 0.96);
+            y < canvas.height;
+            y++
+          ) {
+            const i = ((canvas.height - 1 - y) * canvas.width + x) * 4;
+            if (baseline[i] > 165 && baseline[i + 1] > 195) foam = true;
+          }
+          columns++;
+          if (foam) covered++;
+        }
+        if (covered / columns < 0.85)
+          throw new Error(
+            `Central surf has a gap: ${covered}/${columns} columns`,
+          );
+      }
       const clicked = frame(scene, 3, [0.5, 0.82, 2]);
       let changed = 0,
         mass = 0,

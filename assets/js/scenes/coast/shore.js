@@ -3,14 +3,14 @@ const curves = [
   [
     [0, 0.855],
     [0.14, 0.88],
-    [0.17, 0.96],
-    [0.53, 1],
+    [0.36, 0.995],
+    [0.57, 0.995],
   ],
   [
     [1, 0.855],
     [0.9, 0.86],
-    [0.82, 0.92],
-    [0.61, 1],
+    [0.72, 0.995],
+    [0.57, 0.995],
   ],
 ];
 export function beachPath(W, H, side) {
@@ -25,6 +25,7 @@ export function beachPath(W, H, side) {
     d[0] * W,
     d[1] * H,
   );
+  path.lineTo(d[0] * W, H);
   path.lineTo(a[0] * W, H);
   path.closePath();
   return path;
@@ -37,8 +38,7 @@ vec2 beachCurve(float t,vec2 a,vec2 b,vec2 c,vec2 d){
   float u=1.-t;return u*u*u*a+3.*u*u*t*b+3.*u*t*t*c+t*t*t*d;
 }
 float beachHeight(float x){
-  bool left=x<.55;
-  if(x>.53&&x<.61)return 1.2;
+  bool left=x<${curves[0][3][0].toFixed(3)};
   vec2 a=left?${vectors[0][0]}:${vectors[1][0]};
   vec2 b=left?${vectors[0][1]}:${vectors[1][1]};
   vec2 c=left?${vectors[0][2]}:${vectors[1][2]};
