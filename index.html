@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-Hans">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#ede8db" />
+    <meta
+      name="description"
+      content="山静日长。一幅以程序笔墨绘就的山水，云行水动，留白无声。"
+    />
+    <title>山静日长 · 7893</title>
+    <link rel="stylesheet" href="./assets/css/site.css" />
+  </head>
+  <body>
+    <main aria-label="程序山水画">
+      <canvas
+        id="landscape"
+        aria-label="层山隐于云间，近岸松石，一舟浮于江上。"
+        role="img"
+      ></canvas>
+      <div class="inscription">
+        <h1>山静日长</h1>
+        <p>一水含天远<br />千山入梦深</p>
+        <span class="signature">七八九三 · 写意</span>
+        <span class="seal" aria-hidden="true">山<br />居</span>
+      </div>
+      <div class="colophon">
+        <span class="work-mark" aria-hidden="true">山水无尽　·　心自闲</span>
+        <button
+          id="motion"
+          type="button"
+          hidden
+          aria-pressed="false"
+          title="暂停云水流动"
+        >
+          静观
+        </button>
+      </div>
+      <p class="sr-only" id="status" aria-live="polite"></p>
+      <noscript
+        ><p class="notice">
+          此卷由程序绘就，请启用 JavaScript 展卷。
+        </p></noscript
+      >
+    </main>
+    <script type="module" src="./assets/js/main.js"></script>
+  </body>
+</html>
