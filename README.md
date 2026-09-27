@@ -1,3 +1,3 @@
-# A Boat Through Time
+# Follow the Boat
 
-One boat, three ways of life. Drift between city lights, island shores, and quiet mountains.
+Drift with a boat through quiet mountains, city lights, and island shores.
