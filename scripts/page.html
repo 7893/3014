@@ -1,46 +1,45 @@
 <!doctype html>
-<!-- Generated from scripts/page.html and assets/js/config/copy.js. Do not edit. -->
 <html lang="zh-Hans">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#ede8db" />
-    <meta name="description" content="一舟行过山海与灯火。" />
-    <title>随舟 · 7893</title>
+    <meta name="description" content="{{ site.description }}" />
+    <title>{{ site.title }}</title>
     <link rel="stylesheet" href="./assets/css/site.css" />
     <link rel="stylesheet" href="./assets/css/layout.css" />
   </head>
   <body>
-    <main aria-label="随舟，一舟行过山海与灯火">
+    <main aria-label="{{ site.label }}">
       <canvas
         id="landscape"
-        aria-label="层山隐于云间，淡日映天，近岸松石，一舟浮于江上，游鱼点水。"
+        aria-label="{{ scenes.ink.description }}"
         role="img"
       ></canvas>
       <div class="inscription">
-        <h1>山静日长</h1>
-        <p>云过千山静<br />舟行一水长</p>
-        <span class="signature">七八九三</span>
-        <span class="seal" aria-hidden="true">山<br />居</span>
+        <h1>{{ scenes.ink.title }}</h1>
+        <p>{{ scenes.ink.poem }}</p>
+        <span class="signature">{{ site.signature }}</span>
+        <span class="seal" aria-hidden="true">{{ scenes.ink.seal }}</span>
       </div>
       <div class="colophon">
-        <span class="work-mark" aria-hidden="true">闲看云起</span>
-        <nav class="scene-nav" aria-label="选择场景">
+        <span class="work-mark" aria-hidden="true">{{ scenes.ink.mark }}</span>
+        <nav class="scene-nav" aria-label="{{ site.navigation }}">
           <button type="button" data-scene="ink" aria-pressed="true">
-            山静
+            {{ scenes.ink.label }}
           </button>
           <span aria-hidden="true">·</span>
           <button type="button" data-scene="city" aria-pressed="false">
-            城光
+            {{ scenes.city.label }}
           </button>
           <span aria-hidden="true">·</span>
           <button type="button" data-scene="coast" aria-pressed="false">
-            海风
+            {{ scenes.coast.label }}
           </button>
         </nav>
       </div>
       <p class="sr-only" id="status" aria-live="polite"></p>
-      <noscript><p class="notice">此卷由程序绘就，请启用 JavaScript 展卷。</p></noscript>
+      <noscript><p class="notice">{{ site.noScript }}</p></noscript>
     </main>
     <script type="module" src="./assets/js/main.js"></script>
   </body>

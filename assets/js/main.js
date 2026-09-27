@@ -1,5 +1,6 @@
 import { createAnimation } from "./app/animation.js";
-import { descriptions, updateSceneUI } from "./app/interface.js";
+import { initializeCopy, updateSceneUI } from "./app/interface.js";
+import { arrivalText } from "./config/copy.js";
 import { createWind } from "./motion/wind.js";
 import { drawStaticCoast } from "./coast/painting.js";
 import { createJourney } from "./motion/journey.js";
@@ -16,6 +17,7 @@ let lost = false,
   resizeTimer;
 const journey = createJourney(innerWidth / innerHeight < 0.85 ? 0.64 : 0.69);
 const sceneButtons = [...document.querySelectorAll("[data-scene]")];
+initializeCopy(sceneButtons);
 let dimensions = "";
 let touch = [0, 0, -100];
 const wind = createWind();
@@ -92,8 +94,9 @@ for (const control of sceneButtons)
   control.addEventListener("click", () => {
     journey.select(control.dataset.scene, !renderer);
     draw();
-    document.getElementById("status").textContent =
-      descriptions[control.dataset.scene].arrival;
+    document.getElementById("status").textContent = arrivalText(
+      control.dataset.scene,
+    );
   });
 if (!renderer) fallback();
 document.addEventListener("visibilitychange", animation.sync);
