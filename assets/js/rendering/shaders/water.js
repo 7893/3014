@@ -5,8 +5,7 @@ vec3 paintWater(vec3 color,vec3 paper,vec2 p){
   float depth=(p.y-.73)/.25;
   float flow=sin(p.y*155.-u_time*1.8+p.x*12.)*.6+sin(p.y*287.+u_time*1.35)*.3;
   float age=u_time-u_touch.z;
-  vec2 d=(p-u_touch.xy)*vec2(u_size.x/u_size.y,1.);
-  float distance=length(d);
+  float distance=waterDistance(p,u_touch.xy,u_size.x/u_size.y,.73);
   float ring=sin(distance*135.-age*5.)*exp(-pow((distance-age*.034)*12.,2.))*exp(-max(age,0.)*.5)*step(0.,age);
   vec2 reflected=vec2(p.x+flow*.018*depth+ring*.006,.73-(p.y-.73)*2.05+flow*.004);
   vec3 reflection=paper;

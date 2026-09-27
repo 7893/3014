@@ -66,7 +66,7 @@ void main(){
     wake*=smoothstep(.005,.02,behind)*(1.-smoothstep(.06,.19,behind));
     color+=vec3(.37,.30,.16)*wake*.24;
     float age=u_time-u_touch.z;
-    float distance=length((p-u_touch.xy)*vec2(u_size.x/u_size.y,1.));
+    float distance=waterDistance(p,u_touch.xy,u_size.x/u_size.y,.64);
     color+=vec3(.10,.13,.14)*sin(distance*140.-age*5.)*exp(-pow((distance-age*.035)*12.,2.))*exp(-max(age,0.)*.5)*step(0.,age);
   }
   // Small pairs walk along the opposite embankment.

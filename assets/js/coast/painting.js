@@ -35,12 +35,17 @@ export function createCoast(width, height) {
   }
   ctx.restore();
   drawCoastDetails(ctx, W, H, random);
-  const palms = document.createElement("canvas");
-  palms.width = width;
-  palms.height = height;
-  ctx = palms.getContext("2d");
-  ctx.scale(width / W, height / H);
+  const palms = [];
+  function palmLayer() {
+    const layer = document.createElement("canvas");
+    layer.width = width;
+    layer.height = height;
+    ctx = layer.getContext("2d");
+    ctx.scale(width / W, height / H);
+    palms.push(layer);
+  }
   function palm(x, y, h, lean) {
+    palmLayer();
     const crownX = x + lean,
       crownY = y - h;
     ctx.beginPath();
@@ -54,6 +59,7 @@ export function createCoast(width, height) {
     trunk.addColorStop(1, "#555e39");
     ctx.fillStyle = trunk;
     ctx.fill();
+    palmLayer();
     for (let j = 0; j < 10; j++) {
       const angle = -Math.PI * 0.94 + j * Math.PI * 0.2;
       const length = h * (0.3 + random() * 0.19),
@@ -134,5 +140,5 @@ export function drawStaticCoast(ctx, coast, boatLayer) {
   ctx.fill();
   ctx.drawImage(boatLayer, 0, 0);
   ctx.drawImage(coast.layer, 0, 0);
-  ctx.drawImage(coast.palms, 0, 0);
+  for (const layer of coast.palms) ctx.drawImage(layer, 0, 0);
 }

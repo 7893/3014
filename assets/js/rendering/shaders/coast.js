@@ -3,11 +3,26 @@ export const fragment = `#version 300 es
 precision highp float;
 in vec2 v_uv;
 out vec4 outColor;
-uniform sampler2D u_foreground,u_palms,u_boatLayer;
+uniform sampler2D u_foreground,u_trunk0,u_leaves0,u_trunk1,u_leaves1,u_boatLayer;
 uniform vec2 u_size,u_boat,u_boatCenter,u_actorScale;
 uniform float u_time;
 uniform vec3 u_touch;
 ${noise}
+vec2 palmUV(vec2 p,vec2 root,vec2 crown,float phase,bool leaves){
+  float height=root.y-crown.y;
+  float bend=leaves?1.:pow(clamp((root.y-p.y)/height,0.,1.),2.);
+  float wind=sin(u_time*.48+phase)*.0045+sin(u_time*.79+phase*.6)*.0018;
+  vec2 q=p-vec2(wind*bend,0.);
+  if(leaves){
+    vec2 local=(q-crown)*vec2(u_size.x/u_size.y,1.);
+    float tip=smoothstep(.008,height*.42,length(local));
+    float lag=length(local)/height*2.5;
+    float flutter=(sin(u_time*.86+phase-lag)*.003+sin(u_time*1.37+phase+local.x*11.-lag)*.001)*tip;
+    q.x-=flutter;
+    q.y-=sin(u_time*.86+phase-lag+.8)*.002*tip;
+  }
+  return q;
+}
 float triangle(vec2 p,vec2 a,vec2 b,vec2 c){
   vec2 e0=b-a,e1=c-b,e2=a-c,v0=p-a,v1=p-b,v2=p-c;
   float s0=e0.x*v0.y-e0.y*v0.x,s1=e1.x*v1.y-e1.y*v1.x,s2=e2.x*v2.y-e2.y*v2.x;
@@ -48,7 +63,7 @@ void main(){
     float behind=boat.x-p.x,wy=abs(p.y-boat.y-.009);
     float wake=exp(-pow((wy-(.002+max(behind,0.)*.095))*400.,2.))*smoothstep(.005,.02,behind)*(1.-smoothstep(.06,.19,behind));
     color+=vec3(.35,.40,.23)*wake*.6;
-    float age=u_time-u_touch.z,d=length((p-u_touch.xy)*vec2(aspect,1.));
+    float age=u_time-u_touch.z,d=waterDistance(p,u_touch.xy,aspect,.475);
     color+=vec3(.12,.15,.10)*sin(d*140.-age*5.)*exp(-pow((d-age*.035)*12.,2.))*exp(-max(age,0.)*.5)*step(0.,age);
   }
   // Three distant sails drift at different depths, apart from the travelling protagonist.
@@ -76,12 +91,12 @@ void main(){
   vec4 boat=sampleLayer(u_boatLayer,p-u_boat);
   color=mix(color,vec3(.18,.24,.19),boat.a);
   color=over(color,sampleLayer(u_foreground,p));
-  vec2 q=p;
-  float canopy=clamp((.965-p.y)/.48,0.,1.);
-  float breeze=sin(u_time*1.05+p.y*4.)*.009+sin(u_time*1.9+p.y*17.)*.003;
-  q.x+=breeze*canopy;
-  q.y+=sin(u_time*1.35+p.x*18.)*.003*canopy;
-  color=over(color,sampleLayer(u_palms,q));
+  vec2 root0=vec2(.035,.965),crown0=vec2(.09,.495);
+  vec2 root1=vec2(-.025,.945),crown1=vec2(.145,.605);
+  color=over(color,sampleLayer(u_trunk0,palmUV(p,root0,crown0,0.,false)));
+  color=over(color,sampleLayer(u_leaves0,palmUV(p,root0,crown0,0.,true)));
+  color=over(color,sampleLayer(u_trunk1,palmUV(p,root1,crown1,.8,false)));
+  color=over(color,sampleLayer(u_leaves1,palmUV(p,root1,crown1,.8,true)));
   color+=vec3((hash(gl_FragCoord.xy)-.5)*.006);
   outColor=vec4(color,1.);
 }

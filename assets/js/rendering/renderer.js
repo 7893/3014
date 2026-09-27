@@ -72,7 +72,7 @@ export function createRenderer(canvas) {
   const names = {
     ink: layerNames.map((n) => (n === "boat" ? "boatLayer" : n)),
     city: cityLayerNames,
-    coast: ["foreground", "palms"],
+    coast: ["foreground", "trunk0", "leaves0", "trunk1", "leaves1"],
   };
   function initialize() {
     passes = {};
@@ -132,7 +132,7 @@ export function createRenderer(canvas) {
     const sources = {
       ink: layerNames.map((n) => scene.layers[n]),
       city: cityLayerNames.map((n) => scene.city.layers[n]),
-      coast: [scene.coast.layer, scene.coast.palms],
+      coast: [scene.coast.layer, ...scene.coast.palms],
     };
     gl.activeTexture(gl.TEXTURE0);
     for (const key of Object.keys(names))
