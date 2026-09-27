@@ -1,4 +1,5 @@
 import { sails } from "./sails.js";
+import { horizon } from "./horizon.js";
 import { surf } from "./surf.js";
 import { wind } from "./wind.js";
 import { surface } from "./surface.js";
@@ -17,6 +18,7 @@ ${surface}
 ${wind}
 ${surf}
 ${sails}
+${horizon}
 void main(){
   vec2 p=vec2(v_uv.x,1.-v_uv.y);
   float aspect=u_size.x/u_size.y;
@@ -28,29 +30,31 @@ void main(){
   vec2 cloudP=vec2(p.x*3.-u_wind.z*.10,p.y*13.+sin(u_time*.18)*.08);
   float cloud=fbm(cloudP);
   color=mix(color,vec3(1.,.94,.80),smoothstep(.48,.73,cloud)*.62*(1.-smoothstep(.3,.44,p.y)));
-  float island=.468-.033*exp(-pow((p.x-.85)*6.,2.))-.013*noise(vec2(p.x*20.,0.));
-  float farIsland=.455-.065*exp(-pow((p.x-.91)*5.,2.))-.012*noise(vec2(p.x*14.,8.));
-  if(p.y>farIsland&&p.y<.475)color=vec3(.40,.56,.52);
-  if(p.y>island&&p.y<.478)color=mix(vec3(.28,.46,.44),vec3(.36,.52,.48),p.x);
-  if(p.y>.475){
-    float depth=(p.y-.475)/.525;
+  color=paintIslands(color,p);
+  if(p.y>.473){
+    vec3 skyEdge=color;
+    float depth=max(0.,(p.y-.475)/.525);
     vec2 flow=vec2(p.x*45.,p.y*150.-u_time*.65);
     vec3 normal=waterNormal(p,aspect,depth);
     float fresnel=waterFresnel(normal,depth);
-    float ripple=sin(p.y*260.-u_time*1.3+noise(flow)*2.);
+    float perspective=log(1.+depth*16.)*65.;
+    float ripple=sin(perspective-u_time*1.3+noise(flow)*2.);
     color=mix(vec3(.12,.43,.49),vec3(.43,.76,.67),pow(depth,.65));
     color=mix(color,vec3(.70,.81,.75),fresnel*.45);
+    color=mix(vec3(.64,.74,.69),color,smoothstep(0.,.24,depth));
     float caustic=pow(1.-abs(sin(fbm(flow*.34+vec2(u_time*.045,0.))*24.)),18.);
     color+=vec3(.055,.085,.048)*caustic*smoothstep(.2,.9,depth);
     float glint=exp(-pow((p.x-.32)/(.014+depth*.12),2.));
     color=mix(color,vec3(1.,.91,.68),glint*waterSparkle(normal)*(.32+depth*.22)*(.25+.75*pow(max(0.,ripple),3.)));
-    color+=vec3(.17,.24,.19)*pow(max(0.,ripple),25.)*.18;
+    float wavePatch=smoothstep(.28,.72,noise(vec2(p.x*21.+u_time*.08,p.y*37.)));
+    color+=vec3(.17,.24,.19)*pow(max(0.,ripple),25.)*.13*smoothstep(.03,.4,depth)*wavePatch;
     vec2 boat=u_boatCenter+u_boat;
     float behind=boat.x-p.x,wy=abs(p.y-boat.y-.009);
     float wake=exp(-pow((wy-(.002+max(behind,0.)*.095))*400.,2.))*smoothstep(.005,.02,behind)*(1.-smoothstep(.06,.19,behind));
     color+=vec3(.35,.40,.23)*wake*.6;
     float age=u_time-u_touch.z,d=waterDistance(p,u_touch.xy,aspect,.475);
     color+=vec3(.12,.15,.10)*sin(d*140.-age*5.)*exp(-pow((d-age*.035)*12.,2.))*exp(-max(age,0.)*.5)*step(0.,age);
+    color=mix(skyEdge,color,smoothstep(.473,.481,p.y));
   }
   color=paintSails(color,p,aspect);
   vec4 boat=sampleLayer(u_boatLayer,p-u_boat);

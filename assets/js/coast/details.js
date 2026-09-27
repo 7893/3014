@@ -1,3 +1,4 @@
+import { drawHeadland } from "./headland.js";
 import { beachPath } from "./shore.js";
 export function drawCoastDetails(ctx, W, H, random, mask) {
   let material = null;
@@ -17,38 +18,7 @@ export function drawCoastDetails(ctx, W, H, random, mask) {
       mask.fill();
     }
   }
-  // A vegetated headland and pale beach establish the far side of the cove.
-  shape(
-    [
-      [W, H * 0.52],
-      [W * 0.95, H * 0.51],
-      [W * 0.89, H * 0.54],
-      [W * 0.86, H * 0.58],
-      [W * 0.76, H * 0.616],
-      [W * 0.82, H * 0.632],
-      [W, H * 0.61],
-    ],
-    "#547e61",
-  );
-  shape(
-    [
-      [W, H * 0.606],
-      [W * 0.83, H * 0.623],
-      [W * 0.76, H * 0.616],
-      [W * 0.81, H * 0.637],
-      [W * 0.92, H * 0.63],
-      [W, H * 0.618],
-    ],
-    "#d4c59b",
-  );
-  for (let i = 0; i < 160; i++) {
-    const x = W * (0.88 + random() * 0.15),
-      y = H * (0.55 + random() * 0.055);
-    ctx.fillStyle = `rgba(47,93,62,${0.12 + random() * 0.2})`;
-    ctx.beginPath();
-    ctx.ellipse(x, y, 3 + random() * 9, 2 + random() * 5, 0, 0, Math.PI * 2);
-    ctx.fill();
-  }
+  drawHeadland(ctx, W, H, random);
   // Right foreground: a second sweep of sand around the open boating channel.
   const beach = beachPath(W, H, 1);
   const sand = ctx.createLinearGradient(0, H * 0.85, 0, H);

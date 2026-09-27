@@ -1,11 +1,19 @@
 import { FISH_COUNT, fishState } from "../motion/fish.js";
+import { LEAP_DURATION, leapingFish } from "../motion/fish-leap.js";
 export function updateFish(canvas, time, fishData, rippleData) {
   const aspect = canvas.width / canvas.height;
   for (let i = 0; i < FISH_COUNT; i++) {
-    fishData.set(fishState(time, i, aspect), i * 4);
     const period = 13 + i * 3,
       age = (time + period - i * 3 - 2) % period,
-      position = fishState(time - age + (i === 0 ? 1.1 : 0), i, aspect);
+      position = fishState(
+        time - age + (i === 0 ? LEAP_DURATION : 0),
+        i,
+        aspect,
+      );
+    fishData.set(
+      i === 0 ? leapingFish(time, age, aspect) : fishState(time, i, aspect),
+      i * 4,
+    );
     rippleData.set(
       [
         position[0],
