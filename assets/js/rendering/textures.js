@@ -13,7 +13,7 @@ export function uploadTextures(
   const sources = {
     ink: layerNames.map((n) => scene.layers[n]),
     city: cityLayerNames.map((n) => scene.city.layers[n]),
-    coast: [scene.coast.layer, ...scene.coast.palms],
+    coast: [scene.coast.layer, ...scene.coast.palms, scene.coast.shore],
   };
   gl.activeTexture(gl.TEXTURE0);
   for (const key of Object.keys(names))

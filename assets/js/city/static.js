@@ -11,6 +11,11 @@ export function drawStaticCity(ctx, city, boatLayer) {
   ctx.drawImage(layers.buildings, 0, 0);
   ctx.drawImage(layers.lights, 0, 0);
   ctx.save();
+  ctx.globalCompositeOperation = "screen";
+  ctx.globalAlpha = 0.6;
+  ctx.drawImage(layers.glow, 0, 0, w, h);
+  ctx.restore();
+  ctx.save();
   ctx.translate(0, h * 0.64);
   ctx.scale(1, -0.62);
   ctx.translate(0, -h * 0.635);

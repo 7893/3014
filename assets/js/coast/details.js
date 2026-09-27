@@ -1,10 +1,21 @@
-export function drawCoastDetails(ctx, W, H, random) {
+import { beachPath } from "./shore.js";
+export function drawCoastDetails(ctx, W, H, random, mask) {
+  let material = null;
   function shape(points, fill) {
     ctx.beginPath();
     points.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
     ctx.closePath();
     ctx.fillStyle = fill;
     ctx.fill();
+    if (material) {
+      mask.beginPath();
+      points.forEach(([x, y], i) =>
+        i ? mask.lineTo(x, y) : mask.moveTo(x, y),
+      );
+      mask.closePath();
+      mask.fillStyle = material;
+      mask.fill();
+    }
   }
   // A vegetated headland and pale beach establish the far side of the cove.
   shape(
@@ -39,16 +50,15 @@ export function drawCoastDetails(ctx, W, H, random) {
     ctx.fill();
   }
   // Right foreground: a second sweep of sand around the open boating channel.
-  ctx.beginPath();
-  ctx.moveTo(W, H * 0.855);
-  ctx.bezierCurveTo(W * 0.9, H * 0.86, W * 0.82, H * 0.92, W * 0.61, H);
-  ctx.lineTo(W, H);
-  ctx.closePath();
+  const beach = beachPath(W, H, 1);
   const sand = ctx.createLinearGradient(0, H * 0.85, 0, H);
   sand.addColorStop(0, "#f0ddad");
   sand.addColorStop(1, "#cbb57f");
   ctx.fillStyle = sand;
-  ctx.fill();
+  ctx.fill(beach);
+  mask.fillStyle = "#ff0000";
+  mask.fill(beach);
+  material = "#00ff00";
   // Weathered boulders at the waterline, each with a softly lit upper face.
   for (let i = 0; i < 9; i++) {
     const x = W * (0.92 + i * 0.012),
@@ -75,6 +85,7 @@ export function drawCoastDetails(ctx, W, H, random) {
       "#96a18a",
     );
   }
+  material = "#0000ff";
   // A modest boardwalk descends toward the beach, kept below the boat's passage.
   shape(
     [

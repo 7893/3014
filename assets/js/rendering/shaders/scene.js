@@ -23,9 +23,9 @@ ${sky}
 void main(){
   vec2 p=vec2(v_uv.x,1.-v_uv.y);
   vec3 paper=texture(u_paper,v_uv).rgb;
-  vec3 color=over(paintSun(paper,p),texture(u_far,v_uv));
+  vec3 color=mountainLayer(paintSun(paper,p),texture(u_far,v_uv),paper,.18);
   color=mix(color,paper,mistLayer(p,.47,0.));
-  color=over(color,texture(u_middle,v_uv));
+  color=mountainLayer(color,texture(u_middle,v_uv),paper,.07);
   color=mix(color,paper,mistLayer(p,.56,1.));
   color=over(color,texture(u_near,v_uv));
   color=mix(color,paper,mistLayer(p,.665,2.));

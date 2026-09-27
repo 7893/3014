@@ -4,7 +4,7 @@ export const fragment = `#version 300 es
 precision highp float;
 in vec2 v_uv;
 out vec4 outColor;
-uniform sampler2D u_buildings,u_lights,u_bank,u_boatLayer;
+uniform sampler2D u_buildings,u_lights,u_bank,u_glow,u_boatLayer;
 uniform vec2 u_size,u_boat,u_boatCenter,u_actorScale;
 uniform float u_time;
 uniform vec3 u_touch;
@@ -35,6 +35,11 @@ vec3 animatedLights(vec2 p){
   vec3 warmth=mix(vec3(1.,.95,.87),vec3(1.1,.88,.65),sweep*river);
   return lamps.rgb*lamps.a*mix(windows,bridge,river)*warmth;
 }
+vec3 lightSpill(vec2 p){
+  vec4 glow=sampleLayer(u_glow,p);
+  float sweep=pow(.5+.5*sin(p.x*15.-u_time*.95),5.);
+  return glow.rgb*glow.a*(.8+sweep*.65);
+}
 vec3 skyline(vec2 p){
   vec3 top=vec3(.025,.052,.079),horizon=vec3(.17,.22,.245);
   vec3 color=mix(top,horizon,pow(clamp(p.y/.72,0.,1.),1.7));
@@ -43,6 +48,7 @@ vec3 skyline(vec2 p){
   color+=stars(p);
   color=over(color,sampleLayer(u_buildings,p));
   color+=animatedLights(p);
+  color+=lightSpill(p)*.85;
   return color;
 }
 float lineMark(vec2 p,vec2 a,vec2 b,float width){vec2 d=b-a;return 1.-smoothstep(width,width+0.35,length(p-a-d*clamp(dot(p-a,d)/dot(d,d),0.,1.)));}
@@ -64,6 +70,7 @@ void main(){
     color+=lamps*breaks*(1.25-depth*.45);
     vec3 spread=animatedLights(reflected+vec2(.002,0.))+animatedLights(reflected-vec2(.002,0.));
     color+=spread*breaks*.18;
+    color+=lightSpill(reflected)*(.65+.35*breaks)*(1.-depth*.6);
     color+=vec3(.08,.11,.12)*waterSparkle(normal)*fresnel;
     color+=vec3(.13,.16,.17)*pow(max(0.,sin(p.y*485.+p.x*13.-u_time*1.6)),18.)*.055;
     vec2 boat=u_boatCenter+u_boat;

@@ -28,7 +28,7 @@ export function createRenderer(canvas) {
   const names = {
     ink: layerNames.map((n) => (n === "boat" ? "boatLayer" : n)),
     city: cityLayerNames,
-    coast: ["foreground", "trunk0", "leaves0", "trunk1", "leaves1"],
+    coast: ["foreground", "trunk0", "leaves0", "trunk1", "leaves1", "shore"],
   };
   function initialize() {
     passes = {};

@@ -1,3 +1,4 @@
+import { surf } from "./surf.js";
 import { wind } from "./wind.js";
 import { surface } from "./surface.js";
 import { noise } from "./common.js";
@@ -5,7 +6,7 @@ export const fragment = `#version 300 es
 precision highp float;
 in vec2 v_uv;
 out vec4 outColor;
-uniform sampler2D u_foreground,u_trunk0,u_leaves0,u_trunk1,u_leaves1,u_boatLayer;
+uniform sampler2D u_foreground,u_trunk0,u_leaves0,u_trunk1,u_leaves1,u_shore,u_boatLayer;
 uniform vec2 u_size,u_boat,u_boatCenter,u_actorScale;
 uniform float u_time;
 uniform vec3 u_touch;
@@ -13,6 +14,7 @@ uniform vec4 u_wind;
 ${noise}
 ${surface}
 ${wind}
+${surf}
 float triangle(vec2 p,vec2 a,vec2 b,vec2 c){
   vec2 e0=b-a,e1=c-b,e2=a-c,v0=p-a,v1=p-b,v2=p-c;
   float s0=e0.x*v0.y-e0.y*v0.x,s1=e1.x*v1.y-e1.y*v1.x,s2=e2.x*v2.y-e2.y*v2.x;
@@ -46,12 +48,6 @@ void main(){
     float glint=exp(-pow((p.x-.32)/(.014+depth*.12),2.));
     color=mix(color,vec3(1.,.91,.68),glint*waterSparkle(normal)*(.32+depth*.22)*(.25+.75*pow(max(0.,ripple),3.)));
     color+=vec3(.17,.24,.19)*pow(max(0.,ripple),25.)*.18;
-    float shore=.855+.38*pow(max(p.x,0.),.8);
-    float wave=sin(p.y*58.-u_time*1.1+p.x*5.);
-    float rightShore=.855+.42*pow(max(1.-p.x,0.),.85);
-    float foam=exp(-pow((p.y-shore+.026+wave*.008)*240.,2.));
-    foam+=exp(-pow((p.y-rightShore+.018+wave*.006)*210.,2.));
-    color=mix(color,vec3(.95,.95,.80),foam*.7);
     vec2 boat=u_boatCenter+u_boat;
     float behind=boat.x-p.x,wy=abs(p.y-boat.y-.009);
     float wake=exp(-pow((wy-(.002+max(behind,0.)*.095))*400.,2.))*smoothstep(.005,.02,behind)*(1.-smoothstep(.06,.19,behind));
@@ -84,6 +80,7 @@ void main(){
   vec4 boat=sampleLayer(u_boatLayer,p-u_boat);
   color=mix(color,vec3(.18,.24,.19),boat.a);
   color=over(color,sampleLayer(u_foreground,p));
+  color=paintSurf(color,p);
   vec2 root0=vec2(.035,.965),crown0=vec2(.09,.495);
   vec2 root1=vec2(-.025,.945),crown1=vec2(.145,.605);
   color=over(color,sampleLayer(u_trunk0,palmUV(p,root0,crown0,0.,false)));
