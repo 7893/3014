@@ -1,16 +1,4 @@
 export const wildlife=`
-vec3 paintSun(vec3 paper,vec2 p){
-  float aspect=u_size.x/u_size.y;
-  vec2 center=aspect<.85?vec2(.32,.12):vec2(.72,.205);
-  float radius=min(aspect,1.)*.039;
-  float r=length((p-center)*vec2(aspect,1.));
-  float edge=radius+(noise(p*180.)-.5)*radius*.035;
-  float disc=1.-smoothstep(edge-radius*.025,edge+radius*.025,r);
-  float clouds=fbm(vec2(p.x*8.-u_time*.055,p.y*26.+u_time*.012));
-  float haze=smoothstep(.29,.7,clouds);
-  vec3 pigment=vec3(.64,.36,.23);
-  return mix(paper,pigment,disc*(.24-haze*.15));
-}
 float fishInk(vec2 p,vec4 fish,float phase){
   vec2 q=(p-fish.xy)*vec2(u_size.x/u_size.y,1.);
   float c=cos(fish.z),s=sin(fish.z);

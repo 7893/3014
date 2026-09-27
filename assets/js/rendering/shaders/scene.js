@@ -2,6 +2,7 @@ import { noise } from "./common.js";
 import { mist } from "./mist.js";
 import { water } from "./water.js";
 import { wildlife } from "./wildlife.js";
+import { sky } from "./sky.js";
 export const fragment = `#version 300 es
 precision highp float;
 in vec2 v_uv;
@@ -15,6 +16,7 @@ ${noise}
 ${mist}
 ${water}
 ${wildlife}
+${sky}
 void main(){
   vec2 p=vec2(v_uv.x,1.-v_uv.y);
   vec3 paper=texture(u_paper,v_uv).rgb;
@@ -24,6 +26,7 @@ void main(){
   color=mix(color,paper,mistLayer(p,.56,1.));
   color=over(color,texture(u_near,v_uv));
   color=mix(color,paper,mistLayer(p,.665,2.));
+  color=paintPassingCloud(color,paper,p);
   color=paintWater(color,paper,p);
   color=paintFish(color,p);
   color=over(color,texture(u_shore,v_uv));
