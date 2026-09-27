@@ -7,7 +7,7 @@ let renderer = createRenderer(canvas),
   painting;
 const button = document.getElementById("motion");
 const reduced = matchMedia("(prefers-reduced-motion: reduce)");
-let paused = reduced.matches,
+let paused = false,
   lost = false,
   frame = 0,
   last = 0,
