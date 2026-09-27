@@ -1,4 +1,5 @@
 import { layerNames } from "../scene.js";
+import { FISH_COUNT, fishState } from "../motion/fish.js";
 import { boatMotion } from "../motion/boat.js";
 import { vertex } from "./shaders/common.js";
 import { fragment as sceneFragment } from "./shaders/scene.js";
@@ -13,6 +14,8 @@ export function createRenderer(canvas) {
     powerPreference: "low-power",
   });
   if (!gl) return null;
+  const fishData = new Float32Array(FISH_COUNT * 4);
+  const rippleData = new Float32Array(FISH_COUNT * 4);
   let passes = [],
     textures = [],
     target,
@@ -74,6 +77,8 @@ export function createRenderer(canvas) {
         "size",
         "time",
         "touch",
+        "fish[0]",
+        "fishRipples[0]",
         "boatCenter",
         "boatOpacity",
         "boat",
@@ -161,6 +166,18 @@ export function createRenderer(canvas) {
     gl.uniform2f(u.size, canvas.width, canvas.height);
     gl.uniform1f(u.time, time);
     gl.uniform3fv(u.touch, touch);
+    const aspect = canvas.width / canvas.height;
+    for (let i = 0; i < FISH_COUNT; i++) {
+      fishData.set(fishState(time, i, aspect), i * 4);
+      const period = 13 + i * 3;
+      const age = (time + period - i * 3 - 2) % period;
+      const born = time - age;
+      const position = fishState(born, i, aspect);
+      const opacity = age < 4 ? Math.sin((Math.PI * age) / 4) * 0.65 : 0;
+      rippleData.set([position[0], position[1], age, opacity], i * 4);
+    }
+    gl.uniform4fv(u["fish[0]"], fishData);
+    gl.uniform4fv(u["fishRipples[0]"], rippleData);
     const boat = boatMotion(time, scene.boatCenter);
     gl.uniform2fv(u.boat, boat.offset);
     gl.uniform1f(u.boatOpacity, boat.opacity);

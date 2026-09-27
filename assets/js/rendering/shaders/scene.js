@@ -1,6 +1,7 @@
 import { noise } from "./common.js";
 import { mist } from "./mist.js";
 import { water } from "./water.js";
+import { wildlife } from "./wildlife.js";
 export const fragment = `#version 300 es
 precision highp float;
 in vec2 v_uv;
@@ -9,19 +10,22 @@ uniform sampler2D u_paper,u_far,u_middle,u_near,u_shore,u_pines,u_boatLayer;
 uniform vec2 u_size,u_boat,u_boatCenter;
 uniform float u_time,u_boatOpacity;
 uniform vec3 u_touch;
+uniform vec4 u_fish[3],u_fishRipples[3];
 ${noise}
 ${mist}
 ${water}
+${wildlife}
 void main(){
   vec2 p=vec2(v_uv.x,1.-v_uv.y);
   vec3 paper=texture(u_paper,v_uv).rgb;
-  vec3 color=over(paper,texture(u_far,v_uv));
+  vec3 color=over(paintSun(paper,p),texture(u_far,v_uv));
   color=mix(color,paper,mistLayer(p,.47,0.));
   color=over(color,texture(u_middle,v_uv));
   color=mix(color,paper,mistLayer(p,.56,1.));
   color=over(color,texture(u_near,v_uv));
   color=mix(color,paper,mistLayer(p,.665,2.));
   color=paintWater(color,paper,p);
+  color=paintFish(color,p);
   color=over(color,texture(u_shore,v_uv));
   float bend=pow(clamp((.89-p.y)/.27,0.,1.),2.);
   float wind=(sin(u_time*1.05+p.y*13.)*.65+sin(u_time*1.7+p.x*21.)*.35)*.007*bend;
