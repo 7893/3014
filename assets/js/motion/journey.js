@@ -1,16 +1,34 @@
 const SPEED = 0.014;
 const DURATION = 5;
-export function createJourney(initialX = 0.69) {
-  let scene = "ink",
+export const scenes = ["ink", "city", "coast"];
+export function createJourney(initialX = 0.69, random = Math.random) {
+  function shuffle() {
+    const order = [...scenes];
+    for (let i = order.length - 1; i > 0; i--) {
+      const j = Math.floor(random() * (i + 1));
+      [order[i], order[j]] = [order[j], order[i]];
+    }
+    return order;
+  }
+  let queue = shuffle();
+  let scene = queue.shift(),
     elapsed = 0,
     startX = initialX,
     transition = null;
-  function select(target, instant = false) {
-    if (!["ink", "city"].includes(target)) return;
+  function nextScene() {
+    if (!queue.length) {
+      queue = shuffle();
+      if (queue[0] === scene) [queue[0], queue[1]] = [queue[1], queue[0]];
+    }
+    return queue.shift();
+  }
+  function select(target, instant = false, automatic = false) {
+    if (!scenes.includes(target)) return;
+    if (!automatic) queue = shuffle().filter((name) => name !== target);
     if (instant) {
       scene = target;
       elapsed = 0;
-      startX = target === "ink" ? initialX : 0.3;
+      startX = initialX;
       transition = null;
       return;
     }
@@ -19,7 +37,7 @@ export function createJourney(initialX = 0.69) {
       scene =
         transition.elapsed < DURATION / 2 ? transition.from : transition.to;
       elapsed = 0;
-      startX = scene === "ink" ? initialX : 0.3;
+      startX = 0.3;
       transition = null;
     }
     if (scene === target) return;
@@ -40,31 +58,29 @@ export function createJourney(initialX = 0.69) {
       return;
     }
     elapsed += dt;
-    if (position() >= 0.985) select(scene === "ink" ? "city" : "ink");
+    if (position() >= 0.985) select(nextScene(), false, true);
   }
   function state() {
     if (!transition)
       return {
         scene,
-        blend: scene === "city" ? 1 : 0,
+        from: scene,
+        to: scene,
+        blend: 0,
         transitioning: false,
-        inkX: scene === "ink" ? position() : 1.04,
-        cityX: scene === "city" ? position() : 0.22,
+        positions: { [scene]: position() },
       };
-    const p = transition.elapsed / DURATION,
-      s = p * p * (3 - 2 * p);
+    const p = transition.elapsed / DURATION;
     return {
       scene: p < 0.5 ? transition.from : transition.to,
-      blend: transition.to === "city" ? s : 1 - s,
+      from: transition.from,
+      to: transition.to,
+      blend: p * p * (3 - 2 * p),
       transitioning: true,
-      inkX:
-        transition.from === "ink"
-          ? transition.outgoingX + transition.elapsed * SPEED
-          : 0.07 + transition.elapsed * 0.03,
-      cityX:
-        transition.from === "city"
-          ? transition.outgoingX + transition.elapsed * SPEED
-          : 0.07 + transition.elapsed * 0.03,
+      positions: {
+        [transition.from]: transition.outgoingX + transition.elapsed * SPEED,
+        [transition.to]: 0.07 + transition.elapsed * 0.03,
+      },
     };
   }
   return { advance, select, state };

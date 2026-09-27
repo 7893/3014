@@ -1,3 +1,4 @@
+import { drawStaticCoast } from "./coast/painting.js";
 import { createJourney } from "./motion/journey.js";
 import { drawStaticCity } from "./city/painting.js";
 import { createScene, drawStaticScene } from "./scene.js";
@@ -28,21 +29,49 @@ function fallback() {
   canvas = replacement;
   context = canvas.getContext("2d");
   canvas.dataset.renderer = "canvas2d";
-  if (painting) {
-    if (journey.state().scene === "city")
-      drawStaticCity(context, painting.city, painting.layers.boat);
-    else drawStaticScene(context, painting);
-  }
+  if (painting) drawStatic(journey.state().scene);
   button.hidden = true;
 }
 
+function drawStatic(name) {
+  if (name === "city")
+    drawStaticCity(context, painting.city, painting.layers.boat);
+  else if (name === "coast")
+    drawStaticCoast(context, painting.coast, painting.layers.boat);
+  else drawStaticScene(context, painting);
+}
+const descriptions = {
+  ink: {
+    title: "山静日长",
+    poem: "一水含天远<br />千山入梦深",
+    seal: "山<br />居",
+    mark: "隐居山水　·　心自闲",
+    description: "层山隐于云间，淡日映天，近岸松石，一舟浮于江上，游鱼点水。",
+    arrival: "舟入山水，隐居。",
+  },
+  city: {
+    title: "京华入夜",
+    poem: "亮马浮灯影<br />一舟渡古今",
+    seal: "京<br />华",
+    mark: "都市灯火　·　亮马河畔",
+    description: "北京亮马河入夜，沿岸树影、步道与桥灯映入水中，一舟向右驶去。",
+    arrival: "舟入亮马河，都市。",
+  },
+  coast: {
+    title: "椰风海韵",
+    poem: "椰影摇晴日<br />一舟入海风",
+    seal: "海<br />南",
+    mark: "海岛度假　·　风暖潮轻",
+    description:
+      "海南意境的海湾，椰影摇曳，阳光洒落青绿浅海，细浪涌向沙岸，一舟随波前行。",
+    arrival: "舟入海南海湾，度假。",
+  },
+};
 function draw() {
   if (lost || !painting) return;
   const state = journey.state();
   if (renderer) renderer.draw(time, touch, state);
-  else if (state.scene === "city")
-    drawStaticCity(context, painting.city, painting.layers.boat);
-  else drawStaticScene(context, painting);
+  else drawStatic(state.scene);
   updateSceneUI(state);
 }
 function resize() {
@@ -109,23 +138,12 @@ function updateSceneUI(state) {
   if (shownScene === state.scene) return;
   shownScene = state.scene;
   document.body.dataset.view = state.scene;
-  const city = state.scene === "city";
-  document.querySelector("h1").textContent = city ? "京华入夜" : "山静日长";
-  document.querySelector(".inscription p").innerHTML = city
-    ? "亮马浮灯影<br />一舟渡古今"
-    : "一水含天远<br />千山入梦深";
-  document.querySelector(".seal").innerHTML = city
-    ? "京<br />华"
-    : "山<br />居";
-  document.querySelector(".work-mark").textContent = city
-    ? "亮马河畔　·　灯火可亲"
-    : "山水无尽　·　心自闲";
-  canvas.setAttribute(
-    "aria-label",
-    city
-      ? "北京亮马河入夜，沿岸树影、步道与桥灯映入水中，一舟向右驶去，再循雾回到山水。"
-      : "层山隐于云间，淡日映天，近岸松石，一舟浮于江上，游鱼点水。",
-  );
+  const info = descriptions[state.scene];
+  document.querySelector("h1").textContent = info.title;
+  document.querySelector(".inscription p").innerHTML = info.poem;
+  document.querySelector(".seal").innerHTML = info.seal;
+  document.querySelector(".work-mark").textContent = info.mark;
+  canvas.setAttribute("aria-label", info.description);
   for (const button of sceneButtons)
     button.setAttribute(
       "aria-pressed",
@@ -137,7 +155,7 @@ for (const control of sceneButtons)
     journey.select(control.dataset.scene, paused || !renderer);
     draw();
     document.getElementById("status").textContent =
-      control.dataset.scene === "city" ? "驶入北京。" : "回望山水。";
+      descriptions[control.dataset.scene].arrival;
   });
 if (!renderer) fallback();
 button.hidden = !renderer;

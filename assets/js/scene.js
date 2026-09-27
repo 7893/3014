@@ -1,3 +1,4 @@
+import { createCoast } from "./coast/painting.js";
 import { createCity } from "./city/painting.js";
 import { createBrush } from "./painting/brush.js";
 import { createMountains } from "./painting/mountains.js";
@@ -215,6 +216,7 @@ export function createScene(width, height) {
     boatCenter,
     portrait,
     city: createCity(width, height),
+    coast: createCoast(width, height),
   };
 }
 

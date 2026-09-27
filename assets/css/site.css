@@ -238,3 +238,27 @@ body[data-view="city"] button:focus-visible {
     gap: 8px;
   }
 }
+
+body[data-view="coast"] {
+  color: #314d45;
+}
+body[data-view="coast"] .inscription p {
+  color: #4e6658;
+}
+body[data-view="coast"] .signature,
+body[data-view="coast"] .work-mark {
+  color: #536b5c;
+}
+body[data-view="coast"] button {
+  color: #345c50;
+}
+@media (max-width: 400px) {
+  .colophon {
+    gap: 10px;
+    left: 5%;
+    right: 5%;
+  }
+  .scene-nav {
+    gap: 4px;
+  }
+}
