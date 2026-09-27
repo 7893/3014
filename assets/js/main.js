@@ -8,10 +8,7 @@ let canvas = document.getElementById("landscape");
 let renderer = createRenderer(canvas),
   context,
   painting;
-const button = document.getElementById("motion");
-const reduced = matchMedia("(prefers-reduced-motion: reduce)");
-let paused = false,
-  lost = false,
+let lost = false,
   frame = 0,
   last = 0,
   time = 0,
@@ -30,7 +27,6 @@ function fallback() {
   context = canvas.getContext("2d");
   canvas.dataset.renderer = "canvas2d";
   if (painting) drawStatic(journey.state().scene);
-  button.hidden = true;
 }
 
 function drawStatic(name) {
@@ -107,7 +103,7 @@ function resize() {
 }
 function tick(now) {
   frame = 0;
-  if (paused || lost || document.hidden || !renderer) return;
+  if (lost || document.hidden || !renderer) return;
   if (!last || now - last >= 1000 / 24) {
     const dt = last ? Math.min((now - last) / 1000, 0.1) : 0;
     time += dt;
@@ -121,11 +117,7 @@ function sync() {
   cancelAnimationFrame(frame);
   frame = 0;
   last = 0;
-  button.textContent = paused ? "云起" : "静观";
-  button.title = paused ? "恢复旅程与动态" : "暂停旅程与动态";
-  button.setAttribute("aria-label", button.title);
-  button.setAttribute("aria-pressed", String(paused));
-  if (!paused && !lost && !document.hidden && renderer)
+  if (!lost && !document.hidden && renderer)
     frame = requestAnimationFrame(tick);
 }
 function updateSceneUI(state) {
@@ -152,31 +144,18 @@ function updateSceneUI(state) {
 }
 for (const control of sceneButtons)
   control.addEventListener("click", () => {
-    journey.select(control.dataset.scene, paused || !renderer);
+    journey.select(control.dataset.scene, !renderer);
     draw();
     document.getElementById("status").textContent =
       descriptions[control.dataset.scene].arrival;
   });
 if (!renderer) fallback();
-button.hidden = !renderer;
-button.addEventListener("click", () => {
-  paused = !paused;
-  sync();
-  document.getElementById("status").textContent = paused
-    ? "旅程暂歇，静观此刻。"
-    : "继续行舟。";
-});
-reduced.addEventListener("change", () => {
-  paused = reduced.matches;
-  sync();
-});
 document.addEventListener("visibilitychange", sync);
 window.addEventListener("resize", () => {
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(resize, 120);
 });
 canvas.addEventListener("pointerdown", (event) => {
-  if (paused || reduced.matches) return;
   touch = [event.clientX / innerWidth, event.clientY / innerHeight, time];
   draw();
 });
