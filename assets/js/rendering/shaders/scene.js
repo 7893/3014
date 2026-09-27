@@ -7,7 +7,7 @@ in vec2 v_uv;
 out vec4 outColor;
 uniform sampler2D u_paper,u_far,u_middle,u_near,u_shore,u_pines,u_boatLayer;
 uniform vec2 u_size,u_boat,u_boatCenter;
-uniform float u_time,u_mobile;
+uniform float u_time;
 uniform vec3 u_touch;
 ${noise}
 ${mist}
@@ -18,7 +18,7 @@ void main(){
   vec3 color=over(paper,texture(u_far,v_uv));
   color=mix(color,paper,mistLayer(p,.47,0.));
   color=over(color,texture(u_middle,v_uv));
-  if(u_mobile<.5)color=mix(color,paper,mistLayer(p,.56,1.));
+  color=mix(color,paper,mistLayer(p,.56,1.));
   color=over(color,texture(u_near,v_uv));
   color=mix(color,paper,mistLayer(p,.665,2.));
   color=paintWater(color,paper,p);

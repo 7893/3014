@@ -74,7 +74,6 @@ export function createRenderer(canvas) {
         "size",
         "time",
         "touch",
-        "mobile",
         "boatCenter",
         "boat",
         "paper",
@@ -163,7 +162,6 @@ export function createRenderer(canvas) {
     gl.uniform3fv(u.touch, touch);
     gl.uniform2fv(u.boat, boatOffset(time));
     gl.uniform2fv(u.boatCenter, scene.boatCenter);
-    gl.uniform1f(u.mobile, scene.portrait ? 1 : 0);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     const ink = passes[1];
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);

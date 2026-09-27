@@ -40,7 +40,7 @@ function resize() {
   const dpr = Math.min(
     devicePixelRatio || 1,
     1.5,
-    Math.sqrt((w / h < 0.85 ? 850000 : 1800000) / (w * h)),
+    Math.sqrt(1800000 / (w * h)),
     limit / w,
     limit / h,
   );
