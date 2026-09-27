@@ -1,3 +1,5 @@
+import { createJourney } from "./motion/journey.js";
+import { drawStaticCity } from "./city/painting.js";
 import { createScene, drawStaticScene } from "./scene.js";
 import { createRenderer } from "./rendering/renderer.js";
 
@@ -13,6 +15,9 @@ let paused = false,
   last = 0,
   time = 0,
   resizeTimer;
+const journey = createJourney(innerWidth / innerHeight < 0.85 ? 0.64 : 0.69);
+let shownScene = "";
+const sceneButtons = [...document.querySelectorAll("[data-scene]")];
 let dimensions = "";
 let touch = [0, 0, -100];
 function fallback() {
@@ -23,14 +28,22 @@ function fallback() {
   canvas = replacement;
   context = canvas.getContext("2d");
   canvas.dataset.renderer = "canvas2d";
-  if (painting) drawStaticScene(context, painting);
+  if (painting) {
+    if (journey.state().scene === "city")
+      drawStaticCity(context, painting.city, painting.layers.boat);
+    else drawStaticScene(context, painting);
+  }
   button.hidden = true;
 }
-if (!renderer) fallback();
+
 function draw() {
   if (lost || !painting) return;
-  if (renderer) renderer.draw(time, touch);
+  const state = journey.state();
+  if (renderer) renderer.draw(time, touch, state);
+  else if (state.scene === "city")
+    drawStaticCity(context, painting.city, painting.layers.boat);
   else drawStaticScene(context, painting);
+  updateSceneUI(state);
 }
 function resize() {
   if (lost) return;
@@ -67,7 +80,9 @@ function tick(now) {
   frame = 0;
   if (paused || lost || document.hidden || !renderer) return;
   if (!last || now - last >= 1000 / 24) {
-    time += last ? Math.min((now - last) / 1000, 0.1) : 0;
+    const dt = last ? Math.min((now - last) / 1000, 0.1) : 0;
+    time += dt;
+    journey.advance(dt);
     last = now;
     draw();
   }
@@ -78,19 +93,60 @@ function sync() {
   frame = 0;
   last = 0;
   button.textContent = paused ? "云起" : "静观";
-  button.title = paused ? "恢复云水流动" : "暂停云水流动";
+  button.title = paused ? "恢复旅程与动态" : "暂停旅程与动态";
   button.setAttribute("aria-label", button.title);
   button.setAttribute("aria-pressed", String(paused));
   if (!paused && !lost && !document.hidden && renderer)
     frame = requestAnimationFrame(tick);
 }
+function updateSceneUI(state) {
+  canvas.dataset.scene = state.scene;
+  canvas.dataset.transition = String(state.transitioning);
+  const inscription = document.querySelector(".inscription");
+  inscription.style.opacity = state.transitioning
+    ? String(Math.abs(state.blend * 2 - 1))
+    : "1";
+  if (shownScene === state.scene) return;
+  shownScene = state.scene;
+  document.body.dataset.view = state.scene;
+  const city = state.scene === "city";
+  document.querySelector("h1").textContent = city ? "京华入夜" : "山静日长";
+  document.querySelector(".inscription p").innerHTML = city
+    ? "一舟穿灯火<br />今古共长流"
+    : "一水含天远<br />千山入梦深";
+  document.querySelector(".seal").innerHTML = city
+    ? "京<br />华"
+    : "山<br />居";
+  document.querySelector(".work-mark").textContent = city
+    ? "一舟过城　·　灯火可亲"
+    : "山水无尽　·　心自闲";
+  canvas.setAttribute(
+    "aria-label",
+    city
+      ? "北京入夜，中国尊与央视总部映入江水，车流经过桥面，同一舟人划入城中。"
+      : "层山隐于云间，淡日映天，近岸松石，一舟浮于江上，游鱼点水。",
+  );
+  for (const button of sceneButtons)
+    button.setAttribute(
+      "aria-pressed",
+      String(button.dataset.scene === state.scene),
+    );
+}
+for (const control of sceneButtons)
+  control.addEventListener("click", () => {
+    journey.select(control.dataset.scene, paused || !renderer);
+    draw();
+    document.getElementById("status").textContent =
+      control.dataset.scene === "city" ? "驶入北京。" : "回望山水。";
+  });
+if (!renderer) fallback();
 button.hidden = !renderer;
 button.addEventListener("click", () => {
   paused = !paused;
   sync();
   document.getElementById("status").textContent = paused
-    ? "云水暂歇，静观山色。"
-    : "云行水动。";
+    ? "旅程暂歇，静观此刻。"
+    : "继续行舟。";
 });
 reduced.addEventListener("change", () => {
   paused = reduced.matches;

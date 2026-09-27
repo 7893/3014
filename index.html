@@ -6,13 +6,13 @@
     <meta name="theme-color" content="#ede8db" />
     <meta
       name="description"
-      content="山静日长。一幅以程序笔墨绘就的山水，云行水动，留白无声。"
+      content="一舟穿行古今。从水墨山水到北京灯火，一段以代码绘就的旅程。"
     />
-    <title>山静日长 · 7893</title>
+    <title>一舟古今 · 7893</title>
     <link rel="stylesheet" href="./assets/css/site.css" />
   </head>
   <body>
-    <main aria-label="程序山水画">
+    <main aria-label="一舟古今，双景旅程">
       <canvas
         id="landscape"
         aria-label="层山隐于云间，淡日映天，近岸松石，一舟浮于江上，游鱼点水。"
@@ -26,12 +26,21 @@
       </div>
       <div class="colophon">
         <span class="work-mark" aria-hidden="true">山水无尽　·　心自闲</span>
+        <nav class="scene-nav" aria-label="选择场景">
+          <button type="button" data-scene="ink" aria-pressed="true">
+            山水
+          </button>
+          <span aria-hidden="true">·</span>
+          <button type="button" data-scene="city" aria-pressed="false">
+            北京
+          </button>
+        </nav>
         <button
           id="motion"
           type="button"
           hidden
           aria-pressed="false"
-          title="暂停云水流动"
+          title="暂停旅程与动态"
         >
           静观
         </button>

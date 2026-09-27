@@ -1,3 +1,4 @@
+import { createCity } from "./city/painting.js";
 import { createBrush } from "./painting/brush.js";
 import { createMountains } from "./painting/mountains.js";
 import { createPines } from "./painting/pines.js";
@@ -207,7 +208,14 @@ export function createScene(width, height) {
       ),
     707,
   );
-  return { layers, width, height, boatCenter, portrait };
+  return {
+    layers,
+    width,
+    height,
+    boatCenter,
+    portrait,
+    city: createCity(width, height),
+  };
 }
 
 export function drawStaticScene(ctx, scene) {

@@ -1,3 +1,3 @@
-# Quiet Mountains
+# A Boat Through Time
 
-A landscape written in ink and code. Mountains rest, clouds wander, and a small boat follows the water.
+One boat, two worlds. A quiet journey from ink-washed mountains to the lights of Beijing.
