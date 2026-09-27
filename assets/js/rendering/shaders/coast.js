@@ -1,3 +1,4 @@
+import { sails } from "./sails.js";
 import { surf } from "./surf.js";
 import { wind } from "./wind.js";
 import { surface } from "./surface.js";
@@ -15,11 +16,7 @@ ${noise}
 ${surface}
 ${wind}
 ${surf}
-float triangle(vec2 p,vec2 a,vec2 b,vec2 c){
-  vec2 e0=b-a,e1=c-b,e2=a-c,v0=p-a,v1=p-b,v2=p-c;
-  float s0=e0.x*v0.y-e0.y*v0.x,s1=e1.x*v1.y-e1.y*v1.x,s2=e2.x*v2.y-e2.y*v2.x;
-  return (step(0.,s0)*step(0.,s1)*step(0.,s2)+step(s0,0.)*step(s1,0.)*step(s2,0.));
-}
+${sails}
 void main(){
   vec2 p=vec2(v_uv.x,1.-v_uv.y);
   float aspect=u_size.x/u_size.y;
@@ -55,28 +52,7 @@ void main(){
     float age=u_time-u_touch.z,d=waterDistance(p,u_touch.xy,aspect,.475);
     color+=vec3(.12,.15,.10)*sin(d*140.-age*5.)*exp(-pow((d-age*.035)*12.,2.))*exp(-max(age,0.)*.5)*step(0.,age);
   }
-  // Three distant sails drift at different depths, apart from the travelling protagonist.
-  for(int i=0;i<3;i++){
-    float fi=float(i),direction=i==1?-1.:1.;
-    float x=-.08+fract(.24+fi*.29+u_time*direction*(.010+fi*.003))*1.16,y=.55+fi*.047;
-    float scale=.015+fi*.003;
-    float bob=sin(u_time*1.45+fi*2.)*.003;
-    vec2 q=(p-vec2(x,y+bob))/vec2(scale,scale*aspect);
-    float roll=sin(u_time*1.1+fi*1.7)*.07;
-    q=mat2(cos(roll),-sin(roll),sin(roll),cos(roll))*q;
-    q.x*=direction;
-    float behind=(x-p.x)*direction;
-    float trail=exp(-pow((abs(p.y-y-bob-.003)-max(behind,0.)*.06)*900.,2.));
-    trail*=smoothstep(.008,.015,behind)*(1.-smoothstep(.02,.065,behind));
-    color+=vec3(.19,.23,.15)*trail;
-    float sail=triangle(q,vec2(0.,-1.7),vec2(-.75,0.),vec2(0.,-.05));
-    float jib=triangle(q,vec2(.08,-1.3),vec2(.13,-.03),vec2(.65,-.03));
-    color=mix(color,vec3(.99,.94,.78),clamp(sail+jib,0.,1.)*.9);
-    float hull=(1.-smoothstep(.65,.7,abs(q.x)))*(1.-smoothstep(.08,.16,abs(q.y-.14)));
-    color=mix(color,vec3(.36,.39,.29),hull);
-    float mast=(1.-smoothstep(.018,.035,abs(q.x)))*step(-1.75,q.y)*step(q.y,.14);
-    color=mix(color,vec3(.56,.55,.40),mast);
-  }
+  color=paintSails(color,p,aspect);
   vec4 boat=sampleLayer(u_boatLayer,p-u_boat);
   color=mix(color,vec3(.18,.24,.19),boat.a);
   color=over(color,sampleLayer(u_foreground,p));

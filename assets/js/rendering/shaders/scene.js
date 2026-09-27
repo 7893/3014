@@ -4,6 +4,7 @@ import { mist } from "./mist.js";
 import { water } from "./water.js";
 import { wildlife } from "./wildlife.js";
 import { sky } from "./sky.js";
+import { birds } from "./birds.js";
 export const fragment = `#version 300 es
 precision highp float;
 in vec2 v_uv;
@@ -20,11 +21,13 @@ ${mist}
 ${water}
 ${wildlife}
 ${sky}
+${birds}
 void main(){
   vec2 p=vec2(v_uv.x,1.-v_uv.y);
   vec3 paper=texture(u_paper,v_uv).rgb;
   vec3 color=mountainLayer(paintSun(paper,p),texture(u_far,v_uv),paper,.18);
   color=mix(color,paper,mistLayer(p,.47,0.));
+  color=paintBirds(color,p);
   color=mountainLayer(color,texture(u_middle,v_uv),paper,.07);
   color=mix(color,paper,mistLayer(p,.56,1.));
   color=over(color,texture(u_near,v_uv));

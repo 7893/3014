@@ -5,7 +5,7 @@ export function updateFish(canvas, time, fishData, rippleData) {
     fishData.set(fishState(time, i, aspect), i * 4);
     const period = 13 + i * 3,
       age = (time + period - i * 3 - 2) % period,
-      position = fishState(time - age, i, aspect);
+      position = fishState(time - age + (i === 0 ? 1.1 : 0), i, aspect);
     rippleData.set(
       [
         position[0],

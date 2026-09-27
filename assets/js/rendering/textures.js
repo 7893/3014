@@ -19,6 +19,10 @@ export function uploadTextures(
   for (const key of Object.keys(names))
     sources[key].forEach((source, i) => {
       gl.bindTexture(gl.TEXTURE_2D, textures[key][i]);
+      if (names[key][i] === "windows") {
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+      }
       gl.texImage2D(
         gl.TEXTURE_2D,
         0,

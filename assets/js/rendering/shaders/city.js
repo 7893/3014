@@ -1,16 +1,18 @@
 import { surface } from "./surface.js";
+import { lights } from "./lights.js";
 import { noise } from "./common.js";
 export const fragment = `#version 300 es
 precision highp float;
 in vec2 v_uv;
 out vec4 outColor;
-uniform sampler2D u_buildings,u_lights,u_bank,u_glow,u_boatLayer;
+uniform sampler2D u_buildings,u_lights,u_bank,u_glow,u_windows,u_boatLayer;
 uniform vec2 u_size,u_boat,u_boatCenter,u_actorScale;
 uniform float u_time;
 uniform vec3 u_touch;
 uniform vec4 u_wind;
 ${noise}
 ${surface}
+${lights}
 vec3 stars(vec2 p){
   // Stable sky positions, with pixel-sized cores on every screen.
   vec2 grid=vec2(26.*u_size.x/u_size.y,26.);
@@ -24,21 +26,6 @@ vec3 stars(vec2 p){
   float twinkle=.22+1.05*pow(.5+.5*sin(u_time*(1.1+seed*.9)+seed*83.),1.4);
   float visible=step(.84,seed)*(1.-smoothstep(.16,.48,p.y));
   return mix(vec3(.65,.79,1.),vec3(1.,.88,.65),seed)*(core+glow)*twinkle*visible;
-}
-vec3 animatedLights(vec2 p){
-  vec4 lamps=sampleLayer(u_lights,p);
-  float cells=hash(floor(p*vec2(240.,180.)));
-  float windows=.38+1.05*smoothstep(-.7,.7,sin(u_time*(.55+cells*.35)+cells*65.));
-  float river=smoothstep(.565,.595,p.y);
-  float sweep=pow(.5+.5*sin(p.x*15.-u_time*.95),5.);
-  float bridge=.65+1.25*sweep;
-  vec3 warmth=mix(vec3(1.,.95,.87),vec3(1.1,.88,.65),sweep*river);
-  return lamps.rgb*lamps.a*mix(windows,bridge,river)*warmth;
-}
-vec3 lightSpill(vec2 p){
-  vec4 glow=sampleLayer(u_glow,p);
-  float sweep=pow(.5+.5*sin(p.x*15.-u_time*.95),5.);
-  return glow.rgb*glow.a*(.8+sweep*.65);
 }
 vec3 skyline(vec2 p){
   vec3 top=vec3(.025,.052,.079),horizon=vec3(.17,.22,.245);
