@@ -26,8 +26,7 @@ export function createJourney(initialX = 0.69) {
     transition = { from: scene, to: target, elapsed: 0, outgoingX: position() };
   }
   function position() {
-    if (scene === "ink") return startX + elapsed * SPEED;
-    return -0.06 + ((startX + 0.06 + elapsed * SPEED) % 1.14);
+    return startX + elapsed * SPEED;
   }
   function advance(dt) {
     if (transition) {
@@ -35,13 +34,13 @@ export function createJourney(initialX = 0.69) {
       if (transition.elapsed >= DURATION) {
         scene = transition.to;
         elapsed = 0;
-        startX = scene === "city" ? 0.22 : initialX;
+        startX = 0.22;
         transition = null;
       }
       return;
     }
     elapsed += dt;
-    if (scene === "ink" && position() >= 0.985) select("city");
+    if (position() >= 0.985) select(scene === "ink" ? "city" : "ink");
   }
   function state() {
     if (!transition)
@@ -61,7 +60,7 @@ export function createJourney(initialX = 0.69) {
       inkX:
         transition.from === "ink"
           ? transition.outgoingX + transition.elapsed * SPEED
-          : initialX,
+          : 0.07 + transition.elapsed * 0.03,
       cityX:
         transition.from === "city"
           ? transition.outgoingX + transition.elapsed * SPEED

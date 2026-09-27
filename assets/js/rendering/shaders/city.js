@@ -8,11 +8,26 @@ uniform vec2 u_size,u_boat,u_boatCenter,u_actorScale;
 uniform float u_time;
 uniform vec3 u_touch;
 ${noise}
+vec3 stars(vec2 p){
+  // Stable sky positions, with pixel-sized cores on every screen.
+  vec2 grid=vec2(26.*u_size.x/u_size.y,26.);
+  vec2 cell=floor(p*grid);
+  float seed=hash(cell+17.3);
+  vec2 center=(cell+.18+.64*vec2(hash(cell+3.7),hash(cell+9.2)))/grid;
+  vec2 delta=(p-center)*u_size;
+  float radius=mix(.65,1.15,seed);
+  float core=exp(-dot(delta,delta)/(radius*radius));
+  float glow=exp(-dot(delta,delta)/12.)*.13;
+  float twinkle=.64+.36*sin(u_time*(.65+seed)+seed*83.);
+  float visible=step(.84,seed)*(1.-smoothstep(.16,.48,p.y));
+  return mix(vec3(.65,.79,1.),vec3(1.,.88,.65),seed)*(core+glow)*twinkle*visible;
+}
 vec3 skyline(vec2 p){
   vec3 top=vec3(.035,.085,.13),horizon=vec3(.23,.31,.36);
   vec3 color=mix(top,horizon,pow(clamp(p.y/.72,0.,1.),1.7));
   float haze=fbm(vec2(p.x*4.-u_time*.012,p.y*8.));
   color+=vec3(.035,.035,.028)*haze*smoothstep(.2,.7,p.y);
+  color+=stars(p);
   color=over(color,sampleLayer(u_buildings,p));
   vec4 lights=sampleLayer(u_lights,p);
   float cells=hash(floor(p*vec2(240.,180.)));
