@@ -116,15 +116,6 @@ export function drawRiverTerrace(b, l, W, H) {
     b.ellipse(xx, y - H * 0.003, w * 0.035, 1.5, 0, 0, Math.PI * 2);
     b.fill();
   }
-  // A real place name as part of the embankment, not an extra interface label.
-  l.save();
-  l.font = `${Math.max(20, W * 0.013)}px serif`;
-  l.textAlign = "center";
-  l.fillStyle = "#d5be8e";
-  l.shadowColor = "#e3b56f";
-  l.shadowBlur = 5;
-  l.fillText("亮 马 河", W * 0.32, H * 0.626);
-  l.restore();
   for (let i = 0; i < 19; i++) {
     const t = i / 18,
       xx = x + t * w,
