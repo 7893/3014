@@ -1,3 +1,4 @@
+import { drawCoastDetails } from "./details.js";
 // A warm island cove: foreground palms and sand, with all water drawn on GPU.
 export function createCoast(width, height) {
   const canvas = document.createElement("canvas");
@@ -33,6 +34,7 @@ export function createCoast(width, height) {
     );
   }
   ctx.restore();
+  drawCoastDetails(ctx, W, H, random);
   function palm(x, y, h, lean) {
     const crownX = x + lean,
       crownY = y - h;

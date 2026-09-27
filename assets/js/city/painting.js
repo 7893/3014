@@ -1,3 +1,4 @@
+import { drawBeijingSkyline, drawRiverTerrace } from "./details.js";
 // An imagined Liangma River evening, drawn entirely from geometry and light.
 export const cityLayerNames = ["buildings", "lights", "bank"];
 export function createCity(width, height) {
@@ -33,6 +34,7 @@ export function createCity(width, height) {
     ctx.lineWidth = width;
     ctx.stroke();
   }
+  drawBeijingSkyline(b, l, W, H);
   // Low, recessed buildings: irregular occupied rooms, no outlined landmark icons.
   for (let i = 0; i < 25; i++) {
     const x = (i * W) / 24 - 30,
@@ -231,6 +233,7 @@ export function createCity(width, height) {
     l.lineWidth = 1.2;
     l.stroke();
   }
+  drawRiverTerrace(b, l, W, H);
   // A shaded near bank frames the water without crossing the boat's horizontal route.
   k.beginPath();
   k.moveTo(0, H * 0.89);

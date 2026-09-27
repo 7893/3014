@@ -62,6 +62,17 @@ void main(){
     float distance=length((p-u_touch.xy)*vec2(u_size.x/u_size.y,1.));
     color+=vec3(.10,.13,.14)*sin(distance*140.-age*5.)*exp(-pow((distance-age*.035)*12.,2.))*exp(-max(age,0.)*.5)*step(0.,age);
   }
+  // Small pairs walk along the opposite embankment.
+  if(p.y>.594&&p.y<.617){
+    for(int i=0;i<7;i++){
+      float fi=float(i),x=fract(fi*.143+u_time*(mod(fi,2.)<.5?.0018:-.0015));
+      vec2 q=(p-vec2(x,.610))*u_size;
+      float scale=max(.65,u_size.y/1000.);
+      q/=scale;
+      float person=(1.-smoothstep(1.,1.6,length(q-vec2(0.,-5.))))+(1.-smoothstep(.9,1.5,abs(q.x)))*step(-3.5,q.y)*step(q.y,1.);
+      color=mix(color,vec3(.06,.10,.10),clamp(person,0.,1.)*.8);
+    }
+  }
   vec2 bankP=p;
   bankP.x+=sin(u_time*.85+p.y*15.)*.0013*clamp((.86-p.y)/.17,0.,1.)*(1.-smoothstep(.12,.23,p.x));
   vec4 bank=sampleLayer(u_bank,bankP);
