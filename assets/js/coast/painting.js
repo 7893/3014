@@ -1,16 +1,13 @@
+import { seededRandom, canvasLayer } from "../painting/canvas.js";
 import { drawCoastDetails } from "./details.js";
 // A warm island cove: foreground palms and sand, with all water drawn on GPU.
 export function createCoast(width, height) {
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-  let ctx = canvas.getContext("2d");
   const W = 1200,
     H = (W * height) / width;
-  ctx.scale(width / W, height / H);
-  let seed = 914;
-  const random = () =>
-    (seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0) / 4294967296;
+  const base = canvasLayer(width, height, W),
+    canvas = base.canvas;
+  let ctx = base.ctx;
+  const random = seededRandom(914);
   const sand = ctx.createLinearGradient(0, H * 0.84, 0, H);
   sand.addColorStop(0, "#e9d4a4");
   sand.addColorStop(1, "#bca97b");
@@ -37,12 +34,9 @@ export function createCoast(width, height) {
   drawCoastDetails(ctx, W, H, random);
   const palms = [];
   function palmLayer() {
-    const layer = document.createElement("canvas");
-    layer.width = width;
-    layer.height = height;
-    ctx = layer.getContext("2d");
-    ctx.scale(width / W, height / H);
-    palms.push(layer);
+    const layer = canvasLayer(width, height, W);
+    ctx = layer.ctx;
+    palms.push(layer.canvas);
   }
   function palm(x, y, h, lean) {
     palmLayer();

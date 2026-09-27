@@ -1,3 +1,4 @@
+import { surface } from "./surface.js";
 import { noise } from "./common.js";
 import { mist } from "./mist.js";
 import { water } from "./water.js";
@@ -11,8 +12,10 @@ uniform sampler2D u_paper,u_far,u_middle,u_near,u_shore,u_pines,u_boatLayer;
 uniform vec2 u_size,u_boat,u_boatCenter;
 uniform float u_time,u_boatOpacity;
 uniform vec3 u_touch;
+uniform vec4 u_wind;
 uniform vec4 u_fish[3],u_fishRipples[3];
 ${noise}
+${surface}
 ${mist}
 ${water}
 ${wildlife}
@@ -31,7 +34,7 @@ void main(){
   color=paintFish(color,p);
   color=over(color,texture(u_shore,v_uv));
   float bend=pow(clamp((.89-p.y)/.27,0.,1.),2.);
-  float wind=(sin(u_time*1.05+p.y*13.)*.65+sin(u_time*1.7+p.x*21.)*.35)*.007*bend;
+  float wind=(u_wind.x*.75+sin(u_time*.85+p.y*13.)*.20)*.008*bend;
   color=over(color,sampleLayer(u_pines,p+vec2(wind,0.)));
   // The small boat moves independently of the paper and mountain layers.
   vec4 boatInk=sampleLayer(u_boatLayer,p-u_boat);

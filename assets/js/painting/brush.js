@@ -1,7 +1,6 @@
+import { seededRandom } from "./canvas.js";
 export function createBrush(ctx, initialSeed = 17341) {
-  let seed = initialSeed;
-  const random = () =>
-    (seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0) / 4294967296;
+  const random = seededRandom(initialSeed);
   const between = (a, b) => a + random() * (b - a);
   const ink = (alpha = 1) => `rgba(43,57,49,${alpha})`;
   function noise(x, y = 0) {

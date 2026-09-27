@@ -1,3 +1,5 @@
+import { wind } from "./wind.js";
+import { surface } from "./surface.js";
 import { noise } from "./common.js";
 export const fragment = `#version 300 es
 precision highp float;
@@ -7,22 +9,10 @@ uniform sampler2D u_foreground,u_trunk0,u_leaves0,u_trunk1,u_leaves1,u_boatLayer
 uniform vec2 u_size,u_boat,u_boatCenter,u_actorScale;
 uniform float u_time;
 uniform vec3 u_touch;
+uniform vec4 u_wind;
 ${noise}
-vec2 palmUV(vec2 p,vec2 root,vec2 crown,float phase,bool leaves){
-  float height=root.y-crown.y;
-  float bend=leaves?1.:pow(clamp((root.y-p.y)/height,0.,1.),2.);
-  float wind=sin(u_time*.48+phase)*.0045+sin(u_time*.79+phase*.6)*.0018;
-  vec2 q=p-vec2(wind*bend,0.);
-  if(leaves){
-    vec2 local=(q-crown)*vec2(u_size.x/u_size.y,1.);
-    float tip=smoothstep(.008,height*.42,length(local));
-    float lag=length(local)/height*2.5;
-    float flutter=(sin(u_time*.86+phase-lag)*.003+sin(u_time*1.37+phase+local.x*11.-lag)*.001)*tip;
-    q.x-=flutter;
-    q.y-=sin(u_time*.86+phase-lag+.8)*.002*tip;
-  }
-  return q;
-}
+${surface}
+${wind}
 float triangle(vec2 p,vec2 a,vec2 b,vec2 c){
   vec2 e0=b-a,e1=c-b,e2=a-c,v0=p-a,v1=p-b,v2=p-c;
   float s0=e0.x*v0.y-e0.y*v0.x,s1=e1.x*v1.y-e1.y*v1.x,s2=e2.x*v2.y-e2.y*v2.x;
@@ -36,7 +26,7 @@ void main(){
   float disc=1.-smoothstep(.033,.036,length(sun));
   color+=vec3(.27,.19,.08)*exp(-length(sun)*13.);
   color=mix(color,vec3(1.,.96,.78),disc);
-  vec2 cloudP=vec2(p.x*3.-u_time*.075,p.y*13.+sin(u_time*.18)*.08);
+  vec2 cloudP=vec2(p.x*3.-u_wind.z*.10,p.y*13.+sin(u_time*.18)*.08);
   float cloud=fbm(cloudP);
   color=mix(color,vec3(1.,.94,.80),smoothstep(.48,.73,cloud)*.62*(1.-smoothstep(.3,.44,p.y)));
   float island=.468-.033*exp(-pow((p.x-.85)*6.,2.))-.013*noise(vec2(p.x*20.,0.));
@@ -46,12 +36,15 @@ void main(){
   if(p.y>.475){
     float depth=(p.y-.475)/.525;
     vec2 flow=vec2(p.x*45.,p.y*150.-u_time*.65);
+    vec3 normal=waterNormal(p,aspect,depth);
+    float fresnel=waterFresnel(normal,depth);
     float ripple=sin(p.y*260.-u_time*1.3+noise(flow)*2.);
     color=mix(vec3(.12,.43,.49),vec3(.43,.76,.67),pow(depth,.65));
+    color=mix(color,vec3(.70,.81,.75),fresnel*.45);
     float caustic=pow(1.-abs(sin(fbm(flow*.34+vec2(u_time*.045,0.))*24.)),18.);
     color+=vec3(.055,.085,.048)*caustic*smoothstep(.2,.9,depth);
     float glint=exp(-pow((p.x-.32)/(.014+depth*.12),2.));
-    color+=vec3(1.,.72,.32)*glint*pow(max(0.,ripple),12.)*(.26+depth*.23);
+    color=mix(color,vec3(1.,.91,.68),glint*waterSparkle(normal)*(.32+depth*.22)*(.25+.75*pow(max(0.,ripple),3.)));
     color+=vec3(.17,.24,.19)*pow(max(0.,ripple),25.)*.18;
     float shore=.855+.38*pow(max(p.x,0.),.8);
     float wave=sin(p.y*58.-u_time*1.1+p.x*5.);
