@@ -202,7 +202,7 @@ export function createScene(width, height) {
         tools,
         W * boatCenter[0],
         H * boatCenter[1],
-        portrait ? 1 : 1.15,
+        portrait ? 1.35 : 1.6,
       ),
     707,
   );

@@ -1,4 +1,17 @@
-// A bounded, very slow drift keeps the boat inside the river in both compositions.
-export function boatOffset(time) {
-  return [Math.sin(time * 0.022) * 0.028, Math.sin(time * 0.68) * 0.00065];
+// One rightward river crossing. Its right-edge arrival can later hand off to another scene.
+const START = 0.4;
+const END = 1.08;
+const SPEED = 0.014;
+const smooth = (value) => {
+  const t = Math.max(0, Math.min(1, value));
+  return t * t * (3 - 2 * t);
+};
+
+export function boatMotion(time, center) {
+  const distance = (center[0] - START + time * SPEED) % (END - START);
+  const x = START + distance;
+  return {
+    offset: [x - center[0], Math.sin(time * 1.05) * 0.0022],
+    opacity: smooth(distance / 0.035),
+  };
 }

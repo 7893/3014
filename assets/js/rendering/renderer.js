@@ -1,5 +1,5 @@
 import { layerNames } from "../scene.js";
-import { boatOffset } from "../motion/boat.js";
+import { boatMotion } from "../motion/boat.js";
 import { vertex } from "./shaders/common.js";
 import { fragment as sceneFragment } from "./shaders/scene.js";
 import { fragment as inkFragment } from "./shaders/ink.js";
@@ -75,6 +75,7 @@ export function createRenderer(canvas) {
         "time",
         "touch",
         "boatCenter",
+        "boatOpacity",
         "boat",
         "paper",
         "far",
@@ -160,7 +161,9 @@ export function createRenderer(canvas) {
     gl.uniform2f(u.size, canvas.width, canvas.height);
     gl.uniform1f(u.time, time);
     gl.uniform3fv(u.touch, touch);
-    gl.uniform2fv(u.boat, boatOffset(time));
+    const boat = boatMotion(time, scene.boatCenter);
+    gl.uniform2fv(u.boat, boat.offset);
+    gl.uniform1f(u.boatOpacity, boat.opacity);
     gl.uniform2fv(u.boatCenter, scene.boatCenter);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     const ink = passes[1];
