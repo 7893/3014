@@ -1,5 +1,5 @@
-import { paintLandscape } from "./painting.js";
-import { createRenderer } from "./renderer.js";
+import { createScene, drawStaticScene } from "./scene.js";
+import { createRenderer } from "./rendering/renderer.js";
 
 let canvas = document.getElementById("landscape");
 let renderer = createRenderer(canvas),
@@ -23,14 +23,14 @@ function fallback() {
   canvas = replacement;
   context = canvas.getContext("2d");
   canvas.dataset.renderer = "canvas2d";
-  if (painting) context.drawImage(painting, 0, 0);
+  if (painting) drawStaticScene(context, painting);
   button.hidden = true;
 }
 if (!renderer) fallback();
 function draw() {
   if (lost || !painting) return;
   if (renderer) renderer.draw(time, touch);
-  else context.drawImage(painting, 0, 0);
+  else drawStaticScene(context, painting);
 }
 function resize() {
   if (lost) return;
@@ -39,8 +39,8 @@ function resize() {
   const limit = renderer?.maxSize || 4096;
   const dpr = Math.min(
     devicePixelRatio || 1,
-    1.75,
-    Math.sqrt(2300000 / (w * h)),
+    1.5,
+    Math.sqrt((w / h < 0.85 ? 850000 : 1800000) / (w * h)),
     limit / w,
     limit / h,
   );
@@ -51,8 +51,15 @@ function resize() {
   dimensions = key;
   canvas.width = width;
   canvas.height = height;
-  painting = paintLandscape(width, height);
-  if (renderer) renderer.upload(painting);
+  painting = createScene(width, height);
+  if (renderer) {
+    try {
+      renderer.upload(painting);
+    } catch (error) {
+      console.warn("Using static ink layers.", error);
+      fallback();
+    }
+  }
   draw();
   canvas.dataset.ready = "true";
 }
