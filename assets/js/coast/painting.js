@@ -4,8 +4,8 @@ export function createCoast(width, height) {
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
-  const ctx = canvas.getContext("2d"),
-    W = 1200,
+  let ctx = canvas.getContext("2d");
+  const W = 1200,
     H = (W * height) / width;
   ctx.scale(width / W, height / H);
   let seed = 914;
@@ -35,6 +35,11 @@ export function createCoast(width, height) {
   }
   ctx.restore();
   drawCoastDetails(ctx, W, H, random);
+  const palms = document.createElement("canvas");
+  palms.width = width;
+  palms.height = height;
+  ctx = palms.getContext("2d");
+  ctx.scale(width / W, height / H);
   function palm(x, y, h, lean) {
     const crownX = x + lean,
       crownY = y - h;
@@ -111,7 +116,7 @@ export function createCoast(width, height) {
   }
   palm(W * 0.035, H * 0.965, H * 0.47, W * 0.055);
   palm(-W * 0.025, H * 0.945, H * 0.34, W * 0.17);
-  return { layer: canvas, width, height };
+  return { layer: canvas, palms, width, height };
 }
 export function drawStaticCoast(ctx, coast, boatLayer) {
   const { width: w, height: h } = coast;
@@ -129,4 +134,5 @@ export function drawStaticCoast(ctx, coast, boatLayer) {
   ctx.fill();
   ctx.drawImage(boatLayer, 0, 0);
   ctx.drawImage(coast.layer, 0, 0);
+  ctx.drawImage(coast.palms, 0, 0);
 }

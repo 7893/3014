@@ -3,7 +3,7 @@ export const fragment = `#version 300 es
 precision highp float;
 in vec2 v_uv;
 out vec4 outColor;
-uniform sampler2D u_foreground,u_boatLayer;
+uniform sampler2D u_foreground,u_palms,u_boatLayer;
 uniform vec2 u_size,u_boat,u_boatCenter,u_actorScale;
 uniform float u_time;
 uniform vec3 u_touch;
@@ -21,8 +21,9 @@ void main(){
   float disc=1.-smoothstep(.033,.036,length(sun));
   color+=vec3(.27,.19,.08)*exp(-length(sun)*13.);
   color=mix(color,vec3(1.,.96,.78),disc);
-  float cloud=fbm(vec2(p.x*3.-u_time*.009,p.y*16.));
-  color=mix(color,vec3(1.,.94,.80),smoothstep(.57,.76,cloud)*.35*(1.-smoothstep(.3,.44,p.y)));
+  vec2 cloudP=vec2(p.x*3.-u_time*.075,p.y*13.+sin(u_time*.18)*.08);
+  float cloud=fbm(cloudP);
+  color=mix(color,vec3(1.,.94,.80),smoothstep(.48,.73,cloud)*.62*(1.-smoothstep(.3,.44,p.y)));
   float island=.468-.033*exp(-pow((p.x-.85)*6.,2.))-.013*noise(vec2(p.x*20.,0.));
   float farIsland=.455-.065*exp(-pow((p.x-.91)*5.,2.))-.012*noise(vec2(p.x*14.,8.));
   if(p.y>farIsland&&p.y<.475)color=vec3(.40,.56,.52);
@@ -52,9 +53,18 @@ void main(){
   }
   // Three distant sails drift at different depths, apart from the travelling protagonist.
   for(int i=0;i<3;i++){
-    float fi=float(i),x=.19+fract(fi*.31+u_time*(.0014+fi*.0005))*.55,y=.55+fi*.047;
+    float fi=float(i),direction=i==1?-1.:1.;
+    float x=-.08+fract(.24+fi*.29+u_time*direction*(.010+fi*.003))*1.16,y=.55+fi*.047;
     float scale=.015+fi*.003;
-    vec2 q=(p-vec2(x,y+sin(u_time*.8+fi)*.001))/vec2(scale,scale*aspect);
+    float bob=sin(u_time*1.45+fi*2.)*.003;
+    vec2 q=(p-vec2(x,y+bob))/vec2(scale,scale*aspect);
+    float roll=sin(u_time*1.1+fi*1.7)*.07;
+    q=mat2(cos(roll),-sin(roll),sin(roll),cos(roll))*q;
+    q.x*=direction;
+    float behind=(x-p.x)*direction;
+    float trail=exp(-pow((abs(p.y-y-bob-.003)-max(behind,0.)*.06)*900.,2.));
+    trail*=smoothstep(.008,.015,behind)*(1.-smoothstep(.02,.065,behind));
+    color+=vec3(.19,.23,.15)*trail;
     float sail=triangle(q,vec2(0.,-1.7),vec2(-.75,0.),vec2(0.,-.05));
     float jib=triangle(q,vec2(.08,-1.3),vec2(.13,-.03),vec2(.65,-.03));
     color=mix(color,vec3(.99,.94,.78),clamp(sail+jib,0.,1.)*.9);
@@ -65,8 +75,13 @@ void main(){
   }
   vec4 boat=sampleLayer(u_boatLayer,p-u_boat);
   color=mix(color,vec3(.18,.24,.19),boat.a);
-  vec2 q=p;q.x+=sin(u_time*.8+p.y*9.)*.002*(1.-smoothstep(.5,.9,p.y))*(1.-smoothstep(.15,.4,p.x));
-  color=over(color,sampleLayer(u_foreground,q));
+  color=over(color,sampleLayer(u_foreground,p));
+  vec2 q=p;
+  float canopy=clamp((.965-p.y)/.48,0.,1.);
+  float breeze=sin(u_time*1.05+p.y*4.)*.009+sin(u_time*1.9+p.y*17.)*.003;
+  q.x+=breeze*canopy;
+  q.y+=sin(u_time*1.35+p.x*18.)*.003*canopy;
+  color=over(color,sampleLayer(u_palms,q));
   color+=vec3((hash(gl_FragCoord.xy)-.5)*.006);
   outColor=vec4(color,1.);
 }
