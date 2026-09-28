@@ -1,7 +1,9 @@
 import { defineConfig } from "vite";
 import { renderCopy } from "./scripts/html.mjs";
+import { assetBase } from "./scripts/asset-base.mjs";
 
 export default defineConfig({
+  base: assetBase(process.env.ASSET_BASE_URL),
   publicDir: false,
   plugins: [
     {

@@ -59,6 +59,9 @@ Keep the lockfile, tests, license notices, and historical engineering records.
 Builds include project, font, and bundled dependency notices. Runtime packages
 are bundled locally; browsers do not fetch JavaScript from third-party CDNs.
 Do not add private values to browser configuration or `VITE_*` variables.
+An optional private `ASSET_BASE_URL` selects the production asset origin at build
+time. Its resulting public resource URLs are visible to website visitors; it is
+not a secret. The concrete deployment addresses stay outside version control.
 See `../ops/README.md` for the restricted deployment procedure.
 
 ## Long-running displays

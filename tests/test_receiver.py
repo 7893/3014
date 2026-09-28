@@ -12,7 +12,7 @@ receiver = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(receiver)
 
 
-def bundle(extra=None):
+def bundle(extra=None, asset=None):
     stream = io.BytesIO()
     with tarfile.open(fileobj=stream, mode="w") as archive:
         for name in ["index.html", "LICENSE", "NOTICE", "assets/js/main.js"]:
@@ -21,6 +21,11 @@ def bundle(extra=None):
             archive.addfile(info, io.BytesIO(b"ok"))
         if extra:
             archive.addfile(extra)
+        if asset:
+            name, content = asset
+            info = tarfile.TarInfo("assets/" + name)
+            info.size = len(content)
+            archive.addfile(info, io.BytesIO(content))
     return stream.getvalue()
 
 
@@ -55,6 +60,19 @@ class ReceiverTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             receiver.publish(b"x" * (receiver.LIMIT + 1))
         self.assertFalse((receiver.BASE / "current").exists())
+
+    def test_old_assets_survive_and_cannot_change(self):
+        receiver.publish(bundle(asset=("main-abcdefgh.js", b"first")))
+        receiver.publish(bundle(asset=("main-ijklmnop.js", b"second")))
+        current = (receiver.BASE / "current").resolve()
+        assets = receiver.BASE / "assets"
+        self.assertEqual((assets / "main-abcdefgh.js").read_bytes(), b"first")
+        self.assertEqual((assets / "main-ijklmnop.js").read_bytes(), b"second")
+        with self.assertRaises(ValueError):
+            receiver.publish(bundle(asset=("main-abcdefgh.js", b"different")))
+        self.assertEqual((receiver.BASE / "current").resolve(), current)
+        self.assertEqual((assets / "main-abcdefgh.js").read_bytes(), b"first")
+        self.assertFalse((assets / "js/main.js").exists())
 
 
 if __name__ == "__main__":

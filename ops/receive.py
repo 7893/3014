@@ -3,6 +3,7 @@
 import hashlib
 import io
 import os
+import re
 from pathlib import Path, PurePosixPath
 import shutil
 import sys
@@ -11,6 +12,23 @@ import tempfile
 
 BASE = Path("/var/www/suizhou")
 LIMIT = 20 * 1024 * 1024
+
+
+def retain_assets(release):
+    """Keep content-addressed assets reachable for already-open page versions."""
+    source_root = release / "assets"
+    for source in source_root.rglob("*"):
+        if not source.is_file() or not re.fullmatch(
+            r".+-[A-Za-z0-9_-]{8,}\.(js|css|woff2)", source.name
+        ):
+            continue
+        target = BASE / "assets" / source.relative_to(source_root)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            os.link(source, target)
+        except FileExistsError:
+            if source.read_bytes() != target.read_bytes():
+                raise ValueError("Immutable asset content changed")
 
 
 def publish(data):
@@ -60,6 +78,7 @@ def publish(data):
         finally:
             if temporary.exists():
                 shutil.rmtree(temporary)
+    retain_assets(release)
     link = BASE / (".current-" + str(os.getpid()))
     try:
         link.symlink_to(release)

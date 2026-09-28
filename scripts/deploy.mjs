@@ -27,6 +27,10 @@ function run(command, args, options = {}) {
 const changes = run("git", ["status", "--porcelain"], { encoding: "utf8" });
 if (changes.trim()) throw new Error("Commit changes before deploying");
 run("git", ["verify-commit", "HEAD"], { stdio: "inherit" });
+// The private asset origin must be available while Vite builds the website.
+run(process.execPath, ["scripts/build.mjs"], { stdio: "inherit" });
+if (run("git", ["status", "--porcelain"], { encoding: "utf8" }).trim())
+  throw new Error("Build changed tracked files; review and commit first");
 const archive = run(
   "tar",
   [
