@@ -12,7 +12,7 @@ await appendFile(
     (await readFile(new URL("licenses/colord-MIT.txt", root), "utf8")),
 );
 const destination = new URL("dist/", root);
-for (const name of ["LICENSE", "NOTICE"])
+for (const name of ["LICENSE", "NOTICE", "robots.txt"])
   await cp(new URL(name, root), new URL(name, destination));
 for (const name of ["qiuhong-OFL.txt", "wenkai-OFL.txt"]) {
   await cp(

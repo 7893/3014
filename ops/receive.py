@@ -50,7 +50,7 @@ def publish(data):
                     raise ValueError("Hidden asset")
                 if member.isfile() and path.suffix not in {".js", ".css", ".woff2", ".txt"}:
                     raise ValueError("Unexpected asset type")
-            elif member.name not in {"index.html", "LICENSE", "NOTICE", ".nojekyll"}:
+            elif member.name not in {"index.html", "LICENSE", "NOTICE", "robots.txt"}:
                 raise ValueError("Unexpected website file")
             elif not member.isfile():
                 raise ValueError("Expected regular file")

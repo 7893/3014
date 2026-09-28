@@ -2,7 +2,7 @@ import { readdir, stat } from "node:fs/promises";
 import { extname } from "node:path";
 
 export async function checkBuild(root) {
-  const required = new Set(["index.html", "LICENSE", "NOTICE"]);
+  const required = new Set(["index.html", "LICENSE", "NOTICE", "robots.txt"]);
   const extensions = new Set([".js", ".css", ".woff2", ".txt"]);
   let bytes = 0,
     files = 0;

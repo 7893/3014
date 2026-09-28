@@ -15,7 +15,7 @@ spec.loader.exec_module(receiver)
 def bundle(extra=None, asset=None):
     stream = io.BytesIO()
     with tarfile.open(fileobj=stream, mode="w") as archive:
-        for name in ["index.html", "LICENSE", "NOTICE", "assets/js/main.js"]:
+        for name in ["index.html", "LICENSE", "NOTICE", "robots.txt", "assets/js/main.js"]:
             info = tarfile.TarInfo(name)
             info.size = 2
             archive.addfile(info, io.BytesIO(b"ok"))
@@ -43,6 +43,7 @@ class ReceiverTests(unittest.TestCase):
         current = receiver.BASE / "current"
         release = current.resolve()
         self.assertEqual((current / "index.html").read_bytes(), b"ok")
+        self.assertEqual((current / "robots.txt").read_bytes(), b"ok")
         for name in ["../existing.jpg", "/tmp/escape", ".env", "assets/.env"]:
             with self.assertRaises(ValueError):
                 receiver.publish(bundle(tarfile.TarInfo(name)))

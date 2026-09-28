@@ -32,3 +32,11 @@ Nginx serves `current/`; its existing image locations and ACME challenge root
 remain separate. Keep TLS keys outside all website directories. To roll back,
 an administrator atomically switches `current` to a previous release.
 Review retained releases before removing any; deployment does not prune them.
+
+The build ships a deny-all `robots.txt` and a noindex HTML meta tag. Serve
+`/robots.txt` on every public entry and asset origin, including HTTP, and add
+`X-Robots-Tag: noindex, nofollow, nosnippet, noimageindex` to all responses.
+Repeat the header in Nginx locations that set their own response headers.
+Invalidate CDN caches after changing this policy. These are crawler directives,
+not access controls; blocking crawling can prevent discovery of noindex tags
+and does not guarantee removal of previously indexed URLs.
