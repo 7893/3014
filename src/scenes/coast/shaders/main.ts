@@ -24,6 +24,7 @@ ${surf}
 ${sails}
 ${palmAnchors}
 float coastWaterAt(vec2 p){
+  if(!touchActive())return 0.;
   float solid=max(sampleLayer(u_foreground,p).a,sampleBoat(p-u_boat).a);
   solid=max(solid,sampleLayer(u_trunk0,palmUV(p,palmRoot0,palmCrown0,palmPhase0,false)).a);
   solid=max(solid,sampleLayer(u_leaves0,palmUV(p,palmRoot0,palmCrown0,palmPhase0,true)).a);
@@ -34,7 +35,9 @@ float coastWaterAt(vec2 p){
 void main(){
   vec2 p=vec2(v_uv.x,1.-v_uv.y);
   float aspect=u_size.x/u_size.y;
-  vec3 color=mix(vec3(.38,.66,.74),vec3(.99,.86,.65),smoothstep(0.,.49,p.y));
+  vec3 color=vec3(0.);
+  if(p.y<.481){
+  color=mix(vec3(.38,.66,.74),vec3(.99,.86,.65),smoothstep(0.,.49,p.y));
   vec2 sun=(p-vec2(.32,.28))*vec2(aspect,1.);
   float disc=1.-smoothstep(.033,.036,length(sun));
   color+=vec3(.27,.19,.08)*exp(-length(sun)*13.);
@@ -42,6 +45,7 @@ void main(){
   vec2 cloudP=vec2(p.x*3.-u_wind.z*.10,p.y*13.+sin(u_time*.18)*.08);
   float cloud=fbm(cloudP);
   color=mix(color,vec3(1.,.94,.80),smoothstep(.65-u_environment.y*.45,.88-u_environment.y*.4,cloud)*.62*(1.-smoothstep(.3,.44,p.y)));
+  }
   if(p.y>.473){
     vec3 skyEdge=color;
     float depth=max(0.,(p.y-.475)/.525);

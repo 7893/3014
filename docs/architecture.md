@@ -33,8 +33,8 @@ truth for appearance and water hit masks.
 timing/interpolation; analytic waves, wind springs, and animal deformation stay
 in their appropriate CPU or GPU modules. A Pixi Ticker owns the application clock;
 a manually advanced Ticker handles render-rate limits without scheduling another
-frame loop. Anime owns voyage
-interpolation, completion, and actor timelines. No library may start a competing
+frame loop. Anime owns voyage interpolation, completion, and actor timelines.
+No library may start a competing
 animation loop.
 
 `src/environment` owns bounded render conditions and gradual changes. Geographic
@@ -56,6 +56,12 @@ and a complete static fallback. Shared actor geometry and water interactions
 remain common. Scenes prepare lazily, reuse compiled programs across resize,
 and release obsolete textures and targets.
 
+City and coast render directly to the screen during normal playback. Ink keeps
+its paper-compositing pass; transitions render both scenes and composite them.
+Fullscreen targets acquire viewport storage only when used. Uniform vectors
+are reused rather than allocated on each frame. City reflections reuse sampled
+lighting, and shader work outside its visible region is skipped.
+
 The renderer uses Pixi's WebGL backend. Custom GLSL does not become
 WebGPU-compatible automatically. Texture orientation, straight/premultiplied
 alpha, framebuffer orientation, and pixel coordinates must be verified during
@@ -71,7 +77,8 @@ The source tree, documentation, tests, font tooling, and deployment tooling are
 not public website assets. Only `dist/` is shipped. Keep the short README as the
 project introduction; engineering details live here and in `migration.md`.
 
-Font subsetting and text generation remain project-specific build steps. Keep
+Vite fills the single HTML template from configured text; font subsetting stays
+a project-specific build step. Keep
 font licenses, project LICENSE/NOTICE, and dependency notices in the distribution.
 Do not publish source maps, credentials, private keys, or deployment destinations.
 Browser environment variables are public: never put credentials in `VITE_*`.

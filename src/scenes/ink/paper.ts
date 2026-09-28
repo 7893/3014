@@ -3,7 +3,6 @@ export function paintPaper(
   { ctx, random, between, line, ink }: Brush,
   W: number,
   H: number,
-  portrait: boolean,
 ) {
   const wash = ctx.createRadialGradient(
     W * 0.47,

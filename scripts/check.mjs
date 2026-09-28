@@ -2,13 +2,14 @@ import { readdir, access, readFile } from "node:fs/promises";
 import { resolve, dirname } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { renderCopy } from "./html.mjs";
 
 process.chdir(fileURLToPath(new URL("../", import.meta.url)));
 function run(args) {
   const result = spawnSync(process.execPath, args, { stdio: "inherit" });
   if (result.status !== 0) process.exit(result.status || 1);
 }
-run(["scripts/sync-copy.mjs", "--check"]);
+renderCopy(await readFile("index.html", "utf8"));
 run(["node_modules/typescript/bin/tsc", "--noEmit"]);
 let count = 0;
 for (const root of ["src", "scripts", "tests"]) {

@@ -7,7 +7,6 @@
     "node": ">=24"
   },
   "scripts": {
-    "sync": "node scripts/sync-copy.mjs",
     "check": "node scripts/check.mjs",
     "test": "node --test tests/*.test.mjs",
     "test:browser": "node tests/browser/run.mjs",
@@ -15,7 +14,8 @@
     "deploy": "npm run build && node --env-file=.env.deploy scripts/deploy.mjs",
     "dev": "vite",
     "typecheck": "tsc --noEmit",
-    "test:endurance": "node tests/browser/endurance.mjs"
+    "test:endurance": "node tests/browser/endurance.mjs",
+    "test:performance": "node tests/browser/performance.mjs"
   },
   "devDependencies": {
     "fontkit": "2.0.4",

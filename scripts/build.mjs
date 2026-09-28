@@ -1,16 +1,9 @@
 import { checkBuild } from "./check-build.mjs";
 import { cp, readFile, appendFile } from "node:fs/promises";
-import { spawnSync } from "node:child_process";
 import { build } from "vite";
 import { buildFonts } from "./fonts.mjs";
 
 const root = new URL("../", import.meta.url);
-const check = spawnSync(
-  process.execPath,
-  ["scripts/sync-copy.mjs", "--check"],
-  { cwd: root, stdio: "inherit" },
-);
-if (check.status !== 0) process.exit(check.status || 1);
 await buildFonts();
 await build();
 await appendFile(
@@ -19,11 +12,11 @@ await appendFile(
     (await readFile(new URL("licenses/colord-MIT.txt", root), "utf8")),
 );
 const destination = new URL("dist/", root);
-for (const name of ["LICENSE", "NOTICE", ".nojekyll"])
+for (const name of ["LICENSE", "NOTICE"])
   await cp(new URL(name, root), new URL(name, destination));
 for (const name of ["qiuhong-OFL.txt", "wenkai-OFL.txt"]) {
   await cp(
-    new URL(`assets/fonts/${name}`, root),
+    new URL(`src/assets/fonts/${name}`, root),
     new URL(`assets/${name}`, destination),
   );
 }

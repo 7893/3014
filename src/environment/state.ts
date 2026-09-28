@@ -50,12 +50,10 @@ export function createEnvironment() {
     }
     const strength = 0.25 + 0.75 * state.current.wind;
     // Preserve integrated cloud drift: scaling absolute phase causes snapping.
-    state.wind.set([
-      wind[0] * strength,
-      wind[1] * strength,
-      wind[2],
-      wind[3] * strength,
-    ]);
+    state.wind[0] = wind[0] * strength;
+    state.wind[1] = wind[1] * strength;
+    state.wind[2] = wind[2];
+    state.wind[3] = wind[3] * strength;
     return state;
   }
   return { setTarget, reset, sample };

@@ -7,14 +7,15 @@ a server dependency for the published website.
 
 ## Editing
 
-- Change interface text in `src/config/copy.ts`, then run `npm run sync`.
-  The HTML template is `templates/index.html`; `index.html` is generated.
+- Change interface text in `src/config/copy.ts`. The single HTML template is
+  `index.html`; Vite fills its escaped placeholders in development and builds.
 - Change geography and default conditions in `src/config/places.ts`.
 - Edit composition and painting beside each scene in `src/scenes/`.
 - Put shared brushwork in `src/drawing/`, motion in `src/motion/`, and layout
   in `src/styles/`. Do not embed interface strings in rendering modules.
 - Font subsets regenerate during build from the configured text. Full font
-  downloads stay in the ignored cache; keep the bundled font license notices.
+  downloads stay in the ignored cache. Bundled subsets and their license notices
+  live together in `src/assets/fonts/`.
 
 ## Verification
 
@@ -23,7 +24,7 @@ Run `npm run check`, `npm test`, and
 Install Chromium with `npx playwright install chromium`, then run
 `npm run build && npm run test:browser`.
 
-`check` runs strict TypeScript checking, verifies generated text, and enforces
+`check` runs strict TypeScript and unused-code checks, validates HTML text, and enforces
 small source modules. Unit tests cover timing, wind, environment boundaries,
 fish continuity, and font processing. Browser tests exercise the production
 bundle, both viewport orientations, font rendering, transitions, context
@@ -32,6 +33,26 @@ recovery, static fallback, water masks, and resource lifetime.
 Internal rendering tests use a separate Vite build under `.cache/browser/`.
 The local test server exposes that fixture only to its own browser process;
 `dist/` never contains the fixture, source files, or debug exports.
+
+`npm run test:performance -- current` records per-scene draw counts, startup
+observations, and bundle sizes in `.cache/performance/current.json`. Compare
+under the same browser, hardware, scene and load; software-rendered timings
+do not establish device FPS. See `performance.md` for measured changes.
+
+## Repository layout
+
+- `src/`: runtime code, styles, configured text, and bundled font assets.
+- `scripts/`: build, validation, font processing, and deployment commands.
+- `tests/`: unit tests, browser checks, and receiver regression tests.
+- `docs/`: architecture, development guidance, and engineering records.
+- `ops/`: restricted deployment receiver and its operating instructions.
+- `licenses/`: upstream notices that need to accompany bundled dependencies.
+
+Keep only the Vite entry template and tool configuration at the root alongside
+project metadata. There is no generated HTML copy or Pages-specific marker.
+Dependencies, build output, font downloads, browser fixtures, profiling reports,
+coverage, Python bytecode, editor files, and local environment files are ignored.
+Keep the lockfile, tests, license notices, and historical engineering records.
 
 ## Delivery
 

@@ -1,4 +1,5 @@
 import { checkActor } from "./actor.mjs";
+import { checkPasses } from "./passes.mjs";
 import { checkSoak } from "./soak.mjs";
 import assert from "node:assert/strict";
 import { chromium } from "playwright";
@@ -15,6 +16,7 @@ let browser;
 try {
   browser = await chromium.launch({ args: ["--enable-unsafe-swiftshader"] });
   await checkActor(browser, server.url);
+  await checkPasses(browser, server.url);
   await checkSoak(browser, server.url);
   await checkLifecycle(browser, server.url);
   for (const viewport of [
@@ -40,7 +42,6 @@ try {
       await page.evaluate(() => {
         window.savedDraw = WebGL2RenderingContext.prototype.drawArrays;
         window.savedElements = WebGL2RenderingContext.prototype.drawElements;
-        WebGL2RenderingContext.prototype.drawElements = function () {};
         WebGL2RenderingContext.prototype.drawElements =
           WebGL2RenderingContext.prototype.drawArrays = function () {};
       });

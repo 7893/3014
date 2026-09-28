@@ -1,5 +1,5 @@
 import type { SceneName } from "../scenes/types.ts";
-// All website copy lives here. Run `node scripts/sync-copy.mjs` after editing.
+// All website copy lives here. Vite renders this configuration into the HTML template.
 export const copy = {
   site: {
     title: "随舟 · 3014",

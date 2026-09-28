@@ -31,24 +31,25 @@ vec3 stars(vec2 p){
   float visible=step(.84,seed)*(1.-smoothstep(.16,.48,p.y));
   return mix(vec3(.65,.79,1.),vec3(1.,.88,.65),seed)*(core+glow)*twinkle*visible;
 }
-vec3 skyline(vec2 p){
+vec3 skyline(vec2 p,vec3 lamps,vec3 spill){
   vec3 top=vec3(.025,.052,.079),horizon=vec3(.17,.22,.245);
   vec3 color=mix(top,horizon,pow(clamp(p.y/.72,0.,1.),1.7));
   float haze=fbm(vec2(p.x*4.-u_wind.z*.018,p.y*8.));
   color+=vec3(.035,.035,.028)*(0.65+u_environment.z)*haze*smoothstep(.2,.7,p.y);
   color+=stars(p)*(1.-u_environment.y*.8);
   color=over(color,sampleLayer(u_buildings,p));
-  color+=animatedLights(p);
-  color+=lightSpill(p)*.85;
+  color+=lamps;
+  color+=spill*.85;
   return color;
 }
 float cityWaterAt(vec2 p){
+  if(!touchActive())return 0.;
   float solid=max(sampleLayer(u_bank,p).a,sampleBoat(p-u_boat).a);
   return smoothstep(.645,.66,p.y)*(1.-smoothstep(.08,.35,solid));
 }
 void main(){
   vec2 p=vec2(v_uv.x,1.-v_uv.y);
-  vec3 color=skyline(p);
+  vec3 color;
   if(p.y>.64){
     float depth=(p.y-.64)/.36;
     float waves=sin(p.y*210.-u_time*1.65+p.x*9.)*.34+sin(p.y*437.+u_time*1.2+p.x*23.)*.16;
@@ -57,14 +58,15 @@ void main(){
     float fresnel=waterFresnel(normal,depth);
     vec2 reflected=vec2(p.x+normal.x*(.012+depth*.07)+waves*.001,.635-(p.y-.64)*1.28+waves*.002);
     vec3 lamps=animatedLights(reflected);
-    vec3 reflectedCity=skyline(reflected);
+    vec3 spill=lightSpill(reflected);
+    vec3 reflectedCity=skyline(reflected,lamps,spill);
     vec3 water=mix(vec3(.055,.13,.18),vec3(.025,.075,.12),depth);
     float breaks=.35+.65*noise(vec2(p.x*95.,p.y*640.-u_time*1.5));
     color=mix(water,reflectedCity,(.23+fresnel*.45)*(1.-depth*.5));
     color+=lamps*breaks*(1.25-depth*.45);
     vec3 spread=animatedLights(reflected+vec2(.002,0.))+animatedLights(reflected-vec2(.002,0.));
     color+=spread*breaks*.18;
-    color+=lightSpill(reflected)*(.65+.35*breaks)*(1.-depth*.6);
+    color+=spill*(.65+.35*breaks)*(1.-depth*.6);
     color+=vec3(.08,.11,.12)*waterSparkle(normal)*fresnel;
     color+=vec3(.13,.16,.17)*pow(max(0.,sin(p.y*485.+p.x*13.-u_time*1.6)),18.)*.055;
     vec2 boat=u_boatCenter+u_boat;
@@ -73,7 +75,7 @@ void main(){
     wake*=smoothstep(.005,.02,behind)*(1.-smoothstep(.06,.19,behind));
     color+=vec3(.37,.30,.16)*wake*.24;
     color+=vec3(.10,.13,.14)*touchRipple(p,.64,cityWaterAt(u_touch.xy));
-  }
+  }else color=skyline(p,animatedLights(p),lightSpill(p));
   // Small pairs walk along the opposite embankment.
   if(p.y>.594&&p.y<.617){
     for(int i=0;i<7;i++){

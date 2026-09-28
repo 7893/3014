@@ -55,7 +55,7 @@ export async function createRenderer(canvas: HTMLCanvasElement) {
   }
   function drawScene(
     key: SceneName,
-    slot: number,
+    slot: number | null,
     time: number,
     touch: number[],
     x: number,
@@ -66,20 +66,25 @@ export async function createRenderer(canvas: HTMLCanvasElement) {
     const W = scene.portrait ? 760 : 1600;
     const H = (W * scene.height) / scene.width;
     const scale = scene.portrait ? 1.35 : 1.6;
-    Object.assign(pass.uniforms.uniforms, {
-      u_size: [scene.width, scene.height],
-      u_time: time,
-      u_touch: touch,
-      u_wind: conditions.wind,
-      u_environment: conditions.atmosphere,
-      u_boatCenter: scene.boatCenter,
-      u_boat: [x - scene.boatCenter[0], Math.sin(time * 1.05) * 0.0022],
-      u_actorScale: [scale / W, scale / H],
-    });
-    definitions[key].update?.(pass.uniforms.uniforms, canvas, time);
+    const u = pass.uniforms.uniforms;
+    const size = u.u_size as number[],
+      boat = u.u_boat as number[],
+      actorScale = u.u_actorScale as number[];
+    size[0] = scene.width;
+    size[1] = scene.height;
+    u.u_time = time;
+    u.u_touch = touch;
+    u.u_wind = conditions.wind;
+    u.u_environment = conditions.atmosphere;
+    u.u_boatCenter = scene.boatCenter;
+    boat[0] = x - scene.boatCenter[0];
+    boat[1] = Math.sin(time * 1.05) * 0.0022;
+    actorScale[0] = scale / W;
+    actorScale[1] = scale / H;
+    definitions[key].update?.(u, canvas, time);
     renderer.render({
       container: pass.mesh,
-      target: targets.textures[slot],
+      target: slot === null ? undefined : targets.get(slot),
       clear: true,
     });
   }
@@ -93,9 +98,10 @@ export async function createRenderer(canvas: HTMLCanvasElement) {
     ) {
       Ticker.system.update(performance.now());
       actor.draw(renderer, time);
+      const composite = journey.transitioning || journey.from === "ink";
       drawScene(
         journey.from,
-        0,
+        composite ? 0 : null,
         time,
         touch,
         journey.positions[journey.from]!,
@@ -110,7 +116,7 @@ export async function createRenderer(canvas: HTMLCanvasElement) {
           journey.positions[journey.to]!,
           wind,
         );
-      compositor.draw(renderer, time, journey);
+      if (composite) compositor.draw(renderer, time, journey);
     },
     setEnvironment: environment.setTarget,
     resetEnvironment: environment.reset,

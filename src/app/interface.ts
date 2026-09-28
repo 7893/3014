@@ -13,18 +13,8 @@ function setLines(element: HTMLElement, lines: string[]) {
   );
 }
 
-export function initializeCopy(sceneButtons: SceneButton[]) {
-  document.title = copy.site.title;
-  element<HTMLMetaElement>('meta[name="description"]').content =
-    copy.site.description;
-  element("main").setAttribute("aria-label", copy.site.label);
-  element(".signature").textContent = copy.site.signature;
-  element(".scene-nav").setAttribute("aria-label", copy.site.navigation);
-  for (const button of sceneButtons)
-    button.textContent = copy.scenes[button.dataset.scene].label;
-}
-
 let shownScene = "";
+let inscription: HTMLElement;
 export function updateSceneUI(
   canvas: HTMLCanvasElement,
   state: JourneyState,
@@ -33,7 +23,7 @@ export function updateSceneUI(
   const transition = String(state.transitioning);
   if (canvas.dataset.transition !== transition)
     canvas.dataset.transition = transition;
-  const inscription = element(".inscription");
+  inscription ??= element(".inscription");
   const opacity = state.transitioning
     ? String(Math.abs(state.blend * 2 - 1))
     : "1";

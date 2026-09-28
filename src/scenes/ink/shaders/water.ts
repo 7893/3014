@@ -1,5 +1,6 @@
 export const water = `
 float inkWaterAt(vec2 p){
+  if(!touchActive())return 0.;
   float river=smoothstep(.735,.755,p.y)*(1.-smoothstep(.925,.975,p.y));
   float shore=sampleLayer(u_shore,p).a;
   float trees=sampleLayer(u_foliage,p).a;
@@ -33,7 +34,7 @@ vec3 paintWater(vec3 color,vec3 paper,vec2 p){
   float banks=exp(-pow((wakeY-wakeWidth)*430.,2.));
   float trail=exp(-wakeY*170.)*(.5+.5*sin(behind*340.-u_time*3.));
   float fadeWake=smoothstep(.008,.025,behind)*(1.-smoothstep(.04,.19,behind));
-  color-=vec3(.13,.14,.11)*(banks*.8+trail*.35)*fadeWake*u_boatOpacity;
+  color-=vec3(.13,.14,.11)*(banks*.8+trail*.35)*fadeWake;
   color-=vec3(.055)*ring*river;
   return color;
 }

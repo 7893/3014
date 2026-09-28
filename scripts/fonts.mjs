@@ -63,7 +63,7 @@ export async function buildFonts() {
       preserveNameIds: [0, 13, 14],
     });
     verifyGlyphs(subset, text, font.name);
-    await writeFile(new URL(`assets/fonts/${font.name}.woff2`, root), subset);
+    await writeFile(new URL(`src/assets/fonts/${font.name}.woff2`, root), subset);
     console.log(
       `${font.name}: ${text.length} characters, ${subset.length} bytes`,
     );

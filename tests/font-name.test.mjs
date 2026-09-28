@@ -6,7 +6,7 @@ import { create } from "fontkit";
 import { renameSubset } from "../scripts/font-name.mjs";
 
 test("subset renaming preserves glyphs, layout tables and font checksums", async () => {
-  const woff = await readFile(new URL("../assets/fonts/wenkai.woff2", import.meta.url));
+  const woff = await readFile(new URL("../src/assets/fonts/wenkai.woff2", import.meta.url));
   const before = await subsetFont(woff, undefined, {
     targetFormat: "sfnt", keepAllGlyphs: true,
   });

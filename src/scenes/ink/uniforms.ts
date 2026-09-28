@@ -14,7 +14,6 @@ export function fishUniforms(): Record<string, UniformData> {
       type: "vec4<f32>",
       size: FISH_COUNT,
     },
-    u_boatOpacity: { value: 1, type: "f32" },
   };
 }
 export function updateFishUniforms(

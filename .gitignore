@@ -10,19 +10,23 @@ Thumbs.db
 
 # Logs
 *.log
-npm-debug.log*
 
 # Dependencies
 node_modules/
 
 # Build files
 dist/
-build/
 
 # Cache
 .cache/
-.parcel-cache/
 __pycache__/
+*.py[cod]
+*.tsbuildinfo
+
+# Local test output
+coverage/
+playwright-report/
+test-results/
 
 # Local env files
 .env

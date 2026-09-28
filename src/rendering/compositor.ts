@@ -21,13 +21,14 @@ export function createCompositor(
   );
   return {
     draw(renderer: WebGLRenderer, time: number, journey: JourneyState) {
-      Object.assign(pass.uniforms.uniforms, {
-        u_size: [renderer.width, renderer.height],
-        u_time: time,
-        u_blend: journey.blend,
-        u_sourceInk: Number(journey.from === "ink"),
-        u_destinationInk: Number(journey.to === "ink"),
-      });
+      const u = pass.uniforms.uniforms;
+      const size = u.u_size as number[];
+      size[0] = renderer.width;
+      size[1] = renderer.height;
+      u.u_time = time;
+      u.u_blend = journey.blend;
+      u.u_sourceInk = Number(journey.from === "ink");
+      u.u_destinationInk = Number(journey.to === "ink");
       pass.shader.resources.u_destination =
         textures[journey.transitioning ? 1 : 0].source;
       renderer.render({ container: pass.mesh, clear: true });

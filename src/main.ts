@@ -3,7 +3,7 @@ import { element } from "./app/dom.ts";
 import type { SceneButton } from "./app/dom.ts";
 import type { Scene, SceneName } from "./scenes/types.ts";
 import { createAnimation } from "./app/animation.ts";
-import { initializeCopy, updateSceneUI } from "./app/interface.ts";
+import { updateSceneUI } from "./app/interface.ts";
 import { arrivalText } from "./config/copy.ts";
 import { createWind } from "./motion/wind.ts";
 import { createJourney, scenes } from "./motion/journey.ts";
@@ -26,7 +26,6 @@ const journey = createJourney(innerWidth / innerHeight < 0.85 ? 0.64 : 0.69);
 const sceneButtons = [
   ...document.querySelectorAll<SceneButton>("[data-scene]"),
 ];
-initializeCopy(sceneButtons);
 let dimensions = "";
 let touch = [0, 0, -100];
 const wind = createWind();

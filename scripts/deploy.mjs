@@ -38,7 +38,6 @@ const archive = run(
     "assets",
     "LICENSE",
     "NOTICE",
-    ".nojekyll",
   ],
   { maxBuffer: 20 * 1024 * 1024 },
 );

@@ -18,7 +18,7 @@ export function createInk(width: number, height: number) {
     paint(createBrush(ctx, seed));
     layers[name] = canvas;
   }
-  layer("paper", 101, (tools: Brush) => paintPaper(tools, W, H, portrait));
+  layer("paper", 101, (tools: Brush) => paintPaper(tools, W, H));
   for (const [index, name] of (["far", "middle", "near"] as const).entries())
     layer(name, 202 + index * 101, (tools: Brush) => {
       for (const peak of composition[name]) paintKarst(tools, W, H, peak);

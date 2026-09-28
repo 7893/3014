@@ -5,8 +5,8 @@ The project source code and accompanying original content are licensed
 under the Apache License, Version 2.0. See LICENSE for the full terms.
 
 The bundled font subsets retain their SIL Open Font License 1.1:
-- Slideqiuhong Regular (SlideFont): assets/fonts/qiuhong-OFL.txt
-- LXGW WenKai Regular: assets/fonts/wenkai-OFL.txt
+- Slideqiuhong Regular (SlideFont): src/assets/fonts/qiuhong-OFL.txt
+- LXGW WenKai Regular: src/assets/fonts/wenkai-OFL.txt
   The derived web subset uses the internal family name Boat.
 Source versions and SHA-256 checksums are pinned in scripts/fonts.mjs.
 Only website-specific WOFF2 subsets are distributed. Full upstream fonts
