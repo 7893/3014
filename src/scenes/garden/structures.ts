@@ -3,10 +3,11 @@ import { stroke } from "../../drawing/canvas.ts";
 export function roof(c: CanvasRenderingContext2D, x: number, y: number, w: number, rise: number) {
   const pigment = c.createLinearGradient(0, y - rise, 0, y + 12);
   pigment.addColorStop(0, "#556661"); pigment.addColorStop(.65, "#394d49"); pigment.addColorStop(1, "#253d39");
-  c.beginPath(); c.moveTo(x - w * .09, y - 5);
-  c.bezierCurveTo(x + w * .12, y + 5, x + w * .3, y - rise * .7, x + w * .5, y - rise);
-  c.bezierCurveTo(x + w * .7, y - rise * .7, x + w * .88, y + 5, x + w * 1.09, y - 5);
-  c.lineTo(x + w * 1.05, y + 8); c.quadraticCurveTo(x + w * .5, y + 16, x - w * .05, y + 8);
+  c.beginPath(); c.moveTo(x - w * .09, y - 7);
+  c.quadraticCurveTo(x + w * .03, y + 3, x + w * .21, y - rise);
+  c.lineTo(x + w * .79, y - rise);
+  c.quadraticCurveTo(x + w * .97, y + 3, x + w * 1.09, y - 7);
+  c.lineTo(x + w * 1.05, y + 6); c.quadraticCurveTo(x + w * .5, y + 11, x - w * .05, y + 6);
   c.closePath(); c.fillStyle = pigment; c.fill();
   c.save(); c.clip();
   for (let i = 0; i < 54; i++) {
@@ -23,7 +24,7 @@ export function roof(c: CanvasRenderingContext2D, x: number, y: number, w: numbe
 
 export function hall(c: CanvasRenderingContext2D, x: number, base: number, w: number, h: number, storeys = 1) {
   const plaster = c.createLinearGradient(x, base - h, x + w, base);
-  plaster.addColorStop(0, "#e1dcc9"); plaster.addColorStop(1, "#a7b5a0");
+  plaster.addColorStop(0, "#f0eee0"); plaster.addColorStop(1, "#bbc5b3");
   c.fillStyle = plaster; c.fillRect(x, base - h, w, h);
   const bays = 5;
   for (let floor = 0; floor < storeys; floor++) {

@@ -1,16 +1,10 @@
-import { canvasLayer, seededRandom } from "../../drawing/canvas.ts";
+import { paintingLayers } from "../../drawing/layers.ts";
+import { seededRandom } from "../../drawing/canvas.ts";
 import { architecture } from "./architecture.ts";
 import { foliage, bank } from "./foliage.ts";
 
 export function createGarden(width: number, height: number) {
-  const portrait = width / height < .85, W = portrait ? 760 : 1600;
-  const H = W * height / width;
-  const layers: Record<string, HTMLCanvasElement> = {};
-  const contexts: Record<string, CanvasRenderingContext2D> = {};
-  for (const name of ["buildings", "foliage", "bank"]) {
-    const layer = canvasLayer(width, height, W);
-    layers[name] = layer.canvas; contexts[name] = layer.ctx;
-  }
+  const { layers, contexts, W, H, portrait } = paintingLayers(width, height, ["buildings", "foliage", "bank"]);
   const c = contexts.buildings, random = seededRandom(892);
   // Soft distant canopies behind the enclosure, leaving the inscription in open sky.
   for (let tree = 0; tree < 28; tree++) {

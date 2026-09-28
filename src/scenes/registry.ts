@@ -1,9 +1,10 @@
 import { createRoom } from "./room/painting.ts";
-import { drawStaticRoom, roomUniforms, updateRoom } from "./room/static.ts";
-import { fragment as room } from "./room/shader.ts";
+import { drawStaticRoom } from "./room/static.ts";
+import { roomUniforms, updateRoom } from "./room/uniforms.ts";
+import { fragment as room } from "./room/shaders/main.ts";
 import { createGarden } from "./garden/painting.ts";
 import { drawStaticGarden } from "./garden/static.ts";
-import { fragment as garden } from "./garden/shader.ts";
+import { fragment as garden } from "./garden/shaders/main.ts";
 import { createInk } from "./ink/painting.ts";
 import { drawStaticInk } from "./ink/static.ts";
 import { fragment as ink } from "./ink/shaders/main.ts";

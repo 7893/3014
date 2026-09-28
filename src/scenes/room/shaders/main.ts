@@ -1,4 +1,5 @@
-import { noise } from "../../rendering/shaders/common.ts";
+import { night } from "./night.ts";
+import { noise } from "../../../rendering/shaders/common.ts";
 export const fragment = `#version 300 es
 precision highp float;
 in vec2 v_uv;
@@ -6,10 +7,13 @@ out vec4 outColor;
 uniform sampler2D u_interior,u_curtain,u_figures;
 uniform vec2 u_size,u_candle,u_couple;
 uniform float u_time;
+uniform vec4 u_window;
 ${noise}
+${night}
 void main(){
   vec2 p=vec2(v_uv.x,1.-v_uv.y);
   vec3 color=sampleLayer(u_interior,p).rgb;
+  color=windowNight(color,p);
   float flicker=.91+.06*sin(u_time*5.7)+.03*sin(u_time*9.2);
   vec2 q=(p-u_candle)*vec2(u_size.x/u_size.y,1.);
   color+=vec3(.29,.14,.045)*exp(-length(q)*12.)*flicker;

@@ -1,7 +1,7 @@
-import { noise } from "../../rendering/shaders/common.ts";
-import { boat } from "../../rendering/shaders/boat.ts";
-import { surface } from "../../rendering/shaders/surface.ts";
-import { ripples } from "../../rendering/shaders/ripples.ts";
+import { noise } from "../../../rendering/shaders/common.ts";
+import { boat } from "../../../rendering/shaders/boat.ts";
+import { surface } from "../../../rendering/shaders/surface.ts";
+import { ripples } from "../../../rendering/shaders/ripples.ts";
 export const fragment = `#version 300 es
 precision highp float;
 in vec2 v_uv;
@@ -24,6 +24,7 @@ vec3 courtyard(vec2 p){
 }
 float waterAt(vec2 p){
   float solid=max(sampleLayer(u_bank,p).a,sampleBoat(p-u_boat).a);
+  solid=max(solid,sampleLayer(u_buildings,p).a);
   solid=max(solid,sampleLayer(u_foliage,p).a);
   return smoothstep(.663,.68,p.y)*(1.-smoothstep(.08,.35,solid));
 }
@@ -47,6 +48,7 @@ void main(){
     if(p.y>u_boatCenter.y+u_boat.y+.008)
       color=mix(color,vec3(.16,.25,.21),sampleBoat(reflectedBoat-u_boat).a*.25);
   }
+  if(p.y>.66)color=over(color,sampleLayer(u_buildings,p));
   vec2 leaf=p;
   leaf.x+=(sin(u_time*1.1+p.y*13.)*.0025+u_wind.x*.002)*smoothstep(.1,.4,p.y);
   color=over(color,sampleLayer(u_foliage,leaf));

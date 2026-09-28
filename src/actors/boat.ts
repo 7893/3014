@@ -1,3 +1,4 @@
+import { actorSurface } from "./surface.ts";
 import { BOAT_FRAME } from "../config/actors.ts";
 import "pixi.js/graphics";
 import {
@@ -6,7 +7,6 @@ import {
   CanvasSource,
   Texture,
   Sprite,
-  RenderTexture,
   Point,
 } from "pixi.js";
 import type { WebGLRenderer } from "pixi.js";
@@ -80,14 +80,9 @@ export function createBoat() {
     )
     .add(oar, { rotation: [0.93, 0.45, -0.03, 0.45] }, 0);
   const grip = new Point();
-  const texture = RenderTexture.create({
-    width,
-    height,
-    resolution: 4,
-    antialias: false,
-  });
+  const surface = actorSurface(root, width, height, 4);
   return {
-    texture,
+    texture: surface.texture,
     draw(renderer: WebGLRenderer, time: number) {
       // Bound the timeline's position even after months of continuous display.
       motion.seek((time * 1000) % duration, true);
@@ -96,18 +91,12 @@ export function createBoat() {
         dy = grip.y + 5.5;
       arm.rotation = Math.atan2(dy, dx);
       arm.scale.x = Math.hypot(dx, dy) / 4;
-      renderer.render({
-        container: root,
-        target: texture,
-        clear: true,
-        clearColor: [0, 0, 0, 0],
-      });
+      surface.draw(renderer);
     },
     dispose() {
       motion.cancel();
-      root.destroy({ children: true });
+      surface.dispose();
       hullTexture.destroy(true);
-      texture.destroy(true);
     },
   };
 }

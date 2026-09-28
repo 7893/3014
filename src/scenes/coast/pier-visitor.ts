@@ -2,17 +2,11 @@ import { pier } from "./pier.ts";
 import { stroke } from "../../drawing/canvas.ts";
 
 export function paintPierVisitor(ctx: CanvasRenderingContext2D, W: number, H: number) {
-  ctx.save(); ctx.translate(W * (pier.left + .001), H * pier.top);
-  const scale = W / 1200; ctx.scale(scale, scale);
+  ctx.save(); ctx.translate(W * pier.seatX, H * pier.seatY);
+  ctx.scale(W / 1000, H / 1000);
   ctx.fillStyle = "#544d3c33";
   ctx.beginPath(); ctx.ellipse(0, 1.5, 5.5, 1.8, 0, 0, Math.PI * 2); ctx.fill();
   // Facing the water: a seated back, relaxed shoulders, hands resting on the edge.
-  const reach = H * (pier.water - pier.top) / scale;
-  stroke(ctx, [[-2, 0], [-3, reach * .55], [-2, reach - 2]], "#ad8b6a", 1.5);
-  stroke(ctx, [[2, 0], [3, reach * .55], [2, reach - 2]], "#ad8b6a", 1.5);
-  // Submerged toes are softened by the same turquoise as the surrounding sea.
-  stroke(ctx, [[-2, reach - 2], [-1, reach + 1]], "#779c86", 1.7);
-  stroke(ctx, [[2, reach - 2], [3, reach + 1]], "#779c86", 1.7);
   ctx.fillStyle = "#c7aba0";
   ctx.beginPath(); ctx.moveTo(-3, -11);
   ctx.quadraticCurveTo(-5, -8, -4, -3);

@@ -14,6 +14,21 @@ keep same-origin assets. Never commit the actual CDN or origin destination.
 The page address remains independent of the asset address. The CDN must allow
 cross-origin module/font requests, preserve correct MIME types, and use HTTPS.
 
+## Routine publishing and CDN caching
+
+Normal artwork changes use the same `npm run deploy` command. Vite generates
+content-hashed JavaScript, CSS and font filenames and updates their HTML references.
+The private asset-origin setting stays fixed. Serve entry HTML with `no-cache`
+and hashed assets with `public, max-age=31536000, immutable`.
+
+After the receiver switches the release atomically, CloudFront fetches each new
+asset URL on demand. Unchanged URLs retain their caches, and retained old files
+keep already-open pages working. Routine releases do not edit the distribution,
+DNS, certificates or origins, and do not require cache invalidations. Configure
+those once; reconsider them only for infrastructure or cache-policy changes.
+Verify delivery and resource hashes after publication. CDN caching accelerates
+asset downloads; animation frame rate still depends on the visitor's device.
+
 The server account has no sudo access. Its root-owned authorized-keys file
 uses `restrict,command="/usr/local/libexec/suizhou-receive"`. Install
 `receive.py` at that path as root, mode 755. The account may write only its

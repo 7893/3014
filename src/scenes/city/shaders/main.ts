@@ -1,3 +1,4 @@
+import { skyEffects } from "../../../rendering/shaders/sky.ts";
 import { surface } from "../../../rendering/shaders/surface.ts";
 import { lights } from "./lights.ts";
 import { noise } from "../../../rendering/shaders/common.ts";
@@ -17,26 +18,13 @@ ${surface}
 ${boat}
 ${ripples}
 ${lights}
-vec3 stars(vec2 p){
-  // Stable sky positions, with pixel-sized cores on every screen.
-  vec2 grid=vec2(26.*u_size.x/u_size.y,26.);
-  vec2 cell=floor(p*grid);
-  float seed=hash(cell+17.3);
-  vec2 center=(cell+.18+.64*vec2(hash(cell+3.7),hash(cell+9.2)))/grid;
-  vec2 delta=(p-center)*u_size;
-  float radius=mix(.65,1.15,seed);
-  float core=exp(-dot(delta,delta)/(radius*radius));
-  float glow=exp(-dot(delta,delta)/20.)*.22;
-  float twinkle=.22+1.05*pow(.5+.5*sin(u_time*(1.1+seed*.9)+seed*83.),1.4);
-  float visible=step(.84,seed)*(1.-smoothstep(.16,.48,p.y));
-  return mix(vec3(.65,.79,1.),vec3(1.,.88,.65),seed)*(core+glow)*twinkle*visible;
-}
+${skyEffects}
 vec3 skyline(vec2 p,vec3 lamps,vec3 spill){
   vec3 top=vec3(.025,.052,.079),horizon=vec3(.17,.22,.245);
   vec3 color=mix(top,horizon,pow(clamp(p.y/.72,0.,1.),1.7));
   float haze=fbm(vec2(p.x*4.-u_wind.z*.018,p.y*8.));
   color+=vec3(.035,.035,.028)*(0.65+u_environment.z)*haze*smoothstep(.2,.7,p.y);
-  color+=stars(p)*(1.-u_environment.y*.8);
+  color+=skyStars(p,u_size,u_time,.84)*(1.-u_environment.y*.8);
   color=over(color,sampleLayer(u_buildings,p));
   color+=lamps;
   color+=spill*.85;
@@ -96,11 +84,9 @@ void main(){
   float rim=max(0.,neighbor.a-boat.a*(1.-bank.a));
   color=mix(color,vec3(.035,.07,.085),boat.a*(1.-bank.a));
   color+=vec3(.85,.60,.28)*rim*.65*(1.-bank.a);
-  vec2 local=(p-u_boatCenter-u_boat)/u_actorScale;
   float oar=boatMasks(p-u_boat).r;
   color=mix(color,vec3(.68,.56,.35),oar*.8*(1.-bank.a));
-  float lantern=exp(-dot((local-vec2(-5.,-5.))/vec2(2.5,3.),(local-vec2(-5.,-5.))/vec2(2.5,3.)));
-  color+=vec3(.9,.51,.18)*lantern*.65*(1.-bank.a);
+  color=boatLamp(color,p-u_boat,.8*(1.-bank.a),u_time);
   color*=1.-.18*pow(length((p-.5)*vec2(1.,.8)),2.);
   color+=vec3((hash(gl_FragCoord.xy)-.5)*.006);
   outColor=vec4(color,1.);

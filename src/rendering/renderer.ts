@@ -70,6 +70,7 @@ export async function createRenderer(canvas: HTMLCanvasElement) {
     const H = (W * scene.height) / scene.width;
     const scale = scene.portrait ? 1.35 : 1.6;
     const u = pass.uniforms.uniforms;
+    if (key === "coast") u.u_pierFeet = beachActors.feet;
     const size = u.u_size as number[],
       boat = u.u_boat as number[],
       actorScale = u.u_actorScale as number[];
@@ -100,7 +101,8 @@ export async function createRenderer(canvas: HTMLCanvasElement) {
       wind: ArrayLike<number> = [0, 0, time, 0.65],
     ) {
       Ticker.system.update(performance.now());
-      actor.draw(renderer, time);
+      if (journey.from !== "room" || (journey.transitioning && journey.to !== "room"))
+        actor.draw(renderer, time);
       const composite = journey.transitioning || journey.from === "ink";
       drawScene(
         journey.from,

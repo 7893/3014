@@ -7,7 +7,7 @@ export function foliage(c: CanvasRenderingContext2D, W: number, H: number) {
   c.bezierCurveTo(W * .05, H * .19, W * .15, H * .16, W * .34, H * .19);
   c.strokeStyle = "#4a6252"; c.lineWidth = 7; c.stroke();
   for (let i = 0; i < 48; i++) {
-    const x = random() * W * .34, y = H * (.12 + random() * .09);
+    const x = random() * W * .34, y = H * (.075 + .115 * Math.pow(x / (W * .34), .46));
     const length = H * (.04 + random() * .19);
     c.beginPath(); c.moveTo(x, y); c.quadraticCurveTo(x + 10, y + length * .7, x - 3, y + length);
     c.strokeStyle = "#63805a66"; c.lineWidth = .8; c.stroke();
@@ -38,7 +38,7 @@ export function bank(c: CanvasRenderingContext2D, W: number, H: number) {
       c.strokeStyle = "#c1c89244"; c.lineWidth = .8; c.stroke();
     }
   }
-  const size = portrait ? 38 : 48;
+  const size = portrait ? 46 : 61;
   lotus(c, W * .065, H * .97, size);
   lotus(c, W * .19, H * 1.025, size * .67);
   lotus(c, W * .905, H * .985, size * 1.13);

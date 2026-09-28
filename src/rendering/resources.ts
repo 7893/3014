@@ -57,6 +57,7 @@ export function createResources(geometry: MeshGeometry, boat: TextureSource, bea
           definition.fragment,
           {
             ...shared(),
+            ...(name === "coast" ? { u_pierFeet: { value: new Float32Array(4), type: "vec4<f32>" as const } } : {}),
             ...definition.uniforms?.(),
           },
           sources,

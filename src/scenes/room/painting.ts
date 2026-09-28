@@ -1,19 +1,14 @@
-import { canvasLayer, stroke } from "../../drawing/canvas.ts";
+import { paintingLayers } from "../../drawing/layers.ts";
+import { stroke } from "../../drawing/canvas.ts";
 import { roomLayout } from "./composition.ts";
 import { paintCouple } from "./figures.ts";
 import { paintWindow, paintCurtains } from "./window.ts";
 import { paintFurniture } from "./furniture.ts";
 
 export function createRoom(width: number, height: number) {
-  const W = width / height < .85 ? 760 : 1600, H = W * height / width;
+  const { layers, contexts, W, H } = paintingLayers(width, height, ["interior", "curtain", "figures"]);
   const layout = roomLayout(W, H);
   const { window: win, couple, candle, floor } = layout;
-  const layers: Record<string, HTMLCanvasElement> = {};
-  const contexts: Record<string, CanvasRenderingContext2D> = {};
-  for (const name of ["interior", "curtain", "figures"]) {
-    const layer = canvasLayer(width, height, W);
-    layers[name] = layer.canvas; contexts[name] = layer.ctx;
-  }
   const c = contexts.interior;
   const wall = c.createLinearGradient(0, 0, W, H);
   wall.addColorStop(0, "#8c6e50"); wall.addColorStop(.5, "#79624e"); wall.addColorStop(1, "#483e36");

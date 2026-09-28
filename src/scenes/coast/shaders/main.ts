@@ -16,7 +16,7 @@ uniform sampler2D u_foreground,u_trunk0,u_leaves0,u_trunk1,u_leaves1,u_shore,u_b
 uniform vec2 u_size,u_boat,u_boatCenter,u_actorScale;
 uniform float u_time;
 uniform vec3 u_touch,u_environment;
-uniform vec4 u_wind;
+uniform vec4 u_wind,u_pierFeet;
 ${noise}
 ${surface}
 ${boat}
@@ -76,11 +76,13 @@ void main(){
   color=paintSails(color,p,aspect);
   vec4 boat=sampleBoat(p-u_boat);
   color=mix(color,vec3(.18,.24,.19),boat.a);
+  color=boatLamp(color,p-u_boat,.35,u_time);
   vec4 land=sampleLayer(u_foreground,p);
   land.rgb=mix(land.rgb,vec3(.70,.77,.69),u_environment.z*(1.-smoothstep(.47,.64,p.y))*.38);
   color=over(color,land);
   color=paintSurf(color,p);
   color=pierRipples(color,p);
+  color=pierVisitor(color,p);
   color=beachPeople(color,p);
   color=over(color,sampleLayer(u_trunk0,palmUV(p,palmRoot0,palmCrown0,palmPhase0,false)));
   color=over(color,sampleLayer(u_leaves0,palmUV(p,palmRoot0,palmCrown0,palmPhase0,true)));

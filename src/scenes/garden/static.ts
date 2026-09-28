@@ -8,6 +8,7 @@ export function drawStaticGarden(ctx: CanvasRenderingContext2D, scene: Painting,
   ctx.drawImage(layers.buildings, 0, 0);
   ctx.save(); ctx.translate(0, h * 1.32); ctx.scale(1, -1);
   ctx.globalAlpha = .27; ctx.drawImage(layers.buildings, 0, 0); ctx.restore();
+  ctx.drawImage(layers.buildings, 0, 0);
   ctx.drawImage(layers.foliage, 0, 0);
   ctx.drawImage(boat, 0, 0); ctx.drawImage(layers.bank, 0, 0);
 }

@@ -1,3 +1,4 @@
+import { BOAT_LANTERN as lamp } from "../config/actors.ts";
 import type { Brush } from "./types.ts";
 export function paintBoat(
   tools: Brush,
@@ -36,6 +37,10 @@ export function paintBoat(
   ctx.strokeStyle = ink(.32); ctx.lineWidth = 1.6; ctx.stroke();
   line([[-13, -2], [-12, -9]], ink(.6), .8);
   line([[8, -2], [6, -9]], ink(.6), .8);
+  // Stern-mounted lantern stays clear of the sheltered passenger.
+  line([[lamp.mast, -1], [lamp.mast, lamp.top], [lamp.x, lamp.top], [lamp.x, lamp.y - 2]], ink(.66), .7);
+  ctx.fillStyle = ink(.60);
+  ctx.fillRect(lamp.x - 1.3, lamp.y - 2, 2.6, 4);
   if (crew) {
     ctx.fillStyle = ink(0.78);
     ctx.beginPath();

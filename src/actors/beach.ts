@@ -1,4 +1,6 @@
-import { Container, Graphics, RenderTexture } from "pixi.js";
+import { actorSurface } from "./surface.ts";
+import { createPierVisitor } from "./pier.ts";
+import { Container, Graphics } from "pixi.js";
 import type { WebGLRenderer } from "pixi.js";
 import { createTimeline } from "animejs";
 
@@ -48,9 +50,10 @@ export function createBeachActors() {
     motion.add(torso.position, { y: [-14, -15.5, -14, -15.5, -14] }, 0);
     motions.push(motion);
   }
-  const texture = RenderTexture.create({ width: 128, height: 64, resolution: 2 });
+  const visitor = createPierVisitor(); root.addChild(visitor.root);
+  const surface = actorSurface(root, 192, 64, 2);
   return {
-    texture,
+    texture: surface.texture, feet: visitor.feet,
     draw(renderer: WebGLRenderer, time: number) {
       for (let i = 0; i < motions.length; i++) {
         const phase = time * .27 - i * .55;
@@ -62,11 +65,13 @@ export function createBeachActors() {
         motions[i].seek(gait * 800, true);
         bodies[i].rotation = .09 * Math.abs(Math.cos(phase));
       }
-      renderer.render({ container: root, target: texture, clear: true, clearColor: [0, 0, 0, 0] });
+      visitor.update(time);
+      surface.draw(renderer);
     },
     dispose() {
       motions.forEach(motion => motion.cancel());
-      root.destroy({ children: true }); texture.destroy(true);
+      visitor.dispose();
+      surface.dispose();
     },
   };
 }

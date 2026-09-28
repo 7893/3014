@@ -1,23 +1,15 @@
+import { paintingLayers } from "../../drawing/layers.ts";
 import { skyline } from "./composition.ts";
 import { createGlow } from "../../drawing/glow.ts";
 import { roomMarker } from "./windows.ts";
-import { seededRandom, canvasLayer } from "../../drawing/canvas.ts";
+import { seededRandom } from "../../drawing/canvas.ts";
 import { stroke } from "../../drawing/canvas.ts";
 import { createTrees } from "./trees.ts";
 import { drawRiver } from "./river.ts";
 import { drawBeijingSkyline } from "./details.ts";
 // An imagined Liangma River evening, drawn entirely from geometry and light.
 export function createCity(width: number, height: number) {
-  const portrait = width / height < 0.85,
-    W = portrait ? 760 : 1600,
-    H = (W * height) / width;
-  const layers: Record<string, HTMLCanvasElement> = {},
-    contexts: Record<string, CanvasRenderingContext2D> = {};
-  for (const name of ["buildings", "lights", "bank", "windows"]) {
-    const { canvas, ctx } = canvasLayer(width, height, W);
-    layers[name] = canvas;
-    contexts[name] = ctx;
-  }
+  const { layers, contexts, W, H, portrait } = paintingLayers(width, height, ["buildings", "lights", "bank", "windows"]);
   const { buildings: b, lights: l, bank: k } = contexts;
   const markRoom = roomMarker(contexts.windows);
   const random = seededRandom(2873);

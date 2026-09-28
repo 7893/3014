@@ -1,3 +1,4 @@
+import { checkDetails } from "./details.mjs";
 import { checkRoom } from "./room.mjs";
 import { scenes } from "../../src/motion/journey.ts";
 import { checkActor } from "./actor.mjs";
@@ -19,6 +20,7 @@ try {
   browser = await chromium.launch({ args: ["--enable-unsafe-swiftshader"] });
   await checkActor(browser, server.url);
   await checkPasses(browser, server.url);
+  await checkDetails(browser, server.url);
   await checkSoak(browser, server.url);
   await checkLifecycle(browser, server.url);
   for (const viewport of [

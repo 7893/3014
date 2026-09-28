@@ -104,3 +104,22 @@ Tests assert behavior and resource lifecycle rather than private GL call counts.
 
 The migration is accepted only after the checks in `migration.md` pass; reduced
 source size alone is not evidence of equivalent visuals or better performance.
+
+## Shared effects and actor ownership
+
+`drawing/layers.ts` creates named painting layers in one design coordinate space.
+Scene shaders use the common sky, water, boat-light and interaction effects in
+`rendering/shaders/`; palettes and composition remain local to each scene.
+All scene fragment entry points live under `scenes/<name>/shaders/main.ts`.
+
+`actors/surface.ts` centralizes Pixi atlas rendering and disposal. The boat and
+beach actors use it; the seated pier visitor shares the beach atlas and uses
+Anime timelines for foot movement. Water rings read the actual animated foot
+positions, so motion and contact cannot drift apart. Static fallback artwork
+remains necessary when WebGL is unavailable. Interior playback skips the boat
+atlas update. Room uniforms reuse the painting layout and update on resize.
+
+Keep authored drawing code where the image is defined. Do not replace Pixi
+resource management or Anime timeline interpolation with another scheduler,
+handwritten rasterizer, or duplicate allocation lifecycle. No new dependency
+is needed for these effects.
