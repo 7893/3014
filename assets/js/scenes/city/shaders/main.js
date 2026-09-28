@@ -1,6 +1,8 @@
 import { surface } from "../../../rendering/shaders/surface.js";
 import { lights } from "./lights.js";
 import { noise } from "../../../rendering/shaders/common.js";
+import { boat } from "../../../rendering/shaders/boat.js";
+import { ripples } from "../../../rendering/shaders/ripples.js";
 export const fragment = `#version 300 es
 precision highp float;
 in vec2 v_uv;
@@ -12,6 +14,8 @@ uniform vec3 u_touch;
 uniform vec4 u_wind;
 ${noise}
 ${surface}
+${boat}
+${ripples}
 ${lights}
 vec3 stars(vec2 p){
   // Stable sky positions, with pixel-sized cores on every screen.
@@ -38,7 +42,10 @@ vec3 skyline(vec2 p){
   color+=lightSpill(p)*.85;
   return color;
 }
-float lineMark(vec2 p,vec2 a,vec2 b,float width){vec2 d=b-a;return 1.-smoothstep(width,width+0.35,length(p-a-d*clamp(dot(p-a,d)/dot(d,d),0.,1.)));}
+float cityWaterAt(vec2 p){
+  float solid=max(sampleLayer(u_bank,p).a,sampleBoat(p-u_boat).a);
+  return smoothstep(.645,.66,p.y)*(1.-smoothstep(.08,.35,solid));
+}
 void main(){
   vec2 p=vec2(v_uv.x,1.-v_uv.y);
   vec3 color=skyline(p);
@@ -65,9 +72,7 @@ void main(){
     float wake=exp(-pow((wy-(.002+max(behind,0.)*.095))*400.,2.));
     wake*=smoothstep(.005,.02,behind)*(1.-smoothstep(.06,.19,behind));
     color+=vec3(.37,.30,.16)*wake*.24;
-    float age=u_time-u_touch.z;
-    float distance=waterDistance(p,u_touch.xy,u_size.x/u_size.y,.64);
-    color+=vec3(.10,.13,.14)*sin(distance*140.-age*5.)*exp(-pow((distance-age*.035)*12.,2.))*exp(-max(age,0.)*.5)*step(0.,age);
+    color+=vec3(.10,.13,.14)*touchRipple(p,.64,cityWaterAt(u_touch.xy));
   }
   // Small pairs walk along the opposite embankment.
   if(p.y>.594&&p.y<.617){
@@ -84,14 +89,13 @@ void main(){
   bankP.x+=(u_wind.x*.002+sin(u_time*.85+p.y*15.)*.0005)*clamp((.86-p.y)/.17,0.,1.)*(1.-smoothstep(.12,.23,p.x));
   vec4 bank=sampleLayer(u_bank,bankP);
   color=over(color,bank);
-  vec4 boat=sampleLayer(u_boatLayer,p-u_boat);
-  vec4 neighbor=sampleLayer(u_boatLayer,p-u_boat+vec2(0.,1.2/u_size.y));
+  vec4 boat=sampleBoat(p-u_boat);
+  vec4 neighbor=sampleBoat(p-u_boat+vec2(0.,1.2/u_size.y));
   float rim=max(0.,neighbor.a-boat.a*(1.-bank.a));
   color=mix(color,vec3(.035,.07,.085),boat.a*(1.-bank.a));
   color+=vec3(.85,.60,.28)*rim*.65*(1.-bank.a);
   vec2 local=(p-u_boatCenter-u_boat)/u_actorScale;
-  vec2 end=vec2(31.+sin(u_time*2.)*7.,6.+cos(u_time*2.)*6.);
-  float oar=lineMark(local,vec2(15.,-5.),end,.65);
+  float oar=crewMasks(local).y;
   color=mix(color,vec3(.68,.56,.35),oar*.8*(1.-bank.a));
   float lantern=exp(-dot((local-vec2(-5.,-5.))/vec2(2.5,3.),(local-vec2(-5.,-5.))/vec2(2.5,3.)));
   color+=vec3(.9,.51,.18)*lantern*.65*(1.-bank.a);

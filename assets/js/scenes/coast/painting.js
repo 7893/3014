@@ -1,6 +1,7 @@
 import { beachPath } from "./shore.js";
 import { seededRandom, canvasLayer } from "../../drawing/canvas.js";
 import { drawCoastDetails } from "./details.js";
+import { drawCoconuts } from "./coconuts.js";
 // A warm island cove: foreground palms and sand, with all water drawn on GPU.
 export function createCoast(width, height) {
   const W = 1200,
@@ -54,6 +55,7 @@ export function createCoast(width, height) {
     ctx.fillStyle = trunk;
     ctx.fill();
     palmLayer();
+    drawCoconuts(ctx, crownX, crownY, h);
     for (let j = 0; j < 10; j++) {
       const angle = -Math.PI * 0.94 + j * Math.PI * 0.2;
       const length = h * (0.3 + random() * 0.19),

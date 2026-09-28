@@ -5,6 +5,7 @@ import { checkCopy, checkFallback } from "./interface.mjs";
 import { checkRendering } from "./rendering.mjs";
 import { checkLifecycle } from "./lifecycle.mjs";
 import { checkFonts } from "./fonts.mjs";
+import { checkWaterInteraction } from "./water.mjs";
 import { copy } from "../../assets/js/config/copy.js";
 
 const server = await serve();
@@ -82,6 +83,7 @@ try {
       false,
     );
     await checkRendering(page);
+    if (viewport.width === 960) await checkWaterInteraction(page);
     assert.deepEqual(errors, []);
     await page.close();
   }

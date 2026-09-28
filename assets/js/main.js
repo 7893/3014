@@ -6,6 +6,7 @@ import { createJourney, scenes } from "./motion/journey.js";
 import { createScene } from "./scenes/index.js";
 import { createPreparation } from "./app/preparation.js";
 import { createRenderer } from "./rendering/renderer.js";
+import { hitWater } from "./scenes/water-hit.js";
 
 let canvas = document.getElementById("landscape");
 let renderer = createRenderer(canvas),
@@ -138,8 +139,11 @@ window.addEventListener("resize", () => {
   resizeTimer = setTimeout(resize, 120);
 });
 document.querySelector("main").addEventListener("pointerdown", (event) => {
-  if (event.target !== canvas) return;
-  touch = [event.clientX / innerWidth, event.clientY / innerHeight, time];
+  if (event.target !== canvas || !painting) return;
+  const state = journey.state();
+  const x = event.clientX / innerWidth, y = event.clientY / innerHeight;
+  if (state.transitioning || !hitWater(painting, state.scene, x, y)) return;
+  touch = [x, y, time];
   draw();
 });
 canvas.addEventListener("webglcontextlost", (event) => {

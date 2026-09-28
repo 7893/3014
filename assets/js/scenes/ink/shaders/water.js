@@ -1,4 +1,11 @@
 export const water = `
+float inkWaterAt(vec2 p){
+  float river=smoothstep(.735,.755,p.y)*(1.-smoothstep(.925,.975,p.y));
+  float shore=sampleLayer(u_shore,p).a;
+  float trees=sampleLayer(u_pines,p).a;
+  float vessel=sampleBoat(p-u_boat).a;
+  return river*(1.-smoothstep(.08,.3,max(shore,max(trees,vessel))));
+}
 vec3 paintWater(vec3 color,vec3 paper,vec2 p){
   float river=smoothstep(.725,.75,p.y)*(1.-smoothstep(.925,.985,p.y));
   if(river<.001)return color;
@@ -6,9 +13,8 @@ vec3 paintWater(vec3 color,vec3 paper,vec2 p){
   vec3 normal=waterNormal(p,u_size.x/u_size.y,depth);
   float fresnel=waterFresnel(normal,depth);
   float flow=sin(p.y*155.-u_time*1.8+p.x*12.)*.6+sin(p.y*287.+u_time*1.35)*.3;
-  float age=u_time-u_touch.z;
-  float distance=waterDistance(p,u_touch.xy,u_size.x/u_size.y,.73);
-  float ring=sin(distance*135.-age*5.)*exp(-pow((distance-age*.034)*12.,2.))*exp(-max(age,0.)*.5)*step(0.,age);
+  float ring=touchRipple(p,.73,inkWaterAt(u_touch.xy));
+  ring*=1.-smoothstep(.08,.4,sampleLayer(u_shore,p).a);
   vec2 reflected=vec2(p.x+normal.x*.09*depth+flow*.005*depth+ring*.006,.73-(p.y-.73)*2.05+flow*.004);
   vec3 reflection=paper;
   reflection=over(reflection,sampleLayer(u_far,reflected));
@@ -28,7 +34,7 @@ vec3 paintWater(vec3 color,vec3 paper,vec2 p){
   float trail=exp(-wakeY*170.)*(.5+.5*sin(behind*340.-u_time*3.));
   float fadeWake=smoothstep(.008,.025,behind)*(1.-smoothstep(.04,.19,behind));
   color-=vec3(.13,.14,.11)*(banks*.8+trail*.35)*fadeWake*u_boatOpacity;
-  color-=vec3(.055)*ring*river*exp(-distance*3.);
+  color-=vec3(.055)*ring*river;
   return color;
 }
 `;

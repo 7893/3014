@@ -4,6 +4,8 @@ import { surf } from "./surf.js";
 import { wind } from "./wind.js";
 import { surface } from "../../../rendering/shaders/surface.js";
 import { noise } from "../../../rendering/shaders/common.js";
+import { boat } from "../../../rendering/shaders/boat.js";
+import { ripples } from "../../../rendering/shaders/ripples.js";
 export const fragment = `#version 300 es
 precision highp float;
 in vec2 v_uv;
@@ -15,10 +17,20 @@ uniform vec3 u_touch;
 uniform vec4 u_wind;
 ${noise}
 ${surface}
+${boat}
+${ripples}
 ${wind}
 ${surf}
 ${sails}
 ${horizon}
+float coastWaterAt(vec2 p){
+  float solid=max(sampleLayer(u_foreground,p).a,sampleBoat(p-u_boat).a);
+  solid=max(solid,sampleLayer(u_trunk0,palmUV(p,vec2(.035,.965),vec2(.09,.495),0.,false)).a);
+  solid=max(solid,sampleLayer(u_leaves0,palmUV(p,vec2(.035,.965),vec2(.09,.495),0.,true)).a);
+  solid=max(solid,sampleLayer(u_trunk1,palmUV(p,vec2(-.025,.945),vec2(.145,.605),.8,false)).a);
+  solid=max(solid,sampleLayer(u_leaves1,palmUV(p,vec2(-.025,.945),vec2(.145,.605),.8,true)).a);
+  return smoothstep(.48,.50,p.y)*(1.-smoothstep(.08,.35,solid));
+}
 void main(){
   vec2 p=vec2(v_uv.x,1.-v_uv.y);
   float aspect=u_size.x/u_size.y;
@@ -52,12 +64,11 @@ void main(){
     float behind=boat.x-p.x,wy=abs(p.y-boat.y-.009);
     float wake=exp(-pow((wy-(.002+max(behind,0.)*.095))*400.,2.))*smoothstep(.005,.02,behind)*(1.-smoothstep(.06,.19,behind));
     color+=vec3(.35,.40,.23)*wake*.6;
-    float age=u_time-u_touch.z,d=waterDistance(p,u_touch.xy,aspect,.475);
-    color+=vec3(.12,.15,.10)*sin(d*140.-age*5.)*exp(-pow((d-age*.035)*12.,2.))*exp(-max(age,0.)*.5)*step(0.,age);
+    color+=vec3(.12,.15,.10)*touchRipple(p,.475,coastWaterAt(u_touch.xy));
     color=mix(skyEdge,color,smoothstep(.473,.481,p.y));
   }
   color=paintSails(color,p,aspect);
-  vec4 boat=sampleLayer(u_boatLayer,p-u_boat);
+  vec4 boat=sampleBoat(p-u_boat);
   color=mix(color,vec3(.18,.24,.19),boat.a);
   color=over(color,sampleLayer(u_foreground,p));
   color=paintSurf(color,p);

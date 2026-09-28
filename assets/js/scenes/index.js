@@ -14,7 +14,9 @@ export function createScene(width, height) {
     W * boatCenter[0],
     H * boatCenter[1],
     portrait ? 1.35 : 1.6,
+    false,
   );
+  let staticBoat;
   const cache = new Map();
   function get(name) {
     if (!definitions[name]) throw new Error(`Unknown scene: ${name}`);
@@ -33,7 +35,13 @@ export function createScene(width, height) {
       return [...cache.keys()];
     },
     drawStatic(name, context) {
-      definitions[name].drawStatic(context, get(name), boat);
+      if (!staticBoat) {
+        const layer = canvasLayer(width, height, W);
+        paintBoat(createBrush(layer.ctx, 707), W * boatCenter[0],
+          H * boatCenter[1], portrait ? 1.35 : 1.6);
+        staticBoat = layer.canvas;
+      }
+      definitions[name].drawStatic(context, get(name), staticBoat);
     },
   };
 }
