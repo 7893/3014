@@ -11,12 +11,13 @@ palette, and composition express those places without claiming a surveyed view.
 - Vite provides development serving and produces the static deployment bundle.
 - PixiJS owns WebGL programs, textures, render targets, and drawing submission.
 - Anime.js provides authored timelines, driven by the artwork's single clock.
+- Spine Pixi v8 evaluates the coastal children's authored bone animations.
 - Canvas 2D paints deterministic landscape textures and supplies a static fallback.
 - GLSL retains the artwork's water, ink, lighting, wildlife, and transition effects.
 - Playwright checks the shipped application, including mobile and GPU recovery.
 
 There is no framework for DOM components, second rendering engine, 3D scene,
-Spine runtime, or weather network dependency. Add dependencies only when they
+or weather network dependency. Add dependencies only when they
 replace an existing responsibility or implement an accepted requirement.
 
 ## Boundaries
@@ -51,12 +52,16 @@ shader code no longer constructs the animated person's limbs. Reflection and
 foreground occlusion still use the scene's artistic material. Every scene shares the same
 open boat, seated passenger, and rowing timeline. A single actor texture
 is refreshed once per frame, including scene transitions.
-Coastal children use Pixi AnimatedSprite poses baked from authored contact,
-compression and recovery keyframes. Anime samples those keyframes once during
-creation; no joint timelines run per frame. Playback follows distance traveled
-in screen pixels relative to the authored stride, including viewport scaling.
-An on-ground pose marks the slowest part of each turn. Both children share a
-small output atlas, beneath palm occlusion.
+Coastal children use the official Spine Pixi v8 runtime, with public-domain
+Spineboy project bone animation and original procedural vector clothing. No
+upstream example images are shipped. Motion provenance and separate runtime
+licensing are documented in `licenses/spineboy-project.txt` and `NOTICE`.
+The derived data retains only bone timelines and the run and idle clips:
+https://github.com/EsotericSoftware/spine-runtimes/tree/4.2/examples/spineboy
+Distance traveled controls the run phase, while Spine blends it over idle near
+turns. Both tracks use bounded absolute time, with automatic ticker updates off.
+The children share immutable skeleton data and one small render atlas, beneath
+palm occlusion; the surface owns destruction of all child display objects.
 
 ## Rendering contract
 

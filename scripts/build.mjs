@@ -11,6 +11,9 @@ await appendFile(
   "\n## Colord upstream notice\n\n" +
     (await readFile(new URL("licenses/colord-MIT.txt", root), "utf8")),
 );
+await appendFile(new URL("dist/assets/third-party.txt", root),
+  "\n## Spineboy project motion (no example images)\n\n" +
+  await readFile(new URL("licenses/spineboy-project.txt", root), "utf8"));
 const destination = new URL("dist/", root);
 for (const name of ["LICENSE", "NOTICE", "robots.txt"])
   await cp(new URL(name, root), new URL(name, destination));

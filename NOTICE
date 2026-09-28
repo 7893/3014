@@ -11,3 +11,9 @@ The bundled font subsets retain their SIL Open Font License 1.1:
 Source versions and SHA-256 checksums are pinned in scripts/fonts.mjs.
 Only website-specific WOFF2 subsets are distributed. Full upstream fonts
 are cached locally during builds and are not included in the website.
+
+Coastal child motion derives from the public-domain Spineboy project by
+Esoteric Software. No example images are included. Original upstream terms:
+licenses/spineboy-project.txt. The Spine runtime retains its separate license
+and is not covered by this project's Apache license. Runtime and upstream
+notices accompany the deployed site in assets/third-party.txt.

@@ -1,40 +1,44 @@
-import { AnimatedSprite, CanvasSource, Container, Rectangle, Texture } from "pixi.js";
+import { Container, Graphics } from "pixi.js";
+import {
+  Spine, SkeletonJson, AtlasAttachmentLoader, TextureAtlas, AABBRectangleBoundsProvider,
+} from "@esotericsoftware/spine-pixi-v8";
 import { BEACH_RUN } from "../config/actors.ts";
-import { createRunPoses, runCycle } from "../motion/run-cycle.ts";
-import { drawRunningChild } from "../drawing/running-child.ts";
+import { dressChild } from "./child-appearance.ts";
+import motion from "./child-motion.json";
 
-/** Author once, play with Pixi; no live per-joint animation or limb sorting. */
+// Share immutable motion data; each child owns its skeleton and display objects.
+const data = new SkeletonJson(new AtlasAttachmentLoader(new TextureAtlas(""))).readSkeletonData(motion);
+const size = .06, stride = 48;
+
 export function createRunningChild(index: number) {
-  const poses = createRunPoses(), columns = 8, resolution = 3;
-  const canvas = document.createElement("canvas");
-  canvas.width = columns * 32 * resolution; canvas.height = 5 * 40 * resolution;
-  const c = canvas.getContext("2d")!; c.scale(resolution, resolution);
-  const rest = { hip: -13, kneeX: 1, kneeY: -7, footX: 1, footY: 0 };
-  for (let i = 0; i <= runCycle.frames; i++) {
-    c.save(); c.translate(i % columns * 32 + 16, Math.floor(i / columns) * 40 + 32);
-    drawRunningChild(c, poses[i] ?? rest, i === runCycle.frames ? { ...rest, kneeX: -1, footX: -1 } : poses[(i + 16) % 32], index, i === runCycle.frames);
-    c.restore();
-  }
-  const source = new CanvasSource({ resource: canvas, resolution });
-  const textures = Array.from({ length: runCycle.frames + 1 }, (_, i) => new Texture({ source,
-    frame: new Rectangle(i % columns * 32, Math.floor(i / columns) * 40, 32, 40) }));
-  const sprite = new AnimatedSprite({ textures, autoUpdate: false });
-  sprite.anchor.set(.5, .8);
-  const root = new Container(); root.position.set(32 + index * 64, 57); root.addChild(sprite);
+  const actor = new Spine({ skeletonData: data, autoUpdate: false,
+    boundsProvider: new AABBRectangleBoundsProvider(-250, -700, 600, 800) });
+  actor.scale.set(size);
+  dressChild(actor, index);
+  const root = new Container(); root.position.set(32 + index * 64, 57);
+  const shadow = new Graphics().ellipse(0, 1, 8, 1.2).fill({ color: 0x736041, alpha: .2 });
+  root.addChild(shadow, actor);
+  actor.state.data.defaultMix = 0;
+  const idle = actor.state.setAnimation(0, "idle", true);
+  const run = actor.state.setAnimation(1, "run", true);
   return {
-    root, sprite, poses,
+    root, actor,
     update(time: number, width = 960, height = 844) {
       const phase = time * BEACH_RUN.speed - index * BEACH_RUN.lag, heading = Math.cos(phase);
-      const half = Math.floor((phase + Math.PI / 2) / Math.PI), progress = phase + Math.PI / 2 - half * Math.PI;
+      const half = Math.floor((phase + Math.PI / 2) / Math.PI);
+      const progress = phase + Math.PI / 2 - half * Math.PI;
       const distance = half * 2 + 1 - Math.cos(progress);
       const scale = Math.max(.5, Math.min(width, height) / 850);
-      const cycles = distance * BEACH_RUN.range * width / scale / runCycle.stride;
-      const frame = Math.floor(((cycles % 1 + 1) % 1) * runCycle.frames);
-      sprite.scale.x = heading < 0 ? -1 : 1;
-      sprite.gotoAndStop(Math.abs(heading) < .12 ? runCycle.frames : frame);
+      const cycles = distance * BEACH_RUN.range * width / scale / stride;
+      // Absolute, bounded clocks also support scene switches, seeking and long sessions.
+      idle.trackTime = ((time % idle.animation!.duration) + idle.animation!.duration) % idle.animation!.duration;
+      run.trackTime = ((cycles % 1 + 1) % 1) * run.animation!.duration;
+      const blend = Math.max(0, Math.min(1, (Math.abs(heading) - .12) / .4));
+      run.alpha = blend * blend * (3 - 2 * blend);
+      actor.scale.x = heading < 0 ? -size : size;
+      actor.update(0);
     },
-    dispose() {
-      sprite.stop(); textures.forEach(texture => texture.destroy()); source.destroy();
-    },
+    // The shared actor surface destroys the display tree and its GPU resources.
+    dispose() { actor.state.clearTracks(); },
   };
 }
