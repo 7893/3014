@@ -4,6 +4,7 @@ import { serve } from "./server.mjs";
 import { checkCopy, checkFallback } from "./interface.mjs";
 import { checkRendering } from "./rendering.mjs";
 import { checkLifecycle } from "./lifecycle.mjs";
+import { checkFonts } from "./fonts.mjs";
 import { copy } from "../../assets/js/config/copy.js";
 
 const server = await serve();
@@ -45,6 +46,7 @@ try {
       await page.getByRole("button", { name: info.label, exact: true }).click();
       await advance(6000);
       await checkCopy(page, key);
+      await checkFonts(page);
     }
     await advance(61000);
     assert.notEqual(

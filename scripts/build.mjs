@@ -1,5 +1,6 @@
 import { cp, mkdir, rm } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
+import { buildFonts } from "./fonts.mjs";
 
 const root = new URL("../", import.meta.url);
 const check = spawnSync(
@@ -8,6 +9,7 @@ const check = spawnSync(
   { cwd: root, stdio: "inherit" },
 );
 if (check.status !== 0) process.exit(check.status || 1);
+await buildFonts();
 const destination = new URL("dist/", root);
 await rm(destination, { recursive: true, force: true });
 await mkdir(destination);

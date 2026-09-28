@@ -9,6 +9,7 @@ export async function serve() {
     ".html": "text/html",
     ".js": "text/javascript",
     ".css": "text/css",
+    ".woff2": "font/woff2",
   };
   const server = createServer(async (request, response) => {
     try {
