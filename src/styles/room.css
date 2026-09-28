@@ -19,5 +19,8 @@
 }
 .room-return:hover { background: #49403780; }
 [hidden] { display: none !important; }
-body[data-view="room"] .inscription,
 body[data-view="room"] .colophon { display: none; }
+
+body[data-view="room"] .inscription { color: #f1d6a7; text-shadow: 0 2px 18px #30201866; }
+body[data-view="room"] .inscription p { color: #dfc49b; }
+body[data-view="room"] .signature { color: #c8ac86; }

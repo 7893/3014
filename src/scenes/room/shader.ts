@@ -29,7 +29,14 @@ void main(){
     vec2 delta=(p-center)*u_size;
     color+=vec3(.52,.35,.15)*exp(-dot(delta,delta)/2.)*sin(age*3.14159)*.3;
   }
-  color*=1.-.6*dot(p-.5,p-.5);
+  // A narrow ribbon of rising tea steam fades before reaching the figures.
+  float rise=(.86-p.y)/.065;
+  if(rise>0.&&rise<1.){
+    float drift=sin(rise*7.-u_time*1.3)*.0025;
+    float ribbon=exp(-pow((p.x-.60-drift)/(.0015+rise*.002),2.));
+    color+=vec3(.24,.21,.16)*ribbon*sin(rise*3.14159)*.32;
+  }
+  color*=1.-.45*dot(p-.5,p-.5);
   color+=vec3((hash(gl_FragCoord.xy)-.5)*.003);
   outColor=vec4(color,1.);
 }

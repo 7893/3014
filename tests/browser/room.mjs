@@ -33,6 +33,8 @@ export async function checkRoom(browser, url) {
       assert.equal(await page.locator("canvas").getAttribute("data-scene"), "room");
       assert.equal(await page.locator(".scene-nav").isVisible(), false);
       assert.equal(await page.locator("#sun-entry").isVisible(), false);
+      assert(await page.locator(".inscription").isVisible());
+      assert.equal(await page.locator("h1").textContent(), copy.scenes.room.title);
       await page.clock.fastForward(90000);
       assert.equal(await page.locator("canvas").getAttribute("data-scene"), "room");
       if (scene === "ink") await page.keyboard.press("Escape");

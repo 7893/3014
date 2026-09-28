@@ -13,7 +13,7 @@ export const copy = {
   scenes: {
     room: { label: "灯暖", title: "灯下相依", poem: ["月色入帘轻", "灯前两相依"],
       seal: ["相", "依"], mark: "此刻无声",
-      description: "一室烛光，窗外月色，纱帘微动。两位穿着衣服的成年人静静相拥。" },
+      description: "一室灯暖，木柜藏书，案上温茶。窗外月色入帘，两人静静相依。" },
     ink: {
       label: "山静",
       title: "山静日长",
