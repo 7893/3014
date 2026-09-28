@@ -1,5 +1,5 @@
 {
-  "name": "follow-the-boat",
+  "name": "suizhou",
   "private": true,
   "type": "module",
   "license": "Apache-2.0",
@@ -11,7 +11,8 @@
     "check": "node scripts/check.mjs",
     "test": "node --test tests/*.test.mjs",
     "test:browser": "node tests/browser/run.mjs",
-    "build": "node scripts/build.mjs"
+    "build": "node scripts/build.mjs",
+    "deploy": "npm run build && node --env-file=.env.deploy scripts/deploy.mjs"
   },
   "devDependencies": {
     "fontkit": "2.0.4",
