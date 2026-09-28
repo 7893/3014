@@ -18,7 +18,7 @@ export function paintBoat(
   ctx.quadraticCurveTo(14, 8, -10, 6);
   ctx.closePath();
   ctx.fill();
-  // The same sheltered passenger travels through every setting.
+  // The same seated passenger travels through every setting.
   ctx.fillStyle = ink(.70);
   ctx.beginPath(); ctx.ellipse(-5, -7.8, 1.4, 1.7, -.15, 0, Math.PI * 2); ctx.fill();
   ctx.beginPath(); ctx.arc(-6, -9.6, .95, 0, Math.PI * 2); ctx.fill();
@@ -28,16 +28,10 @@ export function paintBoat(
   ctx.lineTo(-1, -3); ctx.lineTo(-4, -3);
   ctx.lineTo(-4, -6.5); ctx.closePath(); ctx.fill();
   line([[-4, -5], [-1, -3], [2, -3]], ink(.60), .7);
-  // A curved woven canopy shelters the seated figure, with an open side.
-  ctx.beginPath(); ctx.moveTo(-13, -2);
-  ctx.bezierCurveTo(-13, -17, 5, -19, 8, -2);
-  ctx.strokeStyle = ink(.70); ctx.lineWidth = 1.1; ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(-13, -7);
-  ctx.bezierCurveTo(-9, -17, 3, -17, 7, -7);
-  ctx.strokeStyle = ink(.32); ctx.lineWidth = 1.6; ctx.stroke();
-  line([[-13, -2], [-12, -9]], ink(.6), .8);
-  line([[8, -2], [6, -9]], ink(.6), .8);
-  // Stern-mounted lantern stays clear of the sheltered passenger.
+  // Open gunwales and a transverse seat; both travelers remain in clear view.
+  line([[-21, -1], [-11, 1], [9, 0], [23, -2]], ink(.45), .6);
+  line([[-10, -.5], [3, -.5]], ink(.58), .8);
+  // Stern-mounted lantern stays clear of the passenger.
   line([[lamp.mast, -1], [lamp.mast, lamp.top], [lamp.x, lamp.top], [lamp.x, lamp.y - 2]], ink(.66), .7);
   ctx.fillStyle = ink(.60);
   ctx.fillRect(lamp.x - 1.3, lamp.y - 2, 2.6, 4);

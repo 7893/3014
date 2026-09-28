@@ -6,34 +6,24 @@ export function drawBoardwalk(
   ctx: CanvasRenderingContext2D, W: number, H: number,
   shape: (points: Points, fill: string) => void,
 ) {
-  const edge = (t: number, right = false) => W * (right ? pier.right + t * (.995 - pier.right) : pier.left + t * (.89 - pier.left));
-  const level = (t: number, right = false) => H * (pier.top + (right ? pier.slope * (1 - t) : 0) + t * (1 - pier.top));
-  // Cast shadows, paired posts, and diagonal bracing beneath the deck.
-  for (let i = 0; i < 5; i++) {
-    const t = i / 5, y = level(t), drop = H * (pier.drop + t * .008);
-    for (const right of [false, true]) {
-      const x = edge(t, right), y = level(t, right), thick = 2 + t * 2;
-      ctx.fillStyle = "rgba(74,67,44,.18)";
-      ctx.beginPath(); ctx.ellipse(x + 5, y + drop, 8 + t * 6, 2, -.2, 0, Math.PI * 2); ctx.fill();
-      shape([[x - thick, y], [x + thick, y], [x + thick, y + drop], [x - thick, y + drop]], "#685a40");
-      stroke(ctx, [[x - thick, y], [x - thick, y + drop]], "#b3a079", .8);
-      // Keep the end bay open below the sitter; bracing starts one bay inland.
-      if (i > 0 && i < 4) {
-        const nx = edge(t + .2, right), ny = level(t + .2, right);
-        stroke(ctx, [[x, y + drop * .85], [nx, ny + 2]], "#7f6d4b", 2);
-      }
+  const deck = (a: number[], b: number[], c: number[], d: number[], boards: number) => {
+    const point = (p: number[]) => [p[0] * W, p[1] * H] as [number, number];
+    shape([point(a), point(b), point(c), point(d)], "#a18b60");
+    for (let i = 0; i <= boards; i++) {
+      const t = i / boards;
+      const left = point([a[0] + (d[0] - a[0]) * t, a[1] + (d[1] - a[1]) * t]);
+      const right = point([b[0] + (c[0] - b[0]) * t, b[1] + (c[1] - b[1]) * t]);
+      stroke(ctx, [left, right], "#65583e88", .8);
+      stroke(ctx, [[left[0], left[1] + 1], [right[0], right[1] + 1]], "#ebd6ab44", .7);
     }
-    stroke(ctx, [[edge(t), y + drop * .55], [edge(t, true), level(t, true) + drop * .55]], "#685a40", 2.2);
+  };
+  // A narrow approach meets a wider landing. Posts sit behind its open front edge.
+  for (const [x, y] of [[.795, .736], [.855, .757], [.843, .86], [.92, .88], [.89, .97], [.98, .98]]) {
+    const drop = H * .014;
+    shape([[x * W - 2, y * H], [x * W + 2, y * H],
+      [x * W + 2, y * H + drop], [x * W - 2, y * H + drop]], "#685a40");
+    stroke(ctx, [[x * W - 1, y * H], [x * W - 1, y * H + drop]], "#b3a079", .8);
   }
-  shape([[edge(1), H], [edge(1, true), H], [edge(0, true), level(0, true)], [edge(0), level(0)]], "#a18b60");
-  // Leave a thin open landing at the end; the deeper side beam begins behind it.
-  const beamStart = .12;
-  shape([[edge(beamStart), level(beamStart)], [edge(1), H], [edge(1) - 3, H],
-    [edge(beamStart) - 2, level(beamStart) + 4]], "#65583e");
-  shape([[edge(0, true), level(0, true)], [edge(1, true), H], [edge(1, true) + 3, H], [edge(0, true) + 2, level(0, true) + 4]], "#7b6847");
-  for (let i = 0; i < 17; i++) {
-    const t = i / 17, y = level(t), left = edge(t), right = edge(t, true);
-    stroke(ctx, [[left, y], [right, level(t, true)]], "rgba(62,57,37,.45)", .8);
-    stroke(ctx, [[left, y + 1], [right, level(t, true) + 1]], "rgba(235,214,171,.22)", .7);
-  }
+  deck([.825, .765], [.85, .775], [.995, 1], [.89, 1], 19);
+  deck([pier.left, pier.top], [pier.right, pier.top + pier.slope], [.855, .757], [.795, .736], 8);
 }

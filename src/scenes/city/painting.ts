@@ -18,14 +18,19 @@ export function createCity(width: number, height: number) {
   l.save();
   b.globalAlpha = 0.78;
   l.globalAlpha = 0.62;
+  // Distant silhouettes alternate height and leave sky between the left clusters.
+  for (const [x, w, h] of [[.015, .033, .085], [.10, .022, .13], [.17, .035, .065], [.29, .025, .115], [.36, .018, .075]]) {
+    b.fillStyle = "#293942";
+    b.fillRect(W * x, H * (.57 - h), W * w, H * h);
+  }
   drawBeijingSkyline(b, l, W, H);
   b.restore();
   l.restore();
   // Low, recessed buildings: irregular occupied rooms, no outlined landmark icons.
-  for (let i = 0; i < 25; i++) {
-    const x = (i * W) / 24 - 30,
-      w = 24 + random() * 65,
-      candidate = H * (0.035 + random() * 0.14),
+  for (let i = 0; i < 16; i++) {
+    const x = (i * W) / 15 - W * .015,
+      w = W * (0.019 + random() * (i < 7 ? .020 : .037)),
+      candidate = H * (0.035 + random() * (i < 7 ? .10 : .14)),
       nearLandmark = x + w > W * (landmark.x - landmark.width * .7) &&
         x < W * (landmark.x + landmark.width * .7),
       h = nearLandmark ? Math.min(candidate, H * (.59 - landmark.top - landmark.height * .8)) : candidate,
@@ -52,14 +57,14 @@ export function createCity(width: number, height: number) {
     }
   }
   // A quiet hotel frontage glimpsed through the trees, set back from the river.
-  const hx = W * 0.18,
-    hy = H * 0.425,
-    hw = W * 0.2,
-    hh = H * 0.16;
+  const hx = W * 0.20,
+    hy = H * 0.49,
+    hw = W * 0.09,
+    hh = H * 0.095;
   b.fillStyle = "#1c3037";
   b.fillRect(hx, hy, hw, hh);
-  for (let floor = 0; floor < 12; floor++) {
-    const y = hy + 8 + (floor * hh) / 13;
+  for (let floor = 0; floor < 7; floor++) {
+    const y = hy + 8 + (floor * hh) / 8;
     stroke(
       b,
       [

@@ -49,9 +49,10 @@ Graphics, a procedural hull Sprite, and an Anime rowing timeline. Its small loca
 render texture supplies coverage and oar lighting masks to each scene's material;
 shader code no longer constructs the animated person's limbs. Reflection and
 foreground occlusion still use the scene's artistic material. Every scene shares the same
-covered boat, sheltered passenger, and rowing timeline. A single actor texture
+open boat, seated passenger, and rowing timeline. A single actor texture
 is refreshed once per frame, including scene transitions.
-Coastal children share a small Pixi pose atlas and Anime limb timelines; their
+Coastal children share a small Pixi pose atlas and Anime limb timelines.
+Rounded silhouettes and changing limb depth replace whole-body squeeze/flips; their
 path follows the shared shoreline on dry sand, beneath palm occlusion.
 
 ## Rendering contract

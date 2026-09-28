@@ -2,3 +2,4 @@
 export const BOAT_FRAME = { x: 28, y: 20, width: 76, height: 52 };
 export const BOAT_LANTERN = { x: -18, y: -10, mast: -21, top: -15 };
 export const PIER_VISITOR = { sizeDivisor: 700 };
+export const BEACH_RUN = { speed: .22, lag: .65, x: .115, range: .06, orbit: .008 };

@@ -83,8 +83,12 @@ export async function createRenderer(canvas: HTMLCanvasElement) {
     u.u_boatCenter = scene.boatCenter;
     boat[0] = x - scene.boatCenter[0];
     boat[1] = Math.sin(time * 1.05) * 0.0022;
-    actorScale[0] = scale / W;
-    actorScale[1] = scale / H;
+    // Ease offshore before the landing; stay beyond it until leaving the frame.
+    const offshore = key === "coast" ? Math.max(0, Math.min(1, (x - .48) / .22)) : 0;
+    const depth = offshore * offshore * (3 - 2 * offshore);
+    boat[1] -= depth * .105;
+    actorScale[0] = scale * (1 - depth * .18) / W;
+    actorScale[1] = scale * (1 - depth * .18) / H;
     definitions[key].update?.(u, canvas, time);
     renderer.render({
       container: pass.mesh,
