@@ -42,6 +42,7 @@ const animation = createAnimation({
 });
 
 function fallback() {
+  animation.stop();
   preparation.stop();
   renderer?.dispose();
   renderer = null;
@@ -70,7 +71,6 @@ function draw() {
 }
 function resize() {
   if (lost) return;
-  preparation.stop();
   const w = innerWidth,
     h = innerHeight;
   const limit = renderer?.maxSize || 4096;
@@ -85,6 +85,7 @@ function resize() {
     height = Math.max(1, Math.round(h * dpr));
   const key = width + ":" + height;
   if (key === dimensions && painting) return;
+  preparation.stop();
   dimensions = key;
   canvas.width = width;
   canvas.height = height;
@@ -113,13 +114,24 @@ for (const control of sceneButtons)
     );
   });
 if (!renderer) fallback();
-document.addEventListener("visibilitychange", () => {
+function sync() {
   animation.sync();
   if (document.hidden || !renderer || lost) preparation.stop();
   else
     preparation.start(
       scenes.filter((name) => !renderer.preparedScenes.includes(name)),
     );
+}
+document.addEventListener("visibilitychange", sync);
+window.addEventListener("pagehide", () => {
+  clearTimeout(resizeTimer);
+  animation.stop();
+  preparation.stop();
+});
+window.addEventListener("pageshow", (event) => {
+  if (!event.persisted) return;
+  resize();
+  sync();
 });
 window.addEventListener("resize", () => {
   clearTimeout(resizeTimer);

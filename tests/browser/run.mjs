@@ -3,12 +3,14 @@ import { chromium } from "playwright";
 import { serve } from "./server.mjs";
 import { checkCopy, checkFallback } from "./interface.mjs";
 import { checkRendering } from "./rendering.mjs";
+import { checkLifecycle } from "./lifecycle.mjs";
 import { copy } from "../../assets/js/config/copy.js";
 
 const server = await serve();
 let browser;
 try {
   browser = await chromium.launch({ args: ["--enable-unsafe-swiftshader"] });
+  await checkLifecycle(browser, server.url);
   for (const viewport of [
     { width: 960, height: 640 },
     { width: 390, height: 844 },
