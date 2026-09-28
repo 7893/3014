@@ -1,70 +1,40 @@
-import { Container, Graphics } from "pixi.js";
-import { createTimeline } from "animejs";
+import { AnimatedSprite, CanvasSource, Container, Rectangle, Texture } from "pixi.js";
 import { BEACH_RUN } from "../config/actors.ts";
+import { createRunPoses, runCycle } from "../motion/run-cycle.ts";
+import { drawRunningChild } from "../drawing/running-child.ts";
 
-/** Rounded volumes and changing limb depth turn the child without flattening it. */
+/** Author once, play with Pixi; no live per-joint animation or limb sorting. */
 export function createRunningChild(index: number) {
-  const root = new Container(); root.position.set(32 + index * 64, 57);
-  const shadow = new Graphics().ellipse(0, 1, 7, 1.6).fill({ color: 0x665a3a, alpha: .16 });
-  root.addChild(shadow);
-  const torso = new Container({ label: "runner-body" }); torso.position.y = -14; torso.sortableChildren = true; root.addChild(torso);
-  const motion = createTimeline({ autoplay: false, defaults: { duration: 800, ease: "inOutSine" } });
-  const limbs: { hip: Container; shoulder: Container; side: number }[] = [];
-  for (let side = 0; side < 2; side++) {
-    const hip = new Container(), knee = new Container(), shoulder = new Container(), elbow = new Container();
-    hip.addChild(new Graphics().moveTo(0, 0).lineTo(0, 6)
-      .stroke({ color: side ? 0xb38d67 : 0x927353, width: 2.7, cap: "round" }));
-    knee.position.y = 6;
-    knee.addChild(new Graphics().moveTo(0, 0).lineTo(0, 5.4)
-      .stroke({ color: 0xbb9673, width: 2.1, cap: "round" })
-      .ellipse(1, 5.8, 2.5, 1.1).fill(0xe0ccb0));
-    hip.addChild(knee); torso.addChild(hip);
-    shoulder.position.y = -7;
-    shoulder.addChild(new Graphics().moveTo(0, 0).lineTo(0, 4.2)
-      .stroke({ color: 0xb9926b, width: 2, cap: "round" }));
-    elbow.position.y = 4.2; elbow.rotation = -1;
-    elbow.addChild(new Graphics().moveTo(0, 0).lineTo(0, 3.8)
-      .stroke({ color: 0xc6a07c, width: 1.7, cap: "round" }));
-    shoulder.addChild(elbow); torso.addChild(shoulder);
-    const sign = side ? -1 : 1;
-    motion.add(hip, { rotation: [-.70 * sign, .72 * sign, -.70 * sign] }, 0);
-    motion.add(knee, { rotation: side ? [.75, .14, .24, 1.2, .75] : [.24, 1.2, .75, .14, .24] }, 0);
-    motion.add(shoulder, { rotation: [.55 * sign, -.55 * sign, .55 * sign] }, 0);
-    limbs.push({ hip, shoulder, side });
+  const poses = createRunPoses(), columns = 8, resolution = 3;
+  const canvas = document.createElement("canvas");
+  canvas.width = columns * 32 * resolution; canvas.height = 5 * 40 * resolution;
+  const c = canvas.getContext("2d")!; c.scale(resolution, resolution);
+  const rest = { hip: -13, kneeX: 1, kneeY: -7, footX: 1, footY: 0 };
+  for (let i = 0; i <= runCycle.frames; i++) {
+    c.save(); c.translate(i % columns * 32 + 16, Math.floor(i / columns) * 40 + 32);
+    drawRunningChild(c, poses[i] ?? rest, i === runCycle.frames ? { ...rest, kneeX: -1, footX: -1 } : poses[(i + 16) % 32], index, i === runCycle.frames);
+    c.restore();
   }
-  const body = new Graphics().ellipse(0, -4.5, 3.7, 5.8).fill(index ? 0xc3a26d : 0x758c88)
-    .ellipse(-1, -5.5, 1.5, 4).fill({ color: 0xe6d5ad, alpha: .18 })
-    .roundRect(-3.5, -.5, 7, 3.5, 1).fill(index ? 0x777c65 : 0x77715b);
-  body.zIndex = 2; torso.addChild(body);
-  const head = new Container(); head.position.y = -13; head.zIndex = 3;
-  head.addChild(new Graphics().ellipse(0, 0, 3.1, 3.5).fill(0xc29c77)
-    .ellipse(-.8, -.6, 1.7, 2.5).fill({ color: 0xe1ba8b, alpha: .30 }));
-  const hair = new Graphics().ellipse(0, -1.7, 3.2, 2).fill(0x524b3a);
-  const nose = new Graphics({ label: "runner-nose" }).ellipse(0, 0, .9, 1).fill(0xc8a17d);
-  head.addChild(nose, hair); torso.addChild(head);
-  motion.add(torso.position, { y: [-14, -15.4, -14, -15.4, -14] }, 0);
+  const source = new CanvasSource({ resource: canvas, resolution });
+  const textures = Array.from({ length: runCycle.frames + 1 }, (_, i) => new Texture({ source,
+    frame: new Rectangle(i % columns * 32, Math.floor(i / columns) * 40, 32, 40) }));
+  const sprite = new AnimatedSprite({ textures, autoUpdate: false });
+  sprite.anchor.set(.5, .8);
+  const root = new Container(); root.position.set(32 + index * 64, 57); root.addChild(sprite);
   return {
-    root,
-    update(time: number) {
+    root, sprite, poses,
+    update(time: number, width = 960, height = 844) {
       const phase = time * BEACH_RUN.speed - index * BEACH_RUN.lag, heading = Math.cos(phase);
       const half = Math.floor((phase + Math.PI / 2) / Math.PI), progress = phase + Math.PI / 2 - half * Math.PI;
       const distance = half * 2 + 1 - Math.cos(progress);
-      const gait = ((distance * 5.5 + index * .35) % 1 + 1) % 1;
-      motion.seek(gait * 800, true);
-      torso.scale.x = heading < 0 ? -1 : 1;
-      torso.rotation = -heading * .075;
-      // Reflect the complete pose together: knees, elbows, toes and face agree.
-      // Scale magnitude stays one; turns never flatten the silhouette.
-      for (const { hip, shoulder, side } of limbs) {
-        const sign = side ? 1 : -1, depth = Math.sin(phase) * sign;
-        hip.position.x = sign * (1.5 + .5 * Math.abs(Math.sin(phase)));
-        shoulder.position.x = sign * 2.7;
-        hip.zIndex = depth > 0 ? 3 : 0; shoulder.zIndex = depth > 0 ? 4 : 1;
-      }
-      nose.x = Math.abs(heading) * 2.8; nose.alpha = Math.abs(heading) * .8;
-      hair.scale.y = 1 + .55 * Math.max(0, Math.sin(phase));
-      head.rotation = Math.abs(heading) * .09; shadow.scale.x = 1 + (torso.y + 14) * .06;
+      const scale = Math.max(.5, Math.min(width, height) / 850);
+      const cycles = distance * BEACH_RUN.range * width / scale / runCycle.stride;
+      const frame = Math.floor(((cycles % 1 + 1) % 1) * runCycle.frames);
+      sprite.scale.x = heading < 0 ? -1 : 1;
+      sprite.gotoAndStop(Math.abs(heading) < .12 ? runCycle.frames : frame);
     },
-    dispose() { motion.cancel(); },
+    dispose() {
+      sprite.stop(); textures.forEach(texture => texture.destroy()); source.destroy();
+    },
   };
 }

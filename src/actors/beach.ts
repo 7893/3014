@@ -10,8 +10,8 @@ export function createBeachActors() {
   const surface = actorSurface(root, 128, 64, 2);
   return {
     texture: surface.texture,
-    draw(renderer: WebGLRenderer, time: number) {
-      children.forEach(child => child.update(time));
+    draw(renderer: WebGLRenderer, time: number, width: number, height: number) {
+      children.forEach(child => child.update(time, width, height));
       surface.draw(renderer);
     },
     dispose() {

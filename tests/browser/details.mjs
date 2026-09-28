@@ -43,28 +43,41 @@ export async function checkDetails(browser, url) {
       for (let i = 1; i < n; i++)
         if (p[i * 2] <= p[(i - 1) * 2]) throw new Error("Folded pier geometry");
       pier.destroy();
-      let directions = 0;
+      let directions = 0, planted = 0;
       for (const index of [0, 1]) {
         const actor = createRunningChild(index);
         for (let phase = .1; phase < Math.PI * 4; phase += .11) {
           const time = (phase + index * BEACH_RUN.lag) / BEACH_RUN.speed;
-          actor.update(time);
-          const body = actor.root.getChildByLabel("runner-body");
-          const nose = actor.root.getChildByLabel("runner-nose", true);
-          const velocity = Math.cos(phase);
-          const face = nose.toGlobal({ x: 0, y: 0 }).x - nose.parent.toGlobal({ x: 0, y: 0 }).x;
-          if (face * velocity <= 0 || body.scale.x * velocity <= 0 || Math.abs(body.scale.x) !== 1)
+          actor.update(time, innerWidth, innerHeight);
+          const velocity = Math.cos(phase), sprite = actor.sprite;
+          if (sprite.scale.x * velocity <= 0 || Math.abs(sprite.scale.x) !== 1)
             throw new Error("Runner pose faces against travel or flattens during a turn");
+          if (Math.abs(velocity) < .12 && sprite.currentFrame !== 32)
+            throw new Error("Runner must settle on the ground before reversing");
+          const before = sprite.currentFrame, scale = Math.max(.5, Math.min(innerWidth, innerHeight) / 850);
+          const direction = sprite.scale.x;
+          const origin = (BEACH_RUN.x + BEACH_RUN.range * Math.sin(phase)) * innerWidth;
+          const foot = before < 12 ? origin + direction * actor.poses[before].footX * scale : null;
+          actor.update(time + .02, innerWidth, innerHeight);
+          const after = sprite.currentFrame;
+          if (foot !== null && after < 12 && direction === sprite.scale.x) {
+            const nextOrigin = (BEACH_RUN.x + BEACH_RUN.range * Math.sin(phase + .02 * BEACH_RUN.speed)) * innerWidth;
+            const nextFoot = nextOrigin + direction * actor.poses[after].footX * scale;
+            if (Math.abs(nextFoot - foot) > .76 * scale)
+              throw new Error("Planted foot slides beyond a single animation-frame step");
+            planted++;
+          }
           directions++;
         }
         actor.dispose(); actor.root.destroy({ children: true });
       }
       const error = gl.getError(); renderer.dispose();
-      return { skyChanges, wrapChanges, directions, error };
+      return { skyChanges, wrapChanges, directions, planted, error };
     });
     assert(result.skyChanges.every(count => count > 50), JSON.stringify(result));
     assert(result.wrapChanges.every(change => change < .2), "Clouds must wrap outside the window");
     assert(result.directions > 200);
+    assert(result.planted > 20);
     assert.equal(result.error, 0);
     console.log(`Window animation and runner direction (${width}):`, result);
     await page.close();

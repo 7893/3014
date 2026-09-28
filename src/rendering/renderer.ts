@@ -63,7 +63,7 @@ export async function createRenderer(canvas: HTMLCanvasElement) {
     x: number,
     wind: ArrayLike<number>,
   ) {
-    if (key === "coast") beachActors.draw(renderer, time);
+    if (key === "coast") beachActors.draw(renderer, time, scene.width, scene.height);
     const pass = resources.prepare(key);
     const conditions = environment.sample(key, time, wind);
     const W = scene.portrait ? 760 : 1600;

@@ -51,9 +51,12 @@ shader code no longer constructs the animated person's limbs. Reflection and
 foreground occlusion still use the scene's artistic material. Every scene shares the same
 open boat, seated passenger, and rowing timeline. A single actor texture
 is refreshed once per frame, including scene transitions.
-Coastal children share a small Pixi pose atlas and Anime limb timelines.
-Rounded silhouettes keep their width during turns. The whole pose faces its travel direction; its
-path follows the shared shoreline on dry sand, beneath palm occlusion.
+Coastal children use Pixi AnimatedSprite poses baked from authored contact,
+compression and recovery keyframes. Anime samples those keyframes once during
+creation; no joint timelines run per frame. Playback follows distance traveled
+in screen pixels relative to the authored stride, including viewport scaling.
+An on-ground pose marks the slowest part of each turn. Both children share a
+small output atlas, beneath palm occlusion.
 
 ## Rendering contract
 
