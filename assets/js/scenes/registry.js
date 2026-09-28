@@ -10,6 +10,8 @@ import { drawStaticCoast } from "./coast/static.js";
 import { fragment as coast } from "./coast/shaders/main.js";
 
 /**
+ * Geographic references live in config/places; composition lives beside each scene.
+ * Environment state owns smooth render conditions, never fetching inside a frame.
  * Scene contract: create(width, height) returns { layers, width, height }.
  * Layer keys match shader sampler names; array ordering is never an API.
  * drawStatic(ctx, painting, boat) supplies the Canvas 2D fallback.

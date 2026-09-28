@@ -1,3 +1,4 @@
+import { createEnvironment } from "../environment/state.js";
 import { createResources } from "./resources.js";
 import { createTargets } from "./targets.js";
 import { createCompositor } from "./compositor.js";
@@ -13,6 +14,7 @@ export function createRenderer(canvas) {
   });
   if (!gl) return null;
   const device = createDevice(gl);
+  const environment = createEnvironment();
   let resources, targets, compositor, buffer, vao, scene;
   function initialize() {
     resources = targets = compositor = buffer = vao = null;
@@ -46,7 +48,9 @@ export function createRenderer(canvas) {
     gl.uniform2f(u.size, canvas.width, canvas.height);
     gl.uniform1f(u.time, time);
     gl.uniform3fv(u.touch, touch);
-    gl.uniform4fv(u.wind, wind);
+    const conditions = environment.sample(key, time, wind);
+    gl.uniform4fv(u.wind, conditions.wind);
+    gl.uniform3fv(u.environment, conditions.atmosphere);
     gl.uniform2fv(u.boatCenter, scene.boatCenter);
     gl.uniform2f(
       u.boat,
@@ -99,6 +103,8 @@ export function createRenderer(canvas) {
   return {
     upload,
     draw,
+    setEnvironment: environment.setTarget,
+    resetEnvironment: environment.reset,
     dispose,
     restore: initialize,
     prepare: (name) => resources.prepare(name),

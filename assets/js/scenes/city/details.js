@@ -1,9 +1,11 @@
+import { skyline } from "./composition.js";
 // Artistic compression of Beijing's skyline, not a literal viewpoint from the river.
 export function drawBeijingSkyline(b, l, W, H) {
-  const x = W * 0.47,
-    top = H * (W / H < 0.85 ? 0.35 : 0.28),
+  const layout = skyline[W / H < 0.85 ? "portrait" : "landscape"];
+  const x = W * layout.tower.x,
+    top = H * layout.tower.top,
     base = H * 0.59,
-    w = W * (W / H < 0.85 ? 0.095 : 0.045),
+    w = W * layout.tower.width,
     h = base - top;
   const tower = new Path2D();
   tower.moveTo(x - w * 0.62, top);
@@ -63,10 +65,10 @@ export function drawBeijingSkyline(b, l, W, H) {
   l.lineTo(x + w * 0.6, top + 2);
   l.stroke();
   // A smaller angled silhouette sits below the Zun's crown.
-  const cx = W * 0.66,
-    cy = H * 0.455,
-    cw = W * (W / H < 0.85 ? 0.15 : 0.09),
-    ch = H * 0.135;
+  const cx = W * layout.angled.x,
+    cy = H * layout.angled.top,
+    cw = W * layout.angled.width,
+    ch = H * layout.angled.height;
   const shape = new Path2D();
   [
     [-0.48, 1],
@@ -100,29 +102,4 @@ export function drawBeijingSkyline(b, l, W, H) {
     l.stroke();
   }
   l.restore();
-}
-export function drawRiverTerrace(b, l, W, H) {
-  const x = W * 0.075,
-    y = H * 0.61,
-    w = W * 0.23;
-  b.fillStyle = "#172d31";
-  b.fillRect(x, y - H * 0.028, w, H * 0.032);
-  for (let i = 0; i < 8; i++) {
-    const xx = x + ((i + 0.5) * w) / 8;
-    l.fillStyle = "rgba(241,180,97,.42)";
-    l.fillRect(xx - w * 0.033, y - H * 0.019, w * 0.052, H * 0.014);
-    b.fillStyle = "#283833";
-    b.beginPath();
-    b.ellipse(xx, y - H * 0.003, w * 0.035, 1.5, 0, 0, Math.PI * 2);
-    b.fill();
-  }
-  for (let i = 0; i < 19; i++) {
-    const t = i / 18,
-      xx = x + t * w,
-      yy = y - H * 0.038 + Math.sin(t * Math.PI) * H * 0.005;
-    l.fillStyle = "rgba(247,205,137,.8)";
-    l.beginPath();
-    l.arc(xx, yy, 1.1, 0, Math.PI * 2);
-    l.fill();
-  }
 }

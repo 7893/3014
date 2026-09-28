@@ -1,5 +1,5 @@
 import { stroke, glow } from "../../drawing/canvas.js";
-import { drawRiverTerrace } from "./details.js";
+import { drawRiverTerrace } from "./terrace.js";
 export function drawRiver({ b, l, k, W, H, random, tree }) {
   // The opposite promenade lies behind the waterline, so its lights reflect naturally.
   b.fillStyle = "#162b2d";

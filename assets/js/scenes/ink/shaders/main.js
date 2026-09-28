@@ -11,10 +11,10 @@ export const fragment = `#version 300 es
 precision highp float;
 in vec2 v_uv;
 out vec4 outColor;
-uniform sampler2D u_paper,u_far,u_middle,u_near,u_shore,u_pines,u_boatLayer;
+uniform sampler2D u_paper,u_far,u_middle,u_near,u_shore,u_foliage,u_boatLayer;
 uniform vec2 u_size,u_boat,u_boatCenter,u_actorScale;
 uniform float u_time,u_boatOpacity;
-uniform vec3 u_touch;
+uniform vec3 u_touch,u_environment;
 uniform vec4 u_wind;
 uniform vec4 u_fish[3],u_fishRipples[3];
 ${noise}
@@ -42,7 +42,7 @@ void main(){
   color=over(color,texture(u_shore,v_uv));
   float bend=pow(clamp((.89-p.y)/.27,0.,1.),2.);
   float wind=(u_wind.x*.75+sin(u_time*.85+p.y*13.)*.20)*.008*bend;
-  color=over(color,sampleLayer(u_pines,p+vec2(wind,0.)));
+  color=over(color,sampleLayer(u_foliage,p+vec2(wind,0.)));
   // The small boat moves independently of the paper and mountain layers.
   vec4 boatInk=sampleBoat(p-u_boat);
   boatInk.a*=u_boatOpacity;

@@ -20,7 +20,13 @@ export function createCity(width, height) {
   const { buildings: b, lights: l, bank: k } = contexts;
   const markRoom = roomMarker(contexts.windows);
   const random = seededRandom(2873);
+  b.save();
+  l.save();
+  b.globalAlpha = 0.78;
+  l.globalAlpha = 0.62;
   drawBeijingSkyline(b, l, W, H);
+  b.restore();
+  l.restore();
   // Low, recessed buildings: irregular occupied rooms, no outlined landmark icons.
   for (let i = 0; i < 25; i++) {
     const x = (i * W) / 24 - 30,

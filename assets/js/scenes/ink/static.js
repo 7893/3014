@@ -48,6 +48,6 @@ export function drawStaticInk(ctx, scene, boatLayer) {
     ctx.fill();
     ctx.restore();
   }
-  for (const name of ["shore", "pines"]) ctx.drawImage(layers[name], 0, 0);
+  for (const name of ["shore", "foliage"]) ctx.drawImage(layers[name], 0, 0);
   ctx.drawImage(boatLayer, 0, 0);
 }

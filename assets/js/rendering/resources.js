@@ -5,6 +5,7 @@ const shared = [
   "time",
   "touch",
   "wind",
+  "environment",
   "boatCenter",
   "boat",
   "boatLayer",

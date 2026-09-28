@@ -10,7 +10,7 @@ out vec4 outColor;
 uniform sampler2D u_buildings,u_lights,u_bank,u_glow,u_windows,u_boatLayer;
 uniform vec2 u_size,u_boat,u_boatCenter,u_actorScale;
 uniform float u_time;
-uniform vec3 u_touch;
+uniform vec3 u_touch,u_environment;
 uniform vec4 u_wind;
 ${noise}
 ${surface}
@@ -35,8 +35,8 @@ vec3 skyline(vec2 p){
   vec3 top=vec3(.025,.052,.079),horizon=vec3(.17,.22,.245);
   vec3 color=mix(top,horizon,pow(clamp(p.y/.72,0.,1.),1.7));
   float haze=fbm(vec2(p.x*4.-u_wind.z*.018,p.y*8.));
-  color+=vec3(.035,.035,.028)*haze*smoothstep(.2,.7,p.y);
-  color+=stars(p);
+  color+=vec3(.035,.035,.028)*(0.65+u_environment.z)*haze*smoothstep(.2,.7,p.y);
+  color+=stars(p)*(1.-u_environment.y*.8);
   color=over(color,sampleLayer(u_buildings,p));
   color+=animatedLights(p);
   color+=lightSpill(p)*.85;

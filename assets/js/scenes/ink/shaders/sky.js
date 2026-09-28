@@ -29,7 +29,7 @@ vec3 paintPassingCloud(vec3 color,vec3 paper,vec2 p){
   float fibre=fbm(q*vec2(2.1,6.));
   float shade=smoothstep(.35,1.25,q.y)*.038+(1.-cloud)*.026;
   vec3 pigment=paper+vec3(.018,.018,.012)-vec3(shade);
-  float opacity=cloud*presence*(.87+fibre*.11);
+  float opacity=cloud*presence*(.87+fibre*.11)*clamp(.64+u_environment.y*.8,0.,1.);
   return mix(color,pigment,opacity);
 }
 `;

@@ -13,6 +13,6 @@ float mistLayer(vec2 p,float level,float phase){
   float ribbon=exp(-pow((p.y-center)/width,2.));
   float thread=exp(-pow((p.y-center-.032)/(width*.42),2.));
   float fibre=fbm(vec2(p.x*9.-drift*.7,p.y*43.+phase));
-  return clamp((ribbon*.65+thread*.25)*smoothstep(.23,.68,billow)*(.75+fibre*.3),0.,.72);
+  return clamp((.55+u_environment.z*.7)*(ribbon*.65+thread*.25)*smoothstep(.23,.68,billow)*(.75+fibre*.3),0.,.72);
 }
 `;

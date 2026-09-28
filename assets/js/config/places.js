@@ -1,0 +1,25 @@
+// Representative landscape coordinates, not survey points or weather stations.
+// A future provider adapter reads these; painting modules never call a service.
+export const places = {
+  ink: {
+    name: "Yangshuo · Xingping, Li River",
+    latitude: 24.92,
+    longitude: 110.53,
+    timeZone: "Asia/Shanghai",
+    environment: { wind: 0.85, cloud: 0.45, haze: 0.65 },
+  },
+  city: {
+    name: "Beijing · Liangma River",
+    latitude: 39.95,
+    longitude: 116.47,
+    timeZone: "Asia/Shanghai",
+    environment: { wind: 0.65, cloud: 0.18, haze: 0.35 },
+  },
+  coast: {
+    name: "Wanning · Shimei Bay",
+    latitude: 18.66,
+    longitude: 110.25,
+    timeZone: "Asia/Shanghai",
+    environment: { wind: 1, cloud: 0.38, haze: 0.3 },
+  },
+};

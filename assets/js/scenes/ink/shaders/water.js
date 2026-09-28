@@ -2,7 +2,7 @@ export const water = `
 float inkWaterAt(vec2 p){
   float river=smoothstep(.735,.755,p.y)*(1.-smoothstep(.925,.975,p.y));
   float shore=sampleLayer(u_shore,p).a;
-  float trees=sampleLayer(u_pines,p).a;
+  float trees=sampleLayer(u_foliage,p).a;
   float vessel=sampleBoat(p-u_boat).a;
   return river*(1.-smoothstep(.08,.3,max(shore,max(trees,vessel))));
 }

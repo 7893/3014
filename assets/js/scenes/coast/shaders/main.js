@@ -1,5 +1,5 @@
 import { sails } from "./sails.js";
-import { horizon } from "./horizon.js";
+import { palmAnchors } from "../composition.js";
 import { surf } from "./surf.js";
 import { wind } from "./wind.js";
 import { surface } from "../../../rendering/shaders/surface.js";
@@ -13,7 +13,7 @@ out vec4 outColor;
 uniform sampler2D u_foreground,u_trunk0,u_leaves0,u_trunk1,u_leaves1,u_shore,u_boatLayer;
 uniform vec2 u_size,u_boat,u_boatCenter,u_actorScale;
 uniform float u_time;
-uniform vec3 u_touch;
+uniform vec3 u_touch,u_environment;
 uniform vec4 u_wind;
 ${noise}
 ${surface}
@@ -22,13 +22,13 @@ ${ripples}
 ${wind}
 ${surf}
 ${sails}
-${horizon}
+${palmAnchors}
 float coastWaterAt(vec2 p){
   float solid=max(sampleLayer(u_foreground,p).a,sampleBoat(p-u_boat).a);
-  solid=max(solid,sampleLayer(u_trunk0,palmUV(p,vec2(.035,.965),vec2(.09,.495),0.,false)).a);
-  solid=max(solid,sampleLayer(u_leaves0,palmUV(p,vec2(.035,.965),vec2(.09,.495),0.,true)).a);
-  solid=max(solid,sampleLayer(u_trunk1,palmUV(p,vec2(-.025,.945),vec2(.145,.605),.8,false)).a);
-  solid=max(solid,sampleLayer(u_leaves1,palmUV(p,vec2(-.025,.945),vec2(.145,.605),.8,true)).a);
+  solid=max(solid,sampleLayer(u_trunk0,palmUV(p,palmRoot0,palmCrown0,palmPhase0,false)).a);
+  solid=max(solid,sampleLayer(u_leaves0,palmUV(p,palmRoot0,palmCrown0,palmPhase0,true)).a);
+  solid=max(solid,sampleLayer(u_trunk1,palmUV(p,palmRoot1,palmCrown1,palmPhase1,false)).a);
+  solid=max(solid,sampleLayer(u_leaves1,palmUV(p,palmRoot1,palmCrown1,palmPhase1,true)).a);
   return smoothstep(.48,.50,p.y)*(1.-smoothstep(.08,.35,solid));
 }
 void main(){
@@ -41,8 +41,7 @@ void main(){
   color=mix(color,vec3(1.,.96,.78),disc);
   vec2 cloudP=vec2(p.x*3.-u_wind.z*.10,p.y*13.+sin(u_time*.18)*.08);
   float cloud=fbm(cloudP);
-  color=mix(color,vec3(1.,.94,.80),smoothstep(.48,.73,cloud)*.62*(1.-smoothstep(.3,.44,p.y)));
-  color=paintIslands(color,p);
+  color=mix(color,vec3(1.,.94,.80),smoothstep(.65-u_environment.y*.45,.88-u_environment.y*.4,cloud)*.62*(1.-smoothstep(.3,.44,p.y)));
   if(p.y>.473){
     vec3 skyEdge=color;
     float depth=max(0.,(p.y-.475)/.525);
@@ -70,14 +69,14 @@ void main(){
   color=paintSails(color,p,aspect);
   vec4 boat=sampleBoat(p-u_boat);
   color=mix(color,vec3(.18,.24,.19),boat.a);
-  color=over(color,sampleLayer(u_foreground,p));
+  vec4 land=sampleLayer(u_foreground,p);
+  land.rgb=mix(land.rgb,vec3(.70,.77,.69),u_environment.z*(1.-smoothstep(.47,.64,p.y))*.38);
+  color=over(color,land);
   color=paintSurf(color,p);
-  vec2 root0=vec2(.035,.965),crown0=vec2(.09,.495);
-  vec2 root1=vec2(-.025,.945),crown1=vec2(.145,.605);
-  color=over(color,sampleLayer(u_trunk0,palmUV(p,root0,crown0,0.,false)));
-  color=over(color,sampleLayer(u_leaves0,palmUV(p,root0,crown0,0.,true)));
-  color=over(color,sampleLayer(u_trunk1,palmUV(p,root1,crown1,.8,false)));
-  color=over(color,sampleLayer(u_leaves1,palmUV(p,root1,crown1,.8,true)));
+  color=over(color,sampleLayer(u_trunk0,palmUV(p,palmRoot0,palmCrown0,palmPhase0,false)));
+  color=over(color,sampleLayer(u_leaves0,palmUV(p,palmRoot0,palmCrown0,palmPhase0,true)));
+  color=over(color,sampleLayer(u_trunk1,palmUV(p,palmRoot1,palmCrown1,palmPhase1,false)));
+  color=over(color,sampleLayer(u_leaves1,palmUV(p,palmRoot1,palmCrown1,palmPhase1,true)));
   color+=vec3((hash(gl_FragCoord.xy)-.5)*.006);
   outColor=vec4(color,1.);
 }
