@@ -5,7 +5,7 @@ export async function checkDetails(browser, url) {
     const page = await browser.newPage({ viewport: { width, height: 844 } });
     await page.goto(`${url}/__test/blank.html`);
     const result = await page.evaluate(async () => {
-      const { createScene, createRenderer, createPierVisitor, roomLayout } = await import("/__test/harness.js");
+      const { createScene, createRenderer, createRunningChild, BEACH_RUN, roomLayout } = await import("/__test/harness.js");
       const painting = createScene(innerWidth, innerHeight), canvas = document.createElement("canvas");
       canvas.width = innerWidth; canvas.height = innerHeight;
       const renderer = await createRenderer(canvas), gl = canvas.getContext("webgl2");
@@ -33,49 +33,30 @@ export async function checkDetails(browser, url) {
         for (let i = 0; i < frames[index].length; i++) change += Math.abs(frames[index][i] - frames[index + 1][i]);
         return change / frames[index].length;
       });
-      const actor = createPierVisitor(), coast = painting.get("coast").layers.foreground;
-      const ctx = coast.getContext("2d"); let dryContacts = 0;
-      actor.update(0, innerWidth, innerHeight); const initial = Array.from(actor.feet);
-      actor.update(.9, innerWidth, innerHeight); const movement = actor.feet.reduce((n, v, i) => n + Math.abs(v - initial[i]), 0);
-      const silhouettes = new Set();
-      const sprite = actor.root.children[0], source = sprite.texture.source;
-      const sheet = source.resource.getContext("2d"), resolution = source.resolution;
-      for (let t = .001; t < 6.4; t += .1) {
-        actor.update(t, innerWidth, innerHeight);
-        if (!silhouettes.has(sprite.currentFrame)) {
-          silhouettes.add(sprite.currentFrame);
-          const rect = sprite.texture.frame;
-          const pixels = sheet.getImageData(rect.x * resolution, rect.y * resolution,
-            rect.width * resolution, rect.height * resolution);
-          let minX = 100, maxX = -100, minY = 100, maxY = -100;
-          for (let y = 0; y < pixels.height; y++) for (let x = 0; x < pixels.width; x++) {
-            if (pixels.data[(y * pixels.width + x) * 4 + 3] < 64) continue;
-            const px = x / resolution - sprite.anchor.x * rect.width;
-            const py = y / resolution - sprite.anchor.y * rect.height;
-            minX = Math.min(minX, px); maxX = Math.max(maxX, px);
-            minY = Math.min(minY, py); maxY = Math.max(maxY, py);
-          }
-          if (maxX - minX > 24 || maxY - minY > 34 || maxY > 11)
-            throw new Error("Painted pose exceeds seated human proportions");
+      let directions = 0;
+      for (const index of [0, 1]) {
+        const actor = createRunningChild(index);
+        for (let phase = .1; phase < Math.PI * 4; phase += .11) {
+          const time = (phase + index * BEACH_RUN.lag) / BEACH_RUN.speed;
+          actor.update(time);
+          const body = actor.root.getChildByLabel("runner-body");
+          const nose = actor.root.getChildByLabel("runner-nose", true);
+          const velocity = Math.cos(phase);
+          const face = nose.toGlobal({ x: 0, y: 0 }).x - nose.parent.toGlobal({ x: 0, y: 0 }).x;
+          if (face * velocity <= 0 || body.scale.x * velocity <= 0 || Math.abs(body.scale.x) !== 1)
+            throw new Error("Runner pose faces against travel or flattens during a turn");
+          directions++;
         }
-        for (let foot = 0; foot < 2; foot++) {
-          const px = actor.feet[foot * 2] * coast.width, py = actor.feet[foot * 2 + 1] * coast.height;
-          if (ctx.getImageData(Math.floor(px), Math.floor(py), 1, 1).data[3] > 64) dryContacts++;
-        }
+        actor.dispose(); actor.root.destroy({ children: true });
       }
-      actor.update(3.2, innerWidth, innerHeight);
-      const loop = actor.feet.every((value, i) => value === initial[i]) && sprite.currentFrame === 0;
-      if (silhouettes.size !== sprite.totalFrames || !loop) throw new Error("Incomplete or discontinuous pose cycle");
-      actor.dispose(); actor.root.destroy({ children: true });
       const error = gl.getError(); renderer.dispose();
-      return { skyChanges, wrapChanges, movement, dryContacts, error };
+      return { skyChanges, wrapChanges, directions, error };
     });
     assert(result.skyChanges.every(count => count > 50), JSON.stringify(result));
     assert(result.wrapChanges.every(change => change < .2), "Clouds must wrap outside the window");
-    assert(result.movement > .0003, JSON.stringify(result));
-    assert.equal(result.dryContacts, 0, "Feet must remain over open water throughout the motion");
+    assert(result.directions > 200);
     assert.equal(result.error, 0);
-    console.log(`Window animation and moving water contact (${width}):`, result);
+    console.log(`Window animation and runner direction (${width}):`, result);
     await page.close();
   }
 }

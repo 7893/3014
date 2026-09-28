@@ -7,7 +7,7 @@ export function createRunningChild(index: number) {
   const root = new Container(); root.position.set(32 + index * 64, 57);
   const shadow = new Graphics().ellipse(0, 1, 7, 1.6).fill({ color: 0x665a3a, alpha: .16 });
   root.addChild(shadow);
-  const torso = new Container(); torso.position.y = -14; torso.sortableChildren = true; root.addChild(torso);
+  const torso = new Container({ label: "runner-body" }); torso.position.y = -14; torso.sortableChildren = true; root.addChild(torso);
   const motion = createTimeline({ autoplay: false, defaults: { duration: 800, ease: "inOutSine" } });
   const limbs: { hip: Container; shoulder: Container; side: number }[] = [];
   for (let side = 0; side < 2; side++) {
@@ -40,7 +40,7 @@ export function createRunningChild(index: number) {
   head.addChild(new Graphics().ellipse(0, 0, 3.1, 3.5).fill(0xc29c77)
     .ellipse(-.8, -.6, 1.7, 2.5).fill({ color: 0xe1ba8b, alpha: .30 }));
   const hair = new Graphics().ellipse(0, -1.7, 3.2, 2).fill(0x524b3a);
-  const nose = new Graphics().ellipse(0, 0, .9, 1).fill(0xc8a17d);
+  const nose = new Graphics({ label: "runner-nose" }).ellipse(0, 0, .9, 1).fill(0xc8a17d);
   head.addChild(nose, hair); torso.addChild(head);
   motion.add(torso.position, { y: [-14, -15.4, -14, -15.4, -14] }, 0);
   return {
@@ -51,17 +51,19 @@ export function createRunningChild(index: number) {
       const distance = half * 2 + 1 - Math.cos(progress);
       const gait = ((distance * 5.5 + index * .35) % 1 + 1) % 1;
       motion.seek(gait * 800, true);
-      torso.rotation = heading * .075;
-      // Limb overlap and the visible back of the head supply the turn, not a flip.
+      torso.scale.x = heading < 0 ? -1 : 1;
+      torso.rotation = -heading * .075;
+      // Reflect the complete pose together: knees, elbows, toes and face agree.
+      // Scale magnitude stays one; turns never flatten the silhouette.
       for (const { hip, shoulder, side } of limbs) {
         const sign = side ? 1 : -1, depth = Math.sin(phase) * sign;
         hip.position.x = sign * (1.5 + .5 * Math.abs(Math.sin(phase)));
         shoulder.position.x = sign * 2.7;
         hip.zIndex = depth > 0 ? 3 : 0; shoulder.zIndex = depth > 0 ? 4 : 1;
       }
-      nose.x = heading * 2.8; nose.alpha = Math.abs(heading) * .8;
+      nose.x = Math.abs(heading) * 2.8; nose.alpha = Math.abs(heading) * .8;
       hair.scale.y = 1 + .55 * Math.max(0, Math.sin(phase));
-      head.rotation = heading * .09; shadow.scale.x = 1 + (torso.y + 14) * .06;
+      head.rotation = Math.abs(heading) * .09; shadow.scale.x = 1 + (torso.y + 14) * .06;
     },
     dispose() { motion.cancel(); },
   };

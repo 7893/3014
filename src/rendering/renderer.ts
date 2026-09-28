@@ -63,14 +63,13 @@ export async function createRenderer(canvas: HTMLCanvasElement) {
     x: number,
     wind: ArrayLike<number>,
   ) {
-    if (key === "coast") beachActors.draw(renderer, time, scene.width, scene.height);
+    if (key === "coast") beachActors.draw(renderer, time);
     const pass = resources.prepare(key);
     const conditions = environment.sample(key, time, wind);
     const W = scene.portrait ? 760 : 1600;
     const H = (W * scene.height) / scene.width;
     const scale = scene.portrait ? 1.35 : 1.6;
     const u = pass.uniforms.uniforms;
-    if (key === "coast") u.u_pierFeet = beachActors.feet;
     const size = u.u_size as number[],
       boat = u.u_boat as number[],
       actorScale = u.u_actorScale as number[];

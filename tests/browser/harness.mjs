@@ -7,5 +7,6 @@ export { createBoat } from "../../src/actors/boat.ts";
 export { boat } from "../../src/rendering/shaders/boat.ts";
 export { createGeometry, createPass } from "../../src/rendering/pass.ts";
 export { WebGLRenderer, Ticker } from "pixi.js";
-export { createPierVisitor } from "../../src/actors/pier.ts";
+export { createRunningChild } from "../../src/actors/child.ts";
+export { BEACH_RUN } from "../../src/config/actors.ts";
 export { roomLayout } from "../../src/scenes/room/composition.ts";

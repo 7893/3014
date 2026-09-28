@@ -1,4 +1,3 @@
-import { paintPierVisitor } from "./pier-visitor.ts";
 import { paintRestingChildren } from "./leisure.ts";
 import type { Painting } from "../types.ts";
 export function drawStaticCoast(
@@ -21,7 +20,6 @@ export function drawStaticCoast(
   ctx.fill();
   ctx.drawImage(boatLayer, 0, 0);
   ctx.drawImage(coast.layers.foreground, 0, 0);
-  paintPierVisitor(ctx, w, h);
   paintRestingChildren(ctx, w, h);
   for (const name of ["trunk0", "leaves0", "trunk1", "leaves1"])
     ctx.drawImage(coast.layers[name], 0, 0);

@@ -52,7 +52,7 @@ foreground occlusion still use the scene's artistic material. Every scene shares
 open boat, seated passenger, and rowing timeline. A single actor texture
 is refreshed once per frame, including scene transitions.
 Coastal children share a small Pixi pose atlas and Anime limb timelines.
-Rounded silhouettes and changing limb depth replace whole-body squeeze/flips; their
+Rounded silhouettes keep their width during turns. The whole pose faces its travel direction; its
 path follows the shared shoreline on dry sand, beneath palm occlusion.
 
 ## Rendering contract
@@ -114,11 +114,7 @@ Scene shaders use the common sky, water, boat-light and interaction effects in
 All scene fragment entry points live under `scenes/<name>/shaders/main.ts`.
 
 `actors/surface.ts` centralizes Pixi atlas rendering and disposal. The boat and
-beach actors use it; the seated pier visitor shares the beach atlas and uses a Pixi AnimatedSprite
-of prepainted poses. The shared application clock selects frames without a second
-ticker. Each frame supplies its own foot-contact coordinates for water rings.
-The same drawing supplies the static fallback; no runtime limb solving or scaling
-is involved. Static fallback artwork
+beach actors use it with the shared application clock. Static fallback artwork
 remains necessary when WebGL is unavailable. Interior playback skips the boat
 atlas update. Room uniforms reuse the painting layout and update on resize.
 
