@@ -16,7 +16,7 @@ Do not connect a weather service or redesign the artwork in this migration.
 - [x] Integrate Anime.js with the existing single-clock lifecycle.
 - [x] Update tests, deployment output validation, and dependency license notices.
 - [x] Verify desktop/mobile visuals, motion, interactions, fallback, and recovery.
-- [ ] Sign commits, publish, and verify the deployed artifact.
+- [x] Sign commits, publish, and verify the deployed artifact.
 
 ## Acceptance
 
@@ -77,7 +77,10 @@ shader compilation times are noisy and cache-dependent; they do not establish a
 speedup or device FPS. GPU allocation counts are checked across repeated resize
 and transition cycles; final teardown releases the context and owned resources.
 
-Publication and live artifact verification follow the local acceptance checks.
+Signed implementation `ac49973` was published after local acceptance. Live HTTPS
+files matched the local artifact hashes. Desktop and mobile checks verified all
+three scenes and fonts; source, test, documentation, and credential paths remained
+unavailable from the published site.
 
 The final accelerated run retained 21 textures, 3 shared geometry buffers,
 2 framebuffers, 4 programs, and 1 vertex array after warmup and at 48 simulated
