@@ -1,3 +1,5 @@
+import { checkRoom } from "./room.mjs";
+import { scenes } from "../../src/motion/journey.ts";
 import { checkActor } from "./actor.mjs";
 import { checkPasses } from "./passes.mjs";
 import { checkSoak } from "./soak.mjs";
@@ -52,7 +54,7 @@ try {
       });
       await page.clock.runFor(100);
     }
-    for (const [key, info] of Object.entries(copy.scenes)) {
+    for (const [key, info] of scenes.map(key => [key, copy.scenes[key]])) {
       await page.getByRole("button", { name: info.label, exact: true }).click();
       await advance(6000);
       await checkCopy(page, key);
@@ -96,6 +98,7 @@ try {
     assert.deepEqual(errors, []);
     await page.close();
   }
+  await checkRoom(browser, server.url);
   await checkFallback(browser, server.url);
   console.log(
     "Desktop, mobile, transitions, recovery and static fallback passed.",

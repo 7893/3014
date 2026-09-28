@@ -128,3 +128,15 @@ test("authored transitions preserve easing and can be interrupted", () => {
   assert.equal(state.transitioning, false);
   assert.equal(state.positions.coast, 0.22);
 });
+
+test("hidden scene stays outside the public journey until returned", () => {
+  const journey = createJourney(.69, () => .9);
+  assert(!scenes.includes("room"));
+  journey.select("room"); journey.advance(5);
+  assert.equal(journey.state().scene, "room");
+  for (let i = 0; i < 1000; i++) journey.advance(1);
+  assert.equal(journey.state().scene, "room");
+  journey.select("coast"); journey.advance(5);
+  assert.equal(journey.state().scene, "coast");
+  journey.dispose();
+});

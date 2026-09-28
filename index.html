@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="./src/styles/site.css" />
     <link rel="stylesheet" href="./src/styles/layout.css" />
     <link rel="stylesheet" href="./src/styles/fonts.css" />
+    <link rel="stylesheet" href="./src/styles/room.css" />
   </head>
   <body>
     <main aria-label="{{ site.label }}">
@@ -18,6 +19,8 @@
         aria-label="{{ scenes.ink.description }}"
         role="img"
       ></canvas>
+      <button id="sun-entry" class="sun-entry" type="button" aria-label="{{ hidden.enter }}" hidden></button>
+      <button id="room-return" class="room-return" type="button" hidden>{{ hidden.back }}</button>
       <div class="inscription">
         <h1>{{ scenes.ink.title }}</h1>
         <p>{{ scenes.ink.poem }}</p>

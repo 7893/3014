@@ -1,3 +1,4 @@
+import { createRoomControls } from "./app/room-controls.ts";
 import { viewportSize } from "./app/viewport.ts";
 import { element } from "./app/dom.ts";
 import type { SceneButton } from "./app/dom.ts";
@@ -26,6 +27,7 @@ const journey = createJourney(innerWidth / innerHeight < 0.85 ? 0.64 : 0.69);
 const sceneButtons = [
   ...document.querySelectorAll<SceneButton>("[data-scene]"),
 ];
+const roomControls = createRoomControls(name => { journey.select(name, !renderer); draw(); });
 let dimensions = "";
 let touch = [0, 0, -100];
 const wind = createWind();
@@ -77,6 +79,7 @@ function draw() {
     fallback();
   }
   updateSceneUI(canvas, state, sceneButtons);
+  roomControls.update(state);
 }
 function resize() {
   if (lost) return;
@@ -123,6 +126,7 @@ window.addEventListener("pagehide", (event) => {
   animation.stop();
   preparation.stop();
   if (!event.persisted) {
+    roomControls.dispose();
     journey.dispose();
     animation.dispose();
     renderer?.dispose();

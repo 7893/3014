@@ -1,6 +1,8 @@
 // Representative landscape coordinates, not survey points or weather stations.
 // A future provider adapter reads these; painting modules never call a service.
 export const places = {
+  room: { name: "Imagined moonlit room", latitude: 31.32, longitude: 120.63,
+    timeZone: "Asia/Shanghai", environment: { wind: .2, cloud: .1, haze: .1 } },
   garden: {
     name: "Suzhou · Imagined waterside courtyard",
     latitude: 31.32,

@@ -1,0 +1,23 @@
+.sun-entry {
+  position: absolute;
+  border: 0;
+  padding: 0;
+  border-radius: 50%;
+  background: transparent;
+  opacity: 0;
+}
+.sun-entry:hover { background: transparent; }
+.sun-entry:focus-visible { opacity: 1; outline: 1px solid #bc926d; }
+.room-return {
+  position: absolute;
+  top: max(24px, env(safe-area-inset-top));
+  left: 5%;
+  color: #d4c3a4;
+  background: #201e1c40;
+  border-color: #a4977b40;
+  font-size: 12px;
+}
+.room-return:hover { background: #49403780; }
+[hidden] { display: none !important; }
+body[data-view="room"] .inscription,
+body[data-view="room"] .colophon { display: none; }

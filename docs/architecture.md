@@ -2,7 +2,7 @@
 
 Follow the Boat is a static, procedural landscape artwork. Its four settings are
 the Li River near Xingping, Shimei Bay, Beijing's Liangma River, and an imagined
-Suzhou courtyard. Geometry,
+Suzhou courtyard, with a separate moonlit interior reached through the sun. Geometry,
 palette, and composition express those places without claiming a surveyed view.
 
 ## Stack
@@ -59,7 +59,9 @@ path follows the shared shoreline on dry sand, beneath palm occlusion.
 Each scene provides a deterministic Canvas painting, a GLSL fragment program,
 and a complete static fallback. Shared actor geometry and water interactions
 remain common. Scenes prepare lazily, reuse compiled programs across resize,
-and release obsolete textures and targets.
+and release obsolete textures and targets. The interior is excluded from the
+public shuffle and idle preparation. Its journey remains held until returning;
+accessible sun controls and Escape share the same entry/exit state.
 
 City, coast, and garden render directly to the screen during normal playback. Ink keeps
 its paper-compositing pass; transitions render both scenes and composite them.

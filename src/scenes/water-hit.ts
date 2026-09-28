@@ -16,6 +16,7 @@ export function hitWater(
   x: number,
   y: number,
 ) {
+  if (name === "room") return false;
   const surface = surfaces[name];
   if (!surface || x < 0 || x >= 1 || y <= surface.top || y >= surface.bottom)
     return false;

@@ -1,80 +1,64 @@
-import { enclosure } from "./enclosure.ts";
-import { stroke } from "../../drawing/canvas.ts";
-
-function roof(c: CanvasRenderingContext2D, x: number, y: number, w: number) {
-  c.fillStyle = "#454c49";
-  c.beginPath();
-  c.moveTo(x - w * .12, y + 9);
-  c.quadraticCurveTo(x + w * .18, y + 10, x + w * .5, y - w * .17);
-  c.quadraticCurveTo(x + w * .8, y + 8, x + w * 1.12, y + 9);
-  c.quadraticCurveTo(x + w * .9, y + 23, x + w * .5, y + 15);
-  c.quadraticCurveTo(x + w * .15, y + 24, x - w * .12, y + 9);
-  c.fill();
-  c.beginPath(); c.moveTo(x - w * .12, y + 8);
-  c.quadraticCurveTo(x + w * .18, y + 9, x + w * .5, y - w * .17);
-  c.quadraticCurveTo(x + w * .8, y + 7, x + w * 1.12, y + 8);
-  c.strokeStyle = "#a2a596"; c.lineWidth = 1.3; c.stroke();
-  for (let i = 1; i < 25; i++) {
-    const xx = x + w * i / 25;
-    stroke(c, [[xx, y + 13], [xx - (xx - x - w / 2) * .06,
-      y - Math.sin(i / 25 * Math.PI) * w * .10]], "#79807855", .8);
-  }
-}
+import { hall, roof, rock } from "./structures.ts";
+import { stroke, seededRandom } from "../../drawing/canvas.ts";
 
 export function architecture(c: CanvasRenderingContext2D, W: number, H: number) {
-  const base = H * .655;
-  enclosure(c, W, H);
-  // A recessed moon gate, with a shaded garden visible through the opening.
-  const gx = W * .61, r = Math.min(W * .085, H * .086), gy = base - r - H * .009;
-  c.fillStyle = "#657868";
-  c.beginPath(); c.arc(gx, gy, r, 0, Math.PI * 2); c.fill();
-  c.strokeStyle = "#efe8d4"; c.lineWidth = 9; c.stroke();
-  c.strokeStyle = "#a5ad99"; c.lineWidth = 1.5; c.stroke();
+  const base = H * .655, portrait = W / H < .85;
+  // A deep private estate: rear hall, side courtyard, then the waterside residence.
+  c.save(); c.globalAlpha = .64;
+  hall(c, W * .37, base - H * .05, W * .29, Math.min(H * .17, W * .25));
+  c.restore();
+  const plaster = c.createLinearGradient(0, H * .44, 0, base);
+  plaster.addColorStop(0, "#ede6d1"); plaster.addColorStop(1, "#adbaa3");
+  c.fillStyle = plaster;
+  c.beginPath(); c.moveTo(W * .41, base); c.lineTo(W * .41, base - H * .13);
+  c.lineTo(W * .60, base - H * .11); c.lineTo(W * .73, base - H * .20);
+  c.lineTo(W, base - H * .15); c.lineTo(W, base); c.closePath(); c.fill();
+  stroke(c, [[W * .41, base - H * .13], [W * .60, base - H * .11],
+    [W * .73, base - H * .20], [W, base - H * .15]], "#718577", 5);
+  // A round doorway frames a second courtyard and a path disappearing behind bamboo.
+  const r = Math.min(W * .062, H * .075), gx = W * .765, gy = base - r - 4;
+  c.fillStyle = "#567366"; c.beginPath(); c.arc(gx, gy, r, 0, Math.PI * 2); c.fill();
+  c.strokeStyle = "#eee4cc"; c.lineWidth = 7; c.stroke();
   c.save(); c.clip();
-  c.fillStyle = "#89957a"; c.fillRect(gx - r, gy + r * .25, r * 2, r);
-  c.beginPath(); c.moveTo(gx + r * .35, gy + r);
-  c.bezierCurveTo(gx - r * .8, gy + r * .15, gx + r * .8, gy + r * .2, gx + r * .1, gy - r * .3);
-  c.strokeStyle = "#c4c3a7"; c.lineWidth = r * .17; c.stroke();
-  c.fillStyle = "#b7c3ab"; c.fillRect(gx - r, gy - r * .65, r * 2, r * .33);
-  stroke(c, [[gx - r, gy - r * .65], [gx + r, gy - r * .65]], "#7d9180", 2);
-  c.fillStyle = "#748a76"; c.beginPath(); c.arc(gx + r * .3, gy - r * .38, r * .21, Math.PI, 0); c.fill();
-  for (let i = 0; i < 6; i++) {
-    const bx = gx - r * .78 + i * r * .15;
-    stroke(c, [[bx, gy + r], [bx + 6, gy - r]], "#3f5948", 1);
-    for (let j = 0; j < 5; j++) {
-      const by = gy - r * .8 + j * r * .27;
-      stroke(c, [[bx, by], [bx - r * .15, by - r * .11]], "#324f4088", 2);
-      stroke(c, [[bx, by + 5], [bx + r * .18, by - r * .14]], "#324f4088", 2);
-    }
+  c.fillStyle = "#b6c2a7"; c.fillRect(gx - r, gy - r * .7, r * 2, r * .45);
+  stroke(c, [[gx - r, gy - r * .72], [gx + r, gy - r * .72]], "#6f8772", 3);
+  c.beginPath(); c.moveTo(gx + r * .25, gy + r);
+  c.bezierCurveTo(gx - r * .7, gy + r * .2, gx + r * .8, gy + r * .25, gx + r * .1, gy - r * .25);
+  c.strokeStyle = "#c8c9ab"; c.lineWidth = r * .15; c.stroke();
+  for (let i = 0; i < 7; i++) {
+    const x = gx - r + i * r * .13;
+    stroke(c, [[x, gy + r], [x + 4, gy - r]], "#315344", 1.2);
+    for (let j = 0; j < 7; j++)
+      stroke(c, [[x, gy - r + j * r * .24], [x + r * .18, gy - r + j * r * .24 - 5]], "#46684c", 1.7);
   }
   c.restore();
-  // Open waterside pavilion: delicate timber, translucent screens, layered eaves.
-  const x = W * .16, w = W * .24, y = base - Math.min(H * .19, W * .23);
-  c.fillStyle = "#485c53"; c.fillRect(x, y + 12, w, base - y - 12);
-  const light = c.createLinearGradient(x, y, x + w, base);
-  light.addColorStop(0, "#b9b194"); light.addColorStop(1, "#746f57");
-  c.fillStyle = light; c.fillRect(x + 9, y + 18, w - 18, base - y - 24);
-  for (let i = 0; i <= 6; i++) {
-    const xx = x + i * w / 6;
-    stroke(c, [[xx, y + 14], [xx, base]], "#5b5144", 4);
-    for (let j = 0; j < 7 && i < 6; j++)
-      stroke(c, [[xx, y + 23 + j * 8], [xx + w / 6, y + 23 + j * 8]], "#4e594955", .8);
-  }
-  // Recessed open bays between timber frames; upper diamond lattice catches light.
-  for (let i = 0; i < 6; i++) {
-    const xx = x + i * w / 6, ww = w / 6;
-    c.fillStyle = i % 3 === 1 ? "#43574bd9" : "#b5ab8166";
-    c.fillRect(xx + 5, y + 58, ww - 10, base - y - 64);
-    for (let k = 0; k < 4; k++) {
-      const lx = xx + 6 + k * (ww - 12) / 4;
-      stroke(c, [[lx, y + 23], [lx + 8, y + 37], [lx, y + 51]], "#d5c8a055", .8);
+  // Main two-storey hall and an open waterside veranda.
+  const height = Math.min(H * .23, W * .37);
+  hall(c, W * .045, base, W * .36, height, 2);
+  const vx = W * .415, vw = W * .22, vh = height * .40;
+  const shade = c.createLinearGradient(0, base - vh, 0, base);
+  shade.addColorStop(0, "#516b5f"); shade.addColorStop(1, "#99aa8e");
+  c.fillStyle = shade; c.fillRect(vx, base - vh, vw, vh);
+  for (let i = 0; i <= 5; i++) {
+    const x = vx + vw * i / 5;
+    stroke(c, [[x, base - vh], [x, base]], "#5a6150", 3);
+    if (i < 5) {
+      stroke(c, [[x, base - 12], [x + vw / 5, base - 12]], "#b9b99a", 2);
+      for (let k = 1; k < 4; k++)
+        stroke(c, [[x + vw * k / 20, base - 12], [x + vw * k / 20, base - 3]], "#6b765e", 1);
     }
-    stroke(c, [[xx + 4, base - 24], [xx + ww - 4, base - 24]], "#736650", 2);
   }
-  roof(c, x - 10, y, w + 20);
-  c.fillStyle = "#9ba58e"; c.fillRect(x - 20, base - 8, w + 40, 8);
-  stroke(c, [[0, base], [W, base]], "#687c70", 5);
-  stroke(c, [[0, base + 3], [W, base + 3]], "#e0d9bc", 2);
-  for (let xx = 0; xx < W; xx += 31)
-    stroke(c, [[xx, base], [xx + 5, base + 9]], "#788979", .8);
+  roof(c, vx, base - vh, vw, vw * .08);
+  // Broad stone terrace and shallow steps at the pond's edge.
+  for (let i = 0; i < 3; i++) {
+    c.fillStyle = ["#adbaa2", "#8da28e", "#718c7b"][i];
+    c.fillRect(0, base - 3 + i * 3, W, 3);
+  }
+  const random = seededRandom(733);
+  for (let i = 0; i < 750; i++) {
+    c.fillStyle = i % 2 ? "#edf0d710" : "#506d5610";
+    c.fillRect(random() * W, base - random() * height, 1 + random() * 3, .8);
+  }
+  rock(c, W * .88, base, W * (portrait ? .09 : .055));
+  rock(c, W * .95, base + 1, W * .035);
 }

@@ -1,48 +1,46 @@
+import { seededRandom } from "../../drawing/canvas.ts";
 import { lotus } from "./lotus.ts";
-import { seededRandom, stroke } from "../../drawing/canvas.ts";
 
 export function foliage(c: CanvasRenderingContext2D, W: number, H: number) {
-  const random = seededRandom(418);
-  c.beginPath(); c.moveTo(-.03 * W, .04 * H);
-  c.bezierCurveTo(.02 * W, .17 * H, .16 * W, .22 * H, .3 * W, .22 * H);
-  c.bezierCurveTo(.15 * W, .215 * H, .02 * W, .18 * H, -.03 * W, .06 * H);
-  c.fillStyle = "#4b584c"; c.fill();
-  c.beginPath(); c.moveTo(.055 * W, .15 * H);
-  c.bezierCurveTo(.14 * W, .105 * H, .22 * W, .135 * H, .35 * W, .15 * H);
-  c.strokeStyle = "#68735d"; c.lineWidth = 2; c.stroke();
-  for (let i = 0; i < 37; i++) {
-    const x = W * (.025 + random() * .32), y = H * (.13 + random() * .11);
-    const length = H * (.065 + random() * .15);
-    c.beginPath(); c.moveTo(x, y);
-    c.quadraticCurveTo(x + 14, y + length * .55, x + 5, y + length);
-    c.strokeStyle = "#7e8e6a88"; c.lineWidth = .9; c.stroke();
-    for (let j = 0; j < 12; j++) {
-      const yy = y + length * j / 12;
-      c.fillStyle = `rgba(83,111,72,${.35 + random() * .35})`;
-      c.beginPath(); c.ellipse(x + Math.sin(j / 12 * Math.PI) * 7,
-        yy, 1.7, 7, j % 2 ? .55 : -.45, 0, Math.PI * 2); c.fill();
+  const random = seededRandom(1209);
+  c.beginPath(); c.moveTo(-20, H * .06);
+  c.bezierCurveTo(W * .05, H * .19, W * .15, H * .16, W * .34, H * .19);
+  c.strokeStyle = "#4a6252"; c.lineWidth = 7; c.stroke();
+  for (let i = 0; i < 48; i++) {
+    const x = random() * W * .34, y = H * (.12 + random() * .09);
+    const length = H * (.04 + random() * .19);
+    c.beginPath(); c.moveTo(x, y); c.quadraticCurveTo(x + 10, y + length * .7, x - 3, y + length);
+    c.strokeStyle = "#63805a66"; c.lineWidth = .8; c.stroke();
+    for (let j = 0; j < 14; j++) {
+      c.fillStyle = `rgba(75,109,68,${.25 + random() * .35})`;
+      c.beginPath(); c.ellipse(x + Math.sin(j * .21) * 5, y + length * j / 14,
+        2, 6 + random() * 4, j % 2 ? .7 : -.6, 0, Math.PI * 2); c.fill();
     }
   }
 }
 
 export function bank(c: CanvasRenderingContext2D, W: number, H: number) {
-  const random = seededRandom(914);
-  // Corner banks keep the boat's entire crossing unobstructed.
-  for (const [x, y, rx, ry] of [[-.03, .96, .18, .055], [1.05, .99, .21, .045]]) {
-    c.fillStyle = "#7a8870";
-    c.beginPath(); c.ellipse(x * W, y * H, rx * W, ry * H, -.12, 0, Math.PI * 2); c.fill();
+  const random = seededRandom(402), portrait = W / H < .85;
+  // Large near-field pads frame a clear central boating channel.
+  for (let i = 0; i < 22; i++) {
+    const right = i > 10;
+    const x = W * (right ? .83 + random() * .23 : -.05 + random() * .24);
+    const y = H * (.94 + random() * .08), r = (portrait ? 43 : 62) * (.6 + random() * .7);
+    const shade = c.createLinearGradient(x, y - r, x, y + r);
+    shade.addColorStop(0, "#9caf7b"); shade.addColorStop(.5, "#5e845b"); shade.addColorStop(1, "#335f4e");
+    c.beginPath(); c.ellipse(x, y, r, r * .37, -.12, .17, Math.PI * 1.94);
+    c.lineTo(x, y); c.closePath(); c.fillStyle = shade; c.fill();
+    for (let vein = 0; vein < 11; vein++) {
+      const a = vein * Math.PI * 2 / 11;
+      c.beginPath(); c.moveTo(x, y);
+      c.quadraticCurveTo(x + Math.cos(a) * r * .4, y + Math.sin(a) * r * .12,
+        x + Math.cos(a) * r * .9, y + Math.sin(a) * r * .33);
+      c.strokeStyle = "#c1c89244"; c.lineWidth = .8; c.stroke();
+    }
   }
-  for (let i = 0; i < 28; i++) {
-    const right = i > 14;
-    const x = W * (right ? .88 + random() * .16 : random() * .14);
-    const y = H * (.91 + random() * .055), radius = 16 + random() * (W / H < .85 ? 25 : 32);
-    c.fillStyle = i % 3 ? "#627e65" : "#8a9b72";
-    c.beginPath(); c.ellipse(x, y, radius, radius * .31, -.1, .2, Math.PI * 1.95); c.lineTo(x, y); c.fill();
-    stroke(c, [[x - radius * .6, y], [x + radius * .5, y]], "#b4bb8866", .7);
-  }
-  const size = W / H < .85 ? 17 : 23;
-  lotus(c, W * .065, H * .95, size);
-  lotus(c, W * .15, H * .975, size * .78);
-  lotus(c, W * .91, H * .955, size * 1.1);
-  lotus(c, W * .985, H * .935, size * .65);
+  const size = portrait ? 38 : 48;
+  lotus(c, W * .065, H * .97, size);
+  lotus(c, W * .19, H * 1.025, size * .67);
+  lotus(c, W * .905, H * .985, size * 1.13);
+  lotus(c, W * 1.015, H * .945, size * .72);
 }

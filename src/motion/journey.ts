@@ -43,7 +43,7 @@ export function createJourney(initialX = 0.69, random = Math.random) {
     });
   }
   function select(target: SceneName, instant = false, automatic = false) {
-    if (!scenes.includes(target)) return;
+    if (!scenes.includes(target) && target !== "room") return;
     if (!automatic) queue = shuffle().filter((name) => name !== target);
     if (instant) {
       scene = target;
@@ -83,7 +83,7 @@ export function createJourney(initialX = 0.69, random = Math.random) {
   return {
     select,
     advance(dt: number) {
-      motion.seek(motion.currentTime + dt * 1000);
+      if (scene !== "room" || transitioning) motion.seek(motion.currentTime + dt * 1000);
     },
     dispose() {
       motion.cancel();

@@ -48,18 +48,18 @@ export async function checkSoak(browser, url) {
             time++;
             journey.advance(1);
             if (tick % 600 === 0) {
-              const name = ["ink", "city", "coast", "garden"][cycles++ % 4];
+              const name = ["ink", "city", "coast", "garden", "room"][cycles++ % 5];
               journey.select(name);
               journey.advance(2.5);
               renderer.draw(time, [0, 0, -100], journey.state());
-              journey.select(["city", "coast", "garden", "ink"][cycles % 4]);
+              journey.select(["city", "coast", "garden", "room", "ink"][cycles % 5]);
             }
           }
           for (let resize = 0; resize < 3; resize++) {
             canvas.width = resize % 2 ? 128 : 192;
             canvas.height = resize % 2 ? 192 : 128;
             renderer.upload(createScene(canvas.width, canvas.height));
-            for (const name of ["ink", "city", "coast", "garden"]) {
+            for (const name of ["ink", "city", "coast", "garden", "room"]) {
               journey.select(name, true);
               renderer.draw(time, [0, 0, -100], journey.state());
             }

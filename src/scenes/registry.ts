@@ -1,3 +1,6 @@
+import { createRoom } from "./room/painting.ts";
+import { drawStaticRoom, roomUniforms, updateRoom } from "./room/static.ts";
+import { fragment as room } from "./room/shader.ts";
 import { createGarden } from "./garden/painting.ts";
 import { drawStaticGarden } from "./garden/static.ts";
 import { fragment as garden } from "./garden/shader.ts";
@@ -40,6 +43,7 @@ interface Definition {
   ) => void;
 }
 export const definitions: Record<SceneName, Definition> = {
+  room: { create: createRoom, drawStatic: drawStaticRoom, fragment: room, uniforms: roomUniforms, update: updateRoom },
   garden: { create: createGarden, drawStatic: drawStaticGarden, fragment: garden },
   ink: {
     create: createInk,

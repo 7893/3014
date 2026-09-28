@@ -1,3 +1,4 @@
+import { scenes } from "../../src/motion/journey.ts";
 import assert from "node:assert/strict";
 import { copy, arrivalText } from "../../src/config/copy.ts";
 
@@ -31,11 +32,17 @@ export async function checkFallback(browser, url) {
     await page.locator("canvas").getAttribute("data-renderer"),
     "canvas2d",
   );
-  for (const [key, info] of Object.entries(copy.scenes)) {
+  for (const [key, info] of scenes.map(key => [key, copy.scenes[key]])) {
     await page.getByRole("button", { name: info.label, exact: true }).click();
     await checkCopy(page, key);
     assert.equal(await page.locator("#status").textContent(), arrivalText(key));
   }
+  await page.getByRole("button", { name: copy.scenes.ink.label, exact: true }).click();
+  await page.getByRole("button", { name: copy.hidden.enter, exact: true }).click();
+  assert.equal(await page.locator("canvas").getAttribute("data-scene"), "room");
+  assert.equal(await page.locator(".scene-nav").isVisible(), false);
+  await page.getByRole("button", { name: copy.hidden.back, exact: true }).click();
+  assert.equal(await page.locator("canvas").getAttribute("data-scene"), "ink");
   await page.close();
   const noScript = await browser.newPage({ javaScriptEnabled: false });
   await noScript.goto(url);
