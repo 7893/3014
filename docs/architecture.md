@@ -122,3 +122,9 @@ Keep authored drawing code where the image is defined. Do not replace Pixi
 resource management or Anime timeline interpolation with another scheduler,
 handwritten rasterizer, or duplicate allocation lifecycle. No new dependency
 is needed for these effects.
+
+The coastal pier uses Pixi's `PerspectivePlaneGeometry`, shared with
+`PerspectiveMesh`, to project planks and support anchors from one rectangular
+layout. Portrait and landscape compositions have separate corner presets.
+Projected shapes are baked into the existing foreground and material mask;
+geometry buffers are destroyed immediately, with no extra per-frame render pass.

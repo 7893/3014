@@ -10,3 +10,4 @@ export { WebGLRenderer, Ticker } from "pixi.js";
 export { createRunningChild } from "../../src/actors/child.ts";
 export { BEACH_RUN } from "../../src/config/actors.ts";
 export { roomLayout } from "../../src/scenes/room/composition.ts";
+export { createPierGeometry } from "../../src/scenes/coast/pier.ts";

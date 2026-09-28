@@ -5,7 +5,7 @@ export async function checkDetails(browser, url) {
     const page = await browser.newPage({ viewport: { width, height: 844 } });
     await page.goto(`${url}/__test/blank.html`);
     const result = await page.evaluate(async () => {
-      const { createScene, createRenderer, createRunningChild, BEACH_RUN, roomLayout } = await import("/__test/harness.js");
+      const { createScene, createRenderer, createRunningChild, BEACH_RUN, createPierGeometry, roomLayout } = await import("/__test/harness.js");
       const painting = createScene(innerWidth, innerHeight), canvas = document.createElement("canvas");
       canvas.width = innerWidth; canvas.height = innerHeight;
       const renderer = await createRenderer(canvas), gl = canvas.getContext("webgl2");
@@ -33,6 +33,16 @@ export async function checkDetails(browser, url) {
         for (let i = 0; i < frames[index].length; i++) change += Math.abs(frames[index][i] - frames[index + 1][i]);
         return change / frames[index].length;
       });
+      const pier = createPierGeometry(innerWidth, innerHeight);
+      const p = pier.positions, n = pier.verticesX;
+      const farWidth = Math.hypot(p[n * 4] - p[0], p[n * 4 + 1] - p[1]);
+      const nearWidth = Math.hypot(p[(n * 3 - 1) * 2] - p[(n - 1) * 2],
+        p[(n * 3 - 1) * 2 + 1] - p[(n - 1) * 2 + 1]);
+      if (!p.every(Number.isFinite) || nearWidth <= farWidth || p[(n - 1) * 2] < innerWidth)
+        throw new Error("Pier must widen toward shore and connect beyond the frame");
+      for (let i = 1; i < n; i++)
+        if (p[i * 2] <= p[(i - 1) * 2]) throw new Error("Folded pier geometry");
+      pier.destroy();
       let directions = 0;
       for (const index of [0, 1]) {
         const actor = createRunningChild(index);
