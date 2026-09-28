@@ -113,9 +113,11 @@ Scene shaders use the common sky, water, boat-light and interaction effects in
 All scene fragment entry points live under `scenes/<name>/shaders/main.ts`.
 
 `actors/surface.ts` centralizes Pixi atlas rendering and disposal. The boat and
-beach actors use it; the seated pier visitor shares the beach atlas and uses
-Anime timelines for foot movement. Water rings read the actual animated foot
-positions, so motion and contact cannot drift apart. Static fallback artwork
+beach actors use it; the seated pier visitor shares the beach atlas and uses a Pixi AnimatedSprite
+of prepainted poses. The shared application clock selects frames without a second
+ticker. Each frame supplies its own foot-contact coordinates for water rings.
+The same drawing supplies the static fallback; no runtime limb solving or scaling
+is involved. Static fallback artwork
 remains necessary when WebGL is unavailable. Interior playback skips the boat
 atlas update. Room uniforms reuse the painting layout and update on resize.
 

@@ -16,7 +16,7 @@ vec3 pierRipples(vec3 color,vec2 p){
 vec3 pierVisitor(vec3 color,vec2 p){
   float scale=min(u_size.x,u_size.y)/${PIER_VISITOR.sizeDivisor}.;
   vec2 local=(p-pierSeat)*u_size/scale;
-  vec2 uv=(local+vec2(32.,21.))/64.;
+  vec2 uv=(local+vec2(32.,24.))/64.;
   if(any(lessThan(uv,vec2(0)))||any(greaterThan(uv,vec2(1))))return color;
   uv.x=(uv.x+2.)/3.;
   return over(color,texture(u_beachCrew,uv));

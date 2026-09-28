@@ -37,15 +37,35 @@ export async function checkDetails(browser, url) {
       const ctx = coast.getContext("2d"); let dryContacts = 0;
       actor.update(0, innerWidth, innerHeight); const initial = Array.from(actor.feet);
       actor.update(.9, innerWidth, innerHeight); const movement = actor.feet.reduce((n, v, i) => n + Math.abs(v - initial[i]), 0);
-      for (let t = 0; t < 7.2; t += .15) {
+      const silhouettes = new Set();
+      const sprite = actor.root.children[0], source = sprite.texture.source;
+      const sheet = source.resource.getContext("2d"), resolution = source.resolution;
+      for (let t = .001; t < 6.4; t += .1) {
         actor.update(t, innerWidth, innerHeight);
-        const bounds = actor.root.getLocalBounds();
-        if (bounds.width > 27 || bounds.maxY > 11) throw new Error("Pier visitor limbs exceed human proportions");
+        if (!silhouettes.has(sprite.currentFrame)) {
+          silhouettes.add(sprite.currentFrame);
+          const rect = sprite.texture.frame;
+          const pixels = sheet.getImageData(rect.x * resolution, rect.y * resolution,
+            rect.width * resolution, rect.height * resolution);
+          let minX = 100, maxX = -100, minY = 100, maxY = -100;
+          for (let y = 0; y < pixels.height; y++) for (let x = 0; x < pixels.width; x++) {
+            if (pixels.data[(y * pixels.width + x) * 4 + 3] < 64) continue;
+            const px = x / resolution - sprite.anchor.x * rect.width;
+            const py = y / resolution - sprite.anchor.y * rect.height;
+            minX = Math.min(minX, px); maxX = Math.max(maxX, px);
+            minY = Math.min(minY, py); maxY = Math.max(maxY, py);
+          }
+          if (maxX - minX > 24 || maxY - minY > 34 || maxY > 11)
+            throw new Error("Painted pose exceeds seated human proportions");
+        }
         for (let foot = 0; foot < 2; foot++) {
           const px = actor.feet[foot * 2] * coast.width, py = actor.feet[foot * 2 + 1] * coast.height;
           if (ctx.getImageData(Math.floor(px), Math.floor(py), 1, 1).data[3] > 64) dryContacts++;
         }
       }
+      actor.update(3.2, innerWidth, innerHeight);
+      const loop = actor.feet.every((value, i) => value === initial[i]) && sprite.currentFrame === 0;
+      if (silhouettes.size !== sprite.totalFrames || !loop) throw new Error("Incomplete or discontinuous pose cycle");
       actor.dispose(); actor.root.destroy({ children: true });
       const error = gl.getError(); renderer.dispose();
       return { skyChanges, wrapChanges, movement, dryContacts, error };

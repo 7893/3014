@@ -1,47 +1,40 @@
+import { AnimatedSprite, CanvasSource, Container, Rectangle, Texture } from "pixi.js";
 import { PIER_VISITOR as pose } from "../config/actors.ts";
-import { Container, Graphics } from "pixi.js";
-import { createTimeline } from "animejs";
+import { drawPierVisitor, visitorCycle, visitorPose } from "../drawing/pier-visitor.ts";
 import { pier } from "../scenes/coast/pier.ts";
 
-/** Small atlas actor; Anime moves the feet, Pixi transforms the articulated legs. */
+/** Prepainted poses use Pixi frame selection on the application's absolute clock. */
 export function createPierVisitor() {
-  const root = new Container(); root.position.set(160, 21);
+  const cell = { width: 32, height: 40, x: 18, y: 24 }, resolution = 3, columns = 8;
+  const canvas = document.createElement("canvas");
+  canvas.width = cell.width * columns * resolution;
+  canvas.height = cell.height * Math.ceil(visitorCycle.frames / columns) * resolution;
+  const c = canvas.getContext("2d")!; c.scale(resolution, resolution);
+  const poses = Array.from({ length: visitorCycle.frames }, (_, frame) => visitorPose(frame));
+  const source = new CanvasSource({ resource: canvas, resolution });
+  const textures = poses.map((feet, frame) => {
+    const x = frame % columns * cell.width, y = Math.floor(frame / columns) * cell.height;
+    c.save(); c.translate(x + cell.x, y + cell.y); drawPierVisitor(c, feet); c.restore();
+    return new Texture({ source, frame: new Rectangle(x, y, cell.width, cell.height) });
+  });
+  const sprite = new AnimatedSprite({ textures, autoUpdate: false });
+  sprite.anchor.set(cell.x / cell.width, cell.y / cell.height);
+  const root = new Container(); root.position.set(160, 24); root.addChild(sprite);
   const feet = new Float32Array(4);
-  const motions: ReturnType<typeof createTimeline>[] = [];
-  const legs: Graphics[] = [];
-  const duration = 3600;
-  for (let i = 0; i < 2; i++) {
-    const hipX = (i * 2 - 1) * pose.hip, kneeX = pose.kneeX + hipX;
-    root.addChild(new Graphics().moveTo(hipX, -2).lineTo(kneeX, pose.kneeY)
-      .stroke({ color: 0xb8926e, width: 1.9, cap: "round" }));
-    // A fixed-length bone rotates; neither the limb nor its round caps stretch.
-    const lower = new Graphics().moveTo(0, 0).lineTo(pose.shin, 0)
-      .stroke({ color: 0xb8926e, width: 1.7, cap: "round" })
-      .ellipse(pose.shin, 0, 1.25, .8).fill(0x8ba885);
-    lower.position.set(kneeX, pose.kneeY); root.addChild(lower);
-    motions.push(createTimeline({ autoplay: false, defaults: { duration, ease: "inOutSine" } })
-      .add(lower, { rotation: [2.35, 2.65, 2.35] }, 0));
-    legs.push(lower);
-  }
-  const torso = new Graphics().moveTo(-3, -11).quadraticCurveTo(-5, -8, -4, -3)
-    .lineTo(-5, .5).quadraticCurveTo(0, 2, 5, .5).lineTo(4, -3)
-    .quadraticCurveTo(5, -8, 3, -11).closePath().fill(0xc7aba0);
-  root.addChild(torso, new Graphics().moveTo(-3.5, -8).lineTo(-5, -3).lineTo(-7, 0)
-    .moveTo(3.5, -8).lineTo(5, -3).lineTo(7, 0)
-    .stroke({ color: 0xb99879, width: 1.4, cap: "round" }),
-  new Graphics().ellipse(0, -14, 3, 4).fill(0x49493e)
-    .roundRect(-3.5, -14, 7, 8, 2).fill(0x49493e));
   return {
     root, feet,
     update(time: number, width: number, height: number) {
-      const scale = Math.min(width, height) / pose.sizeDivisor;
-      for (let i = 0; i < legs.length; i++) {
-        motions[i].seek((time * 1000 + i * duration * .3) % duration, true);
-        const lower = legs[i];
-        feet[i * 2] = pier.seatX + (lower.x + Math.cos(lower.rotation) * pose.shin) * scale / width;
-        feet[i * 2 + 1] = pier.seatY + (lower.y + Math.sin(lower.rotation) * pose.shin) * scale / height;
+      const frame = Math.floor((time % visitorCycle.seconds) / visitorCycle.seconds * textures.length);
+      sprite.gotoAndStop(frame);
+      const scale = Math.min(width, height) / pose.sizeDivisor, points = poses[sprite.currentFrame];
+      for (let leg = 0; leg < 2; leg++) {
+        feet[leg * 2] = pier.seatX + points[leg * 2] * scale / width;
+        feet[leg * 2 + 1] = pier.seatY + points[leg * 2 + 1] * scale / height;
       }
     },
-    dispose() { motions.forEach(motion => motion.cancel()); },
+    dispose() {
+      sprite.stop();
+      textures.forEach(texture => texture.destroy()); source.destroy();
+    },
   };
 }

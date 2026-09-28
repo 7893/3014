@@ -26,8 +26,10 @@ export function drawBoardwalk(
     stroke(ctx, [[edge(t), y + drop * .55], [edge(t, true), level(t, true) + drop * .55]], "#685a40", 2.2);
   }
   shape([[edge(1), H], [edge(1, true), H], [edge(0, true), level(0, true)], [edge(0), level(0)]], "#a18b60");
-  // The darker fascia gives the planks physical thickness.
-  shape([[edge(0), level(0)], [edge(1), H], [edge(1) - 3, H], [edge(0) - 2, level(0) + 4]], "#65583e");
+  // Leave a thin open landing at the end; the deeper side beam begins behind it.
+  const beamStart = .12;
+  shape([[edge(beamStart), level(beamStart)], [edge(1), H], [edge(1) - 3, H],
+    [edge(beamStart) - 2, level(beamStart) + 4]], "#65583e");
   shape([[edge(0, true), level(0, true)], [edge(1, true), H], [edge(1, true) + 3, H], [edge(0, true) + 2, level(0, true) + 4]], "#7b6847");
   for (let i = 0; i < 17; i++) {
     const t = i / 17, y = level(t), left = edge(t), right = edge(t, true);
