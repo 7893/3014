@@ -80,6 +80,7 @@ void main(){
   land.rgb=mix(land.rgb,vec3(.70,.77,.69),u_environment.z*(1.-smoothstep(.47,.64,p.y))*.38);
   color=over(color,land);
   color=paintSurf(color,p);
+  color=pierRipples(color,p);
   color=beachPeople(color,p);
   color=over(color,sampleLayer(u_trunk0,palmUV(p,palmRoot0,palmCrown0,palmPhase0,false)));
   color=over(color,sampleLayer(u_leaves0,palmUV(p,palmRoot0,palmCrown0,palmPhase0,true)));

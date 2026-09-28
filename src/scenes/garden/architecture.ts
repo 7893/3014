@@ -1,3 +1,4 @@
+import { enclosure } from "./enclosure.ts";
 import { stroke } from "../../drawing/canvas.ts";
 
 function roof(c: CanvasRenderingContext2D, x: number, y: number, w: number) {
@@ -22,23 +23,21 @@ function roof(c: CanvasRenderingContext2D, x: number, y: number, w: number) {
 
 export function architecture(c: CanvasRenderingContext2D, W: number, H: number) {
   const base = H * .655;
-  const wall = c.createLinearGradient(0, H * .42, 0, base);
-  wall.addColorStop(0, "#e6e0c8");
-  wall.addColorStop(1, "#b6bda4");
-  c.fillStyle = wall;
-  c.fillRect(0, H * .475, W, H * .18);
-  stroke(c, [[0, H * .475], [W, H * .475]], "#707c70", 5);
-  stroke(c, [[0, H * .482], [W, H * .482]], "#f1e8ce", 2);
+  enclosure(c, W, H);
   // A recessed moon gate, with a shaded garden visible through the opening.
-  const gx = W * .61, gy = H * .565, r = Math.min(W * .085, H * .086);
+  const gx = W * .61, r = Math.min(W * .085, H * .086), gy = base - r - H * .009;
   c.fillStyle = "#657868";
   c.beginPath(); c.arc(gx, gy, r, 0, Math.PI * 2); c.fill();
   c.strokeStyle = "#efe8d4"; c.lineWidth = 9; c.stroke();
   c.strokeStyle = "#a5ad99"; c.lineWidth = 1.5; c.stroke();
   c.save(); c.clip();
   c.fillStyle = "#89957a"; c.fillRect(gx - r, gy + r * .25, r * 2, r);
-  stroke(c, [[gx - r * .6, gy + r], [gx, gy + r * .3],
-    [gx + r * .35, gy + r]], "#c4c3a7", 12);
+  c.beginPath(); c.moveTo(gx + r * .35, gy + r);
+  c.bezierCurveTo(gx - r * .8, gy + r * .15, gx + r * .8, gy + r * .2, gx + r * .1, gy - r * .3);
+  c.strokeStyle = "#c4c3a7"; c.lineWidth = r * .17; c.stroke();
+  c.fillStyle = "#b7c3ab"; c.fillRect(gx - r, gy - r * .65, r * 2, r * .33);
+  stroke(c, [[gx - r, gy - r * .65], [gx + r, gy - r * .65]], "#7d9180", 2);
+  c.fillStyle = "#748a76"; c.beginPath(); c.arc(gx + r * .3, gy - r * .38, r * .21, Math.PI, 0); c.fill();
   for (let i = 0; i < 6; i++) {
     const bx = gx - r * .78 + i * r * .15;
     stroke(c, [[bx, gy + r], [bx + 6, gy - r]], "#3f5948", 1);

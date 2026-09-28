@@ -43,8 +43,8 @@ export async function checkActor(browser, url) {
         geometry,
       );
       const gl = canvas.getContext("webgl2");
-      function frame(time, passenger = false) {
-        actor.draw(renderer, time, passenger);
+      function frame(time) {
+        actor.draw(renderer, time);
         renderer.render({ container: pass.mesh, clear: true });
         const pixels = new Uint8Array(160 * 100 * 4);
         gl.readPixels(0, 0, 160, 100, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
@@ -67,8 +67,6 @@ export async function checkActor(browser, url) {
         below: peak(first, 58),
         movement: difference(first, next),
         loop: difference(first, repeated),
-        companion: difference(first, frame(0, true)),
-        restored: difference(first, frame(0)),
         error: gl.getError(),
       };
       pass.dispose();
@@ -81,8 +79,6 @@ export async function checkActor(browser, url) {
     assert(result.below < 110, "actor texture must not be vertically inverted");
     assert(result.movement > 100, "rowing parts must move");
     assert(result.loop < 100, "rowing must loop without a visible jump");
-    assert(result.companion > 100, "courtyard must add a seated passenger");
-    assert.equal(result.restored, 0, "passenger must not persist in other scenes");
     assert.equal(result.error, 0);
     console.log("Actor orientation, rowing and loop passed:", result);
   } finally {

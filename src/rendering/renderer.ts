@@ -63,7 +63,6 @@ export async function createRenderer(canvas: HTMLCanvasElement) {
     x: number,
     wind: ArrayLike<number>,
   ) {
-    actor.draw(renderer, time, key === "garden");
     if (key === "coast") beachActors.draw(renderer, time);
     const pass = resources.prepare(key);
     const conditions = environment.sample(key, time, wind);
@@ -101,6 +100,7 @@ export async function createRenderer(canvas: HTMLCanvasElement) {
       wind: ArrayLike<number> = [0, 0, time, 0.65],
     ) {
       Ticker.system.update(performance.now());
+      actor.draw(renderer, time);
       const composite = journey.transitioning || journey.from === "ink";
       drawScene(
         journey.from,

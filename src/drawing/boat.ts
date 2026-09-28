@@ -5,7 +5,6 @@ export function paintBoat(
   y: number,
   scale: number,
   crew = true,
-  passenger = false,
 ) {
   const { ctx, ink, brush, line } = tools;
   ctx.save();
@@ -18,29 +17,25 @@ export function paintBoat(
   ctx.quadraticCurveTo(14, 8, -10, 6);
   ctx.closePath();
   ctx.fill();
-  if (!passenger) brush(
-    [
-      [-9, -2],
-      [-8, -9],
-      [-2, -11],
-      [7, -9],
-      [10, -1],
-    ],
-    0.65,
-    1,
-  );
-  if (passenger) {
-    // Seated profile: bun, neck, draped sleeves and a skirt resting inside the hull.
-    ctx.fillStyle = ink(.83);
-    ctx.beginPath(); ctx.ellipse(-6, -13.2, 1.7, 2.1, -.15, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(-7, -15.5, 1.25, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(-6.5, -11.5);
-    ctx.quadraticCurveTo(-10, -9, -10.5, -3);
-    ctx.quadraticCurveTo(-5, -1, 1, -2);
-    ctx.lineTo(-1, -4); ctx.lineTo(-5, -5);
-    ctx.quadraticCurveTo(-3.5, -8, -5, -11.5); ctx.fill();
-    line([[-5, -9], [-2, -6], [1, -6]], ink(.72), .85);
-  }
+  // The same sheltered passenger travels through every setting.
+  ctx.fillStyle = ink(.70);
+  ctx.beginPath(); ctx.ellipse(-5, -7.8, 1.4, 1.7, -.15, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(-6, -9.6, .95, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(-5.5, -6.5);
+  ctx.quadraticCurveTo(-8, -5, -8, -1);
+  ctx.quadraticCurveTo(-4, 1, 1, -1);
+  ctx.lineTo(-1, -3); ctx.lineTo(-4, -3);
+  ctx.lineTo(-4, -6.5); ctx.closePath(); ctx.fill();
+  line([[-4, -5], [-1, -3], [2, -3]], ink(.60), .7);
+  // A curved woven canopy shelters the seated figure, with an open side.
+  ctx.beginPath(); ctx.moveTo(-13, -2);
+  ctx.bezierCurveTo(-13, -17, 5, -19, 8, -2);
+  ctx.strokeStyle = ink(.70); ctx.lineWidth = 1.1; ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-13, -7);
+  ctx.bezierCurveTo(-9, -17, 3, -17, 7, -7);
+  ctx.strokeStyle = ink(.32); ctx.lineWidth = 1.6; ctx.stroke();
+  line([[-13, -2], [-12, -9]], ink(.6), .8);
+  line([[8, -2], [6, -9]], ink(.6), .8);
   if (crew) {
     ctx.fillStyle = ink(0.78);
     ctx.beginPath();

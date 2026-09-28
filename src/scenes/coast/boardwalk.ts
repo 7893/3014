@@ -1,3 +1,4 @@
+import { pier } from "./pier.ts";
 import { paintPierVisitor } from "./pier-visitor.ts";
 import { stroke } from "../../drawing/canvas.ts";
 import type { Points } from "../../drawing/types.ts";
@@ -6,11 +7,11 @@ export function drawBoardwalk(
   ctx: CanvasRenderingContext2D, W: number, H: number,
   shape: (points: Points, fill: string) => void,
 ) {
-  const edge = (t: number, right = false) => W * (right ? .86 + t * .135 : .832 + t * .058);
-  const level = (t: number) => H * (.87 + t * .13);
+  const edge = (t: number, right = false) => W * (right ? pier.right + t * (.995 - pier.right) : pier.left + t * (.89 - pier.left));
+  const level = (t: number) => H * (pier.top + t * (1 - pier.top));
   // Cast shadows, paired posts, and diagonal bracing beneath the deck.
   for (let i = 0; i < 5; i++) {
-    const t = i / 5, y = level(t), drop = H * (.014 + t * .008);
+    const t = i / 5, y = level(t), drop = H * (pier.water - pier.top + t * .008);
     for (const right of [false, true]) {
       const x = edge(t, right), thick = 2 + t * 2;
       ctx.fillStyle = "rgba(74,67,44,.18)";

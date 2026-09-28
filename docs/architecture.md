@@ -48,9 +48,9 @@ Rain and daylight rendering remain separate future work.
 Graphics, a procedural hull Sprite, and an Anime rowing timeline. Its small local
 render texture supplies coverage and oar lighting masks to each scene's material;
 shader code no longer constructs the animated person's limbs. Reflection and
-foreground occlusion still use the scene's artistic material. The courtyard selects
-an open hull with a seated passenger; both variants share the rowing timeline.
-Each transition pass refreshes the shared actor texture for its own scene.
+foreground occlusion still use the scene's artistic material. Every scene shares the same
+covered boat, sheltered passenger, and rowing timeline. A single actor texture
+is refreshed once per frame, including scene transitions.
 Coastal children share a small Pixi pose atlas and Anime limb timelines; their
 path follows the shared shoreline on dry sand, beneath palm occlusion.
 

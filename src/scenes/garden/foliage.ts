@@ -1,3 +1,4 @@
+import { lotus } from "./lotus.ts";
 import { seededRandom, stroke } from "../../drawing/canvas.ts";
 
 export function foliage(c: CanvasRenderingContext2D, W: number, H: number) {
@@ -34,16 +35,14 @@ export function bank(c: CanvasRenderingContext2D, W: number, H: number) {
   for (let i = 0; i < 28; i++) {
     const right = i > 14;
     const x = W * (right ? .88 + random() * .16 : random() * .14);
-    const y = H * (.91 + random() * .055), radius = 9 + random() * 13;
+    const y = H * (.91 + random() * .055), radius = 16 + random() * (W / H < .85 ? 25 : 32);
     c.fillStyle = i % 3 ? "#627e65" : "#8a9b72";
     c.beginPath(); c.ellipse(x, y, radius, radius * .31, -.1, .2, Math.PI * 1.95); c.lineTo(x, y); c.fill();
     stroke(c, [[x - radius * .6, y], [x + radius * .5, y]], "#b4bb8866", .7);
-    if (i % 5 === 0) {
-      stroke(c, [[x, y], [x + 3, y - 22]], "#6e8264", 1);
-      for (let k = -2; k <= 2; k++) {
-        c.fillStyle = k % 2 ? "#c79591" : "#e2beb1";
-        c.beginPath(); c.ellipse(x + 3 + k * 2, y - 24, 3, 7, k * .28, 0, Math.PI * 2); c.fill();
-      }
-    }
   }
+  const size = W / H < .85 ? 17 : 23;
+  lotus(c, W * .065, H * .95, size);
+  lotus(c, W * .15, H * .975, size * .78);
+  lotus(c, W * .91, H * .955, size * 1.1);
+  lotus(c, W * .985, H * .935, size * .65);
 }
