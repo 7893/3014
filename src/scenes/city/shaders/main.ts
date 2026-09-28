@@ -95,7 +95,7 @@ void main(){
   color=mix(color,vec3(.035,.07,.085),boat.a*(1.-bank.a));
   color+=vec3(.85,.60,.28)*rim*.65*(1.-bank.a);
   vec2 local=(p-u_boatCenter-u_boat)/u_actorScale;
-  float oar=crewMasks(local).y;
+  float oar=boatMasks(p-u_boat).r;
   color=mix(color,vec3(.68,.56,.35),oar*.8*(1.-bank.a));
   float lantern=exp(-dot((local-vec2(-5.,-5.))/vec2(2.5,3.),(local-vec2(-5.,-5.))/vec2(2.5,3.)));
   color+=vec3(.9,.51,.18)*lantern*.65*(1.-bank.a);

@@ -88,3 +88,47 @@ hours. Retained JS heap after forced GC was about 3.62 MB at the warm sample and
 3.98 MB at the final sample; DOM nodes stayed at 27 and listeners at 3. This is
 bounded growth within the regression threshold, not proof of zero allocations.
 All tracked textures and buffers were released on renderer disposal.
+
+## Library ownership follow-up
+
+Pixi Ticker now owns frame scheduling and rate limiting. Anime timelines own
+voyage interpolation, arrival callbacks, scene blending, and the rowing cycle.
+The separate transition controller and manual RAF scheduling were removed.
+Adaptive quality and randomized scene order remain application policy.
+
+The shared boat uses Pixi Container, Graphics, and Sprite objects. The crew and
+oar are animated through transforms instead of custom GLSL limb geometry. One
+304×208 actor render texture is reused by all scenes, including crossfades, and
+survives viewport resize. This replaces the viewport-sized boat texture; the
+static fallback still paints its own complete boat when WebGL is unavailable.
+Scene shaders retain artistic lighting, reflections, and foreground occlusion.
+Fish and foliage remain procedural shaders; this phase does not migrate them.
+
+The scheduling and journey modules shrink from 219 to 192 lines, including the
+removed transition module. The boat shader shrinks from 36 to 11 lines. Overall
+runtime source grows from 75 modules / 3,922 lines to 76 modules / 3,984 lines:
+the explicit actor hierarchy and teardown offset these deletions. No runtime
+module exceeds 180 lines. This is an ownership change, not a net code reduction.
+
+All JavaScript assets total about 540 KB, or 166 KB when individually gzipped,
+including optional chunks. Graphics support adds bundle weight and a small
+offscreen pass; smaller boat textures do not establish a rendering speedup.
+
+Strict checks, unit behaviors, production validation, and desktop/mobile browser
+regressions pass. A dedicated actor test verifies orientation, rowing movement,
+and a seamless cycle. Lifecycle coverage verifies one active frame loop,
+back/forward cache resume, and explicit GPU teardown on ordinary departure.
+Water-only input, perspective ripples, foreground occlusion, context recovery,
+fonts, and the static fallback remain covered.
+
+Across 48 simulated hours and 24 resizes, retained GPU allocations plateau at
+23 textures, 5 buffers, 3 framebuffers, 5 programs, and 2 vertex arrays. Retained
+heap rises from about 4.20 MB after warmup to 4.58 MB; DOM nodes remain at 27 and
+listeners at 3. Disposal releases tracked textures and buffers and loses the
+context. These accelerated checks are not proof of indefinite leak freedom.
+
+A separate 120-second real-time run also passes, including automatic scene
+changes. After the 60-second sample, retained heap grows from about 4.90 MB to
+4.98 MB; DOM nodes remain at 108 and listeners at 39 in the full page. No browser
+errors or invalid GPU operations occur. Longer target-device testing remains
+necessary before claiming unattended-display reliability.

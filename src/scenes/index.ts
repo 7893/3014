@@ -9,14 +9,6 @@ export function createScene(width: number, height: number) {
   const W = portrait ? 760 : 1600,
     H = (W * height) / width;
   const boatCenter = [portrait ? 0.64 : 0.69, portrait ? 0.815 : 0.805];
-  const { canvas: boat, ctx } = canvasLayer(width, height, W);
-  paintBoat(
-    createBrush(ctx, 707),
-    W * boatCenter[0],
-    H * boatCenter[1],
-    portrait ? 1.35 : 1.6,
-    false,
-  );
   let staticBoat: HTMLCanvasElement | undefined;
   const cache = new Map<SceneName, Painting>();
   function get(name: SceneName) {
@@ -30,7 +22,6 @@ export function createScene(width: number, height: number) {
     height,
     portrait,
     boatCenter,
-    boat,
     get,
     get preparedScenes() {
       return [...cache.keys()];

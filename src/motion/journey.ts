@@ -1,10 +1,10 @@
-import {
-  createTransition,
-  TRANSITION_SECONDS as DURATION,
-} from "./transition.ts";
+import { createTimeline, engine } from "animejs";
 import type { SceneName, JourneyState } from "../scenes/types.ts";
+
+engine.useDefaultMainLoop = false;
 const SPEED = 0.014;
 export const scenes: SceneName[] = ["ink", "city", "coast"];
+
 export function createJourney(initialX = 0.69, random = Math.random) {
   function shuffle() {
     const order = [...scenes];
@@ -14,92 +14,91 @@ export function createJourney(initialX = 0.69, random = Math.random) {
     }
     return order;
   }
-  let queue = shuffle();
-  let scene = queue.shift()!,
-    elapsed = 0,
-    startX = initialX,
-    transition: {
-      from: SceneName;
-      to: SceneName;
-      elapsed: number;
-      motion: ReturnType<typeof createTransition>;
-    } | null = null;
-  function nextScene() {
+  let queue = shuffle(),
+    scene = queue.shift()!;
+  let from = scene,
+    to = scene,
+    transitioning = false;
+  const position = { outgoing: initialX, incoming: 0.07, blend: 0 };
+  let motion: ReturnType<typeof createTimeline>;
+  function next() {
     if (!queue.length) {
       queue = shuffle();
       if (queue[0] === scene) [queue[0], queue[1]] = [queue[1], queue[0]];
     }
     return queue.shift()!;
   }
+  function cruise(x: number) {
+    motion?.cancel();
+    from = to = scene;
+    transitioning = false;
+    Object.assign(position, { outgoing: x, blend: 0 });
+    motion = createTimeline({
+      autoplay: false,
+      onComplete: () => select(next(), false, true),
+    }).add(position, {
+      outgoing: 0.985,
+      duration: ((0.985 - x) / SPEED) * 1000,
+      ease: "linear",
+    });
+  }
   function select(target: SceneName, instant = false, automatic = false) {
     if (!scenes.includes(target)) return;
     if (!automatic) queue = shuffle().filter((name) => name !== target);
     if (instant) {
       scene = target;
-      elapsed = 0;
-      startX = initialX;
-      transition?.motion.dispose();
-      transition = null;
+      cruise(initialX);
       return;
     }
-    if (transition?.to === target || (!transition && scene === target)) return;
-    if (transition) {
-      scene =
-        transition.elapsed < DURATION / 2 ? transition.from : transition.to;
-      elapsed = 0;
-      startX = 0.3;
-      transition?.motion.dispose();
-      transition = null;
+    if (to === target) return;
+    let x = position.outgoing;
+    if (transitioning) {
+      scene = position.blend < 0.5 ? from : to;
+      x = 0.3;
     }
-    if (scene === target) return;
-    transition = {
-      from: scene,
-      to: target,
-      elapsed: 0,
-      motion: createTransition(position(), SPEED),
-    };
-  }
-  function position() {
-    return startX + elapsed * SPEED;
-  }
-  function advance(dt: number) {
-    if (transition) {
-      transition.elapsed = Math.min(DURATION, transition.elapsed + dt);
-      transition.motion.seek(transition.elapsed);
-      if (transition.elapsed >= DURATION) {
-        scene = transition.to;
-        elapsed = 0;
-        startX = 0.22;
-        transition?.motion.dispose();
-        transition = null;
-      }
+    if (scene === target) {
+      cruise(x);
       return;
     }
-    elapsed += dt;
-    if (position() >= 0.985) select(nextScene(), false, true);
-  }
-  function state(): JourneyState {
-    if (!transition)
-      return {
-        scene,
-        from: scene,
-        to: scene,
-        blend: 0,
-        transitioning: false,
-        positions: { [scene]: position() },
-      };
-    const p = transition.elapsed / DURATION;
-    return {
-      scene: p < 0.5 ? transition.from : transition.to,
-      from: transition.from,
-      to: transition.to,
-      blend: transition.motion.values.blend,
-      transitioning: true,
-      positions: {
-        [transition.from]: transition.motion.values.outgoing,
-        [transition.to]: transition.motion.values.incoming,
+    motion.cancel();
+    from = scene;
+    to = target;
+    transitioning = true;
+    Object.assign(position, { outgoing: x, incoming: 0.07, blend: 0 });
+    motion = createTimeline({
+      autoplay: false,
+      onComplete: () => {
+        scene = target;
+        cruise(0.22);
       },
-    };
+    }).add(position, {
+      outgoing: x + 5 * SPEED,
+      incoming: 0.22,
+      blend: { from: 0, to: 1, ease: (p: number) => p * p * (3 - 2 * p) },
+      duration: 5000,
+      ease: "linear",
+    });
   }
-  return { advance, select, state };
+  cruise(initialX);
+  return {
+    select,
+    advance(dt: number) {
+      motion.seek(motion.currentTime + dt * 1000);
+    },
+    dispose() {
+      motion.cancel();
+    },
+    state(): JourneyState {
+      return {
+        scene: transitioning && position.blend >= 0.5 ? to : from,
+        from,
+        to,
+        transitioning,
+        blend: position.blend,
+        positions: transitioning
+          ? { [from]: position.outgoing, [to]: position.incoming }
+          : { [from]: position.outgoing },
+      };
+    },
+  };
 }

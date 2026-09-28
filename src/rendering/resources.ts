@@ -1,5 +1,5 @@
 import { CanvasSource } from "pixi.js";
-import type { UniformData, MeshGeometry } from "pixi.js";
+import type { UniformData, MeshGeometry, TextureSource } from "pixi.js";
 import { definitions } from "../scenes/registry.ts";
 import type { Scene, SceneName } from "../scenes/types.ts";
 import { createPass } from "./pass.ts";
@@ -25,26 +25,24 @@ function shared(): Record<string, UniformData> {
     u_actorScale: { value: [0, 0], type: "vec2<f32>" },
   };
 }
-export function createResources(geometry: MeshGeometry) {
+export function createResources(geometry: MeshGeometry, boat: TextureSource) {
   const passes = new Map<SceneName, Pass>();
   const textures = new Map<SceneName, CanvasSource[]>();
-  let boat: CanvasSource | undefined, painting: Scene;
+  let painting: Scene;
   function clear() {
     textures.forEach((sources) =>
       sources.forEach((source) => source.destroy()),
     );
     textures.clear();
-    boat?.destroy();
   }
   function upload(next: Scene) {
     clear();
     painting = next;
-    boat = texture(next.boat);
   }
   function prepare(name: SceneName) {
     if (textures.has(name)) return passes.get(name)!;
     const definition = definitions[name];
-    const sources: Record<string, CanvasSource> = { u_boatLayer: boat! };
+    const sources: Record<string, TextureSource> = { u_boatLayer: boat };
     const owned: CanvasSource[] = [];
     try {
       for (const [key, canvas] of Object.entries(painting.get(name).layers)) {

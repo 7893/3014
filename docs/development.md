@@ -53,11 +53,19 @@ Use `ENDURANCE_SECONDS=21600 npm run test:endurance` for a six-hour run, or
 display/browser/GPU before unattended installation; software Chromium cannot
 certify a particular graphics driver or indefinitely stable uptime.
 
-Keep one application frame loop. Pixi's maintenance ticker is advanced manually,
-and Anime timelines are paused and explicitly cancelled when replaced or finished.
+Keep one Pixi Ticker frame loop. The render-rate and maintenance tickers advance
+manually, and Anime timelines are paused and explicitly cancelled when replaced
+or finished.
 Scene caches are limited to three paintings; resizing destroys obsolete textures.
 All passes share one fullscreen geometry. Internal resolution is capped at
 1.8 million pixels to bound Canvas and GPU memory on high-density displays.
 Renderer disposal releases owned textures/buffers and the WebGL context. Context
 loss, page suspension, and static fallback are tested separately. Never hide a
 leak with periodic page reloads or clear unrelated browser state.
+
+Boat motion lives in `src/actors/boat.ts`; adjust the display hierarchy and Anime
+keyframes there. Its local coordinate bounds live in `src/config/actors.ts`.
+Do not recreate the previous GPU limb-distance functions or full-viewport boat
+texture. Actor tests check texture orientation, movement, and a seamless cycle.
+A real page departure disposes timelines, tickers, and renderer resources; a
+back/forward-cache suspension only pauses them so restoration remains possible.

@@ -31,14 +31,23 @@ truth for appearance and water hit masks.
 
 `src/motion` owns the journey and wildlife behavior. Anime.js replaces authored
 timing/interpolation; analytic waves, wind springs, and animal deformation stay
-in their appropriate CPU or GPU modules. One application clock advances motion
-and rendering. No library may start a competing animation loop.
+in their appropriate CPU or GPU modules. A Pixi Ticker owns the application clock;
+a manually advanced Ticker handles render-rate limits without scheduling another
+frame loop. Anime owns voyage
+interpolation, completion, and actor timelines. No library may start a competing
+animation loop.
 
 `src/environment` owns bounded render conditions and gradual changes. Geographic
 coordinates in configuration are representative weather lookup points. A future
 weather adapter must validate provider data, convert units, enforce freshness,
 and return provider-independent conditions. Network requests never run per frame.
 Rain and daylight rendering remain separate future work.
+
+`src/actors` owns reusable Pixi display objects. The shared boat uses Containers,
+Graphics, a procedural hull Sprite, and an Anime rowing timeline. Its small local
+render texture supplies coverage and oar lighting masks to each scene's material;
+shader code no longer constructs the animated person's limbs. Reflection and
+foreground occlusion still use the scene's artistic material.
 
 ## Rendering contract
 

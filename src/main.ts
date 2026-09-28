@@ -119,10 +119,16 @@ function sync() {
     );
 }
 document.addEventListener("visibilitychange", sync);
-window.addEventListener("pagehide", () => {
+window.addEventListener("pagehide", (event) => {
   clearTimeout(resizeTimer);
   animation.stop();
   preparation.stop();
+  if (!event.persisted) {
+    journey.dispose();
+    animation.dispose();
+    renderer?.dispose();
+    renderer = null;
+  }
 });
 window.addEventListener("pageshow", (event) => {
   if (!event.persisted) return;

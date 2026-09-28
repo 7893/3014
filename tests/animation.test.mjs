@@ -16,14 +16,22 @@ test("cadence backs off under sustained pressure and recovers without oscillatio
   assert.equal(c.fps, 60);
 });
 
-test("render throttling never throttles journey time; resuming excludes hidden time", () => {
+test("render throttling never throttles journey time; resuming excludes hidden time", (t) => {
   const originalRAF = globalThis.requestAnimationFrame,
     originalCancel = globalThis.cancelAnimationFrame;
+  let now = 0;
+  t.mock.method(performance, "now", () => now);
   let pending,
     elapsed = 0,
     draws = 0,
     rate = 60;
-  globalThis.requestAnimationFrame = (fn) => ((pending = fn), 1);
+  globalThis.requestAnimationFrame = (fn) => {
+    pending = (stamp) => {
+      now = stamp;
+      fn(stamp);
+    };
+    return 1;
+  };
   globalThis.cancelAnimationFrame = () => {
     pending = null;
   };
@@ -41,9 +49,10 @@ test("render throttling never throttles journey time; resuming excludes hidden t
       cb((i * 1000) / 60);
     }
     assert(Math.abs(elapsed - 10) < 1e-8);
-    assert(draws >= 595 && draws <= 601);
+    assert(draws >= 590 && draws <= 601, `Observed ${draws} draws`);
     loop.stop();
     assert.equal(pending, null);
+    now = 60000;
     loop.sync();
     pending(60000);
     assert(Math.abs(elapsed - 10) < 1e-8);

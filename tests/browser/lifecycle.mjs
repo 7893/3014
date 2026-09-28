@@ -93,6 +93,20 @@ export async function checkLifecycle(browser, url) {
       1,
       "one application frame loop",
     );
+    await page.evaluate(() =>
+      window.dispatchEvent(
+        new PageTransitionEvent("pagehide", { persisted: false }),
+      ),
+    );
+    await page.clock.runFor(100);
+    assert.equal(await page.evaluate(() => window.pendingFrames.size), 0);
+    assert.equal(await page.evaluate(() => window.idleWork.size), 0);
+    assert.equal(
+      await page
+        .locator("canvas")
+        .evaluate((canvas) => canvas.getContext("webgl2").isContextLost()),
+      true,
+    );
     assert.deepEqual(errors, []);
     console.log("Unchanged resize and page lifecycle scheduling passed.");
   } finally {

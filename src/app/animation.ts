@@ -1,3 +1,4 @@
+import { Ticker } from "pixi.js";
 // Monitor actual animation callbacks as well as CPU submission cost.
 export function createCadence() {
   let fps = 60,
@@ -45,42 +46,43 @@ export function createAnimation({
   onRate: (fps: number) => void;
 }) {
   const cadence = createCadence();
-  let frame = 0,
-    last: number | null = null,
-    due = 0,
-    lastRate: number | null = null;
-  function tick(now: number) {
-    frame = 0;
-    if (!active()) return;
-    const delta = last === null ? 0 : now - last;
-    last = now;
-    advance(Math.min(delta / 1000, 0.25));
-    let cost = null;
-    if (now + 0.5 >= due) {
-      const start = performance.now();
-      draw();
-      cost = performance.now() - start;
-      const period = 1000 / cadence.fps;
-      due = due ? due + period : now + period;
-      if (due <= now) due = now + period;
+  const clock = new Ticker(),
+    render = new Ticker();
+  clock.minFPS = render.minFPS = 4;
+  render.maxFPS = 60;
+  let cost: number | null = null;
+  render.add(() => {
+    const start = performance.now();
+    draw();
+    cost = performance.now() - start;
+  });
+  clock.add((tick) => {
+    if (!active()) {
+      clock.stop();
+      return;
     }
-    cadence.sample(delta, cost);
-    if (lastRate !== cadence.fps) {
-      lastRate = cadence.fps;
-      onRate(lastRate);
+    advance(tick.deltaMS / 1000);
+    cost = null;
+    render.update(tick.lastTime + tick.elapsedMS);
+    cadence.sample(tick.elapsedMS, cost);
+    if (render.maxFPS !== cadence.fps) {
+      render.maxFPS = cadence.fps;
+      onRate(cadence.fps);
     }
-    frame = requestAnimationFrame(tick);
-  }
-  function stop() {
-    cancelAnimationFrame(frame);
-    frame = 0;
-    last = null;
-    due = 0;
-  }
-  function sync() {
-    stop();
-    cadence.reset();
-    if (active()) frame = requestAnimationFrame(tick);
-  }
-  return { stop, sync };
+  });
+  return {
+    stop: () => clock.stop(),
+    sync() {
+      clock.stop();
+      cadence.reset();
+      render.maxFPS = 60;
+      render.lastTime = performance.now();
+      onRate(60);
+      if (active()) clock.start();
+    },
+    dispose() {
+      clock.destroy();
+      render.destroy();
+    },
+  };
 }

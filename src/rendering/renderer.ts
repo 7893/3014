@@ -1,3 +1,4 @@
+import { createBoat } from "../actors/boat.ts";
 import { createGeometry } from "./pass.ts";
 import { Ticker, WebGLRenderer } from "pixi.js";
 import { createEnvironment } from "../environment/state.ts";
@@ -40,7 +41,8 @@ export async function createRenderer(canvas: HTMLCanvasElement) {
   }
   const environment = createEnvironment();
   const geometry = createGeometry();
-  const resources = createResources(geometry);
+  const actor = createBoat();
+  const resources = createResources(geometry, actor.texture.source);
   const targets = createTargets();
   const compositor = createCompositor(targets.textures, geometry);
   let scene: Scene;
@@ -90,6 +92,7 @@ export async function createRenderer(canvas: HTMLCanvasElement) {
       wind: ArrayLike<number> = [0, 0, time, 0.65],
     ) {
       Ticker.system.update(performance.now());
+      actor.draw(renderer, time);
       drawScene(
         journey.from,
         0,
@@ -113,6 +116,7 @@ export async function createRenderer(canvas: HTMLCanvasElement) {
     resetEnvironment: environment.reset,
     dispose() {
       resources.dispose();
+      actor.dispose();
       compositor.dispose();
       targets.dispose();
       geometry.destroy();

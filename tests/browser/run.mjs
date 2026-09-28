@@ -1,3 +1,4 @@
+import { checkActor } from "./actor.mjs";
 import { checkSoak } from "./soak.mjs";
 import assert from "node:assert/strict";
 import { chromium } from "playwright";
@@ -13,6 +14,7 @@ const server = await serve();
 let browser;
 try {
   browser = await chromium.launch({ args: ["--enable-unsafe-swiftshader"] });
+  await checkActor(browser, server.url);
   await checkSoak(browser, server.url);
   await checkLifecycle(browser, server.url);
   for (const viewport of [
