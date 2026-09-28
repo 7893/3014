@@ -39,6 +39,7 @@ const archive = run(
     "-C",
     "dist",
     "index.html",
+    "robots.txt",
     "assets",
     "LICENSE",
     "NOTICE",
