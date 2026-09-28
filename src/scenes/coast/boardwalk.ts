@@ -10,14 +10,15 @@ export function drawBoardwalk(
   const level = (t: number, right = false) => H * (pier.top + (right ? pier.slope * (1 - t) : 0) + t * (1 - pier.top));
   // Cast shadows, paired posts, and diagonal bracing beneath the deck.
   for (let i = 0; i < 5; i++) {
-    const t = i / 5, y = level(t), drop = H * (pier.water - pier.top + t * .008);
+    const t = i / 5, y = level(t), drop = H * (pier.drop + t * .008);
     for (const right of [false, true]) {
       const x = edge(t, right), y = level(t, right), thick = 2 + t * 2;
       ctx.fillStyle = "rgba(74,67,44,.18)";
       ctx.beginPath(); ctx.ellipse(x + 5, y + drop, 8 + t * 6, 2, -.2, 0, Math.PI * 2); ctx.fill();
       shape([[x - thick, y], [x + thick, y], [x + thick, y + drop], [x - thick, y + drop]], "#685a40");
       stroke(ctx, [[x - thick, y], [x - thick, y + drop]], "#b3a079", .8);
-      if (i < 4) {
+      // Keep the end bay open below the sitter; bracing starts one bay inland.
+      if (i > 0 && i < 4) {
         const nx = edge(t + .2, right), ny = level(t + .2, right);
         stroke(ctx, [[x, y + drop * .85], [nx, ny + 2]], "#7f6d4b", 2);
       }

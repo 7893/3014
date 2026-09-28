@@ -1,3 +1,4 @@
+import { PIER_VISITOR as pose } from "../config/actors.ts";
 import { Container, Graphics } from "pixi.js";
 import { createTimeline } from "animejs";
 import { pier } from "../scenes/coast/pier.ts";
@@ -7,22 +8,20 @@ export function createPierVisitor() {
   const root = new Container(); root.position.set(160, 21);
   const feet = new Float32Array(4);
   const motions: ReturnType<typeof createTimeline>[] = [];
-  const legs: { lower: Graphics; foot: Graphics }[] = [];
+  const legs: Graphics[] = [];
   const duration = 3600;
-  const footX = (pier.footX - pier.seatX) * 1000, footY = (pier.water - pier.seatY) * 1000;
   for (let i = 0; i < 2; i++) {
-    const side = i * 2 - 1, hipX = side * 2.8, kneeX = -14 + side * 2.8;
-    root.addChild(new Graphics().moveTo(hipX, -2).lineTo(kneeX, 10)
+    const hipX = (i * 2 - 1) * pose.hip, kneeX = pose.kneeX + hipX;
+    root.addChild(new Graphics().moveTo(hipX, -2).lineTo(kneeX, pose.kneeY)
       .stroke({ color: 0xb8926e, width: 1.9, cap: "round" }));
-    const lower = new Graphics().moveTo(0, 0).lineTo(1, 0)
-      .stroke({ color: 0xb8926e, width: 1.7, cap: "round" });
-    lower.position.set(kneeX, 10); root.addChild(lower);
-    const foot = new Graphics().moveTo(0, 0).lineTo(-3, 1)
-      .stroke({ color: 0x8ba885, width: 1.8, cap: "round" });
-    foot.position.set(footX + hipX, footY); root.addChild(foot);
+    // A fixed-length bone rotates; neither the limb nor its round caps stretch.
+    const lower = new Graphics().moveTo(0, 0).lineTo(pose.shin, 0)
+      .stroke({ color: 0xb8926e, width: 1.7, cap: "round" })
+      .ellipse(pose.shin, 0, 1.25, .8).fill(0x8ba885);
+    lower.position.set(kneeX, pose.kneeY); root.addChild(lower);
     motions.push(createTimeline({ autoplay: false, defaults: { duration, ease: "inOutSine" } })
-      .add(foot.position, { x: [footX - 2.5 + hipX, footX + 2.5 + hipX, footX - 2.5 + hipX], y: [footY - 1.8, footY + 1.8, footY - 1.8] }, 0));
-    legs.push({ lower, foot });
+      .add(lower, { rotation: [2.35, 2.65, 2.35] }, 0));
+    legs.push(lower);
   }
   const torso = new Graphics().moveTo(-3, -11).quadraticCurveTo(-5, -8, -4, -3)
     .lineTo(-5, .5).quadraticCurveTo(0, 2, 5, .5).lineTo(4, -3)
@@ -34,13 +33,13 @@ export function createPierVisitor() {
     .roundRect(-3.5, -14, 7, 8, 2).fill(0x49493e));
   return {
     root, feet,
-    update(time: number) {
+    update(time: number, width: number, height: number) {
+      const scale = Math.min(width, height) / pose.sizeDivisor;
       for (let i = 0; i < legs.length; i++) {
         motions[i].seek((time * 1000 + i * duration * .3) % duration, true);
-        const { lower, foot } = legs[i], dx = foot.x - lower.x, dy = foot.y - lower.y;
-        lower.rotation = Math.atan2(dy, dx); lower.scale.x = Math.hypot(dx, dy);
-        feet[i * 2] = pier.seatX + foot.x / 1000;
-        feet[i * 2 + 1] = pier.seatY + foot.y / 1000;
+        const lower = legs[i];
+        feet[i * 2] = pier.seatX + (lower.x + Math.cos(lower.rotation) * pose.shin) * scale / width;
+        feet[i * 2 + 1] = pier.seatY + (lower.y + Math.sin(lower.rotation) * pose.shin) * scale / height;
       }
     },
     dispose() { motions.forEach(motion => motion.cancel()); },

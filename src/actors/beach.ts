@@ -54,7 +54,7 @@ export function createBeachActors() {
   const surface = actorSurface(root, 192, 64, 2);
   return {
     texture: surface.texture, feet: visitor.feet,
-    draw(renderer: WebGLRenderer, time: number) {
+    draw(renderer: WebGLRenderer, time: number, width: number, height: number) {
       for (let i = 0; i < motions.length; i++) {
         const phase = time * .27 - i * .55;
         // Integrated travel distance synchronizes the steps with slowing and turning.
@@ -65,7 +65,7 @@ export function createBeachActors() {
         motions[i].seek(gait * 800, true);
         bodies[i].rotation = .09 * Math.abs(Math.cos(phase));
       }
-      visitor.update(time);
+      visitor.update(time, width, height);
       surface.draw(renderer);
     },
     dispose() {

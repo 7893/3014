@@ -1,6 +1,4 @@
 import { paintPierVisitor } from "./pier-visitor.ts";
-import { pier } from "./pier.ts";
-import { stroke } from "../../drawing/canvas.ts";
 import { paintRestingChildren } from "./leisure.ts";
 import type { Painting } from "../types.ts";
 export function drawStaticCoast(
@@ -23,9 +21,6 @@ export function drawStaticCoast(
   ctx.fill();
   ctx.drawImage(boatLayer, 0, 0);
   ctx.drawImage(coast.layers.foreground, 0, 0);
-  for (const side of [-1, 1])
-    stroke(ctx, [[w * pier.seatX + side * w * .002, h * pier.seatY],
-      [w * pier.footX + side * w * .002, h * pier.water]], "#ad8b6a", w * .0018);
   paintPierVisitor(ctx, w, h);
   paintRestingChildren(ctx, w, h);
   for (const name of ["trunk0", "leaves0", "trunk1", "leaves1"])

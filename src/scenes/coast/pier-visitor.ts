@@ -1,11 +1,21 @@
+import { PIER_VISITOR as pose } from "../../config/actors.ts";
 import { pier } from "./pier.ts";
 import { stroke } from "../../drawing/canvas.ts";
 
 export function paintPierVisitor(ctx: CanvasRenderingContext2D, W: number, H: number) {
   ctx.save(); ctx.translate(W * pier.seatX, H * pier.seatY);
-  ctx.scale(W / 1000, H / 1000);
+  const scale = Math.min(W, H) / pose.sizeDivisor;
+  ctx.scale(scale, scale);
   ctx.fillStyle = "#544d3c33";
   ctx.beginPath(); ctx.ellipse(0, 1.5, 5.5, 1.8, 0, 0, Math.PI * 2); ctx.fill();
+  for (const side of [-1, 1]) {
+    const hip = side * pose.hip, knee = pose.kneeX + hip;
+    const fx = knee + Math.cos(2.5) * pose.shin, fy = pose.kneeY + Math.sin(2.5) * pose.shin;
+    ctx.lineCap = "round";
+    stroke(ctx, [[hip, -2], [knee, pose.kneeY], [fx, fy]], "#b8926e", 1.7);
+    ctx.fillStyle = "#8ba885";
+    ctx.beginPath(); ctx.ellipse(fx, fy, 1.25, .8, 2.5, 0, Math.PI * 2); ctx.fill();
+  }
   // Facing the water: a seated back, relaxed shoulders, hands resting on the edge.
   ctx.fillStyle = "#c7aba0";
   ctx.beginPath(); ctx.moveTo(-3, -11);

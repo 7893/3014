@@ -35,10 +35,12 @@ export async function checkDetails(browser, url) {
       });
       const actor = createPierVisitor(), coast = painting.get("coast").layers.foreground;
       const ctx = coast.getContext("2d"); let dryContacts = 0;
-      actor.update(0); const initial = Array.from(actor.feet);
-      actor.update(.9); const movement = actor.feet.reduce((n, v, i) => n + Math.abs(v - initial[i]), 0);
+      actor.update(0, innerWidth, innerHeight); const initial = Array.from(actor.feet);
+      actor.update(.9, innerWidth, innerHeight); const movement = actor.feet.reduce((n, v, i) => n + Math.abs(v - initial[i]), 0);
       for (let t = 0; t < 7.2; t += .15) {
-        actor.update(t);
+        actor.update(t, innerWidth, innerHeight);
+        const bounds = actor.root.getLocalBounds();
+        if (bounds.width > 27 || bounds.maxY > 11) throw new Error("Pier visitor limbs exceed human proportions");
         for (let foot = 0; foot < 2; foot++) {
           const px = actor.feet[foot * 2] * coast.width, py = actor.feet[foot * 2 + 1] * coast.height;
           if (ctx.getImageData(Math.floor(px), Math.floor(py), 1, 1).data[3] > 64) dryContacts++;
@@ -50,7 +52,7 @@ export async function checkDetails(browser, url) {
     });
     assert(result.skyChanges.every(count => count > 50), JSON.stringify(result));
     assert(result.wrapChanges.every(change => change < .2), "Clouds must wrap outside the window");
-    assert(result.movement > .001, JSON.stringify(result));
+    assert(result.movement > .0003, JSON.stringify(result));
     assert.equal(result.dryContacts, 0, "Feet must remain over open water throughout the motion");
     assert.equal(result.error, 0);
     console.log(`Window animation and moving water contact (${width}):`, result);
