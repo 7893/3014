@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createEnvironment } from "../assets/js/environment/state.js";
+import { createEnvironment } from "../src/environment/state.ts";
 
 test("conditions blend without moving the integrated cloud phase", () => {
   const environment = createEnvironment(),

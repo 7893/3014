@@ -1,8 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createCadence, createAnimation } from "../assets/js/app/animation.js";
-import { createWind } from "../assets/js/motion/wind.js";
-import { createJourney } from "../assets/js/motion/journey.js";
+import { createCadence, createAnimation } from "../src/app/animation.ts";
+import { createWind } from "../src/motion/wind.ts";
+import { createJourney } from "../src/motion/journey.ts";
 
 test("cadence backs off under sustained pressure and recovers without oscillation", () => {
   const c = createCadence();
@@ -101,4 +101,21 @@ test("random scene rounds remain balanced without consecutive repeats", () => {
       assert.equal(new Set(arrivals.slice(i, i + 3)).size, 3);
   }
   assert.equal(starts.size, 3);
+});
+
+test("authored transitions preserve easing and can be interrupted", () => {
+  const journey = createJourney(0.69, () => 0.9);
+  journey.select("city");
+  journey.advance(2.5);
+  let state = journey.state();
+  assert.equal(state.transitioning, true);
+  assert.equal(state.blend, 0.5);
+  assert(Math.abs(state.positions.ink - 0.725) < 0.000001);
+  assert(Math.abs(state.positions.city - 0.145) < 0.000001);
+  journey.select("coast");
+  journey.advance(5);
+  state = journey.state();
+  assert.equal(state.scene, "coast");
+  assert.equal(state.transitioning, false);
+  assert.equal(state.positions.coast, 0.22);
 });

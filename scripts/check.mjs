@@ -9,16 +9,17 @@ function run(args) {
   if (result.status !== 0) process.exit(result.status || 1);
 }
 run(["scripts/sync-copy.mjs", "--check"]);
+run(["node_modules/typescript/bin/tsc", "--noEmit"]);
 let count = 0;
-for (const root of ["assets", "scripts", "tests"]) {
+for (const root of ["src", "scripts", "tests"]) {
   for (const name of await readdir(root, { recursive: true })) {
-    if (!/\.(m?js|css)$/.test(name)) continue;
+    if (!/\.(m?js|ts|css)$/.test(name)) continue;
     const path = resolve(root, name),
       source = await readFile(path, "utf8");
     if (source.trimEnd().split("\n").length > 180)
       throw new Error(`Review module size: ${path}`);
-    if (!/\.m?js$/.test(name)) continue;
-    run(["--check", path]);
+    if (/\.css$/.test(name)) continue;
+    if (/\.m?js$/.test(name)) run(["--check", path]);
     for (const match of source.matchAll(/from\s+["'](\.[^"']+)["']/g))
       await access(resolve(dirname(path), match[1]));
     count++;

@@ -27,13 +27,40 @@ function run(command, args, options = {}) {
 const changes = run("git", ["status", "--porcelain"], { encoding: "utf8" });
 if (changes.trim()) throw new Error("Commit changes before deploying");
 run("git", ["verify-commit", "HEAD"], { stdio: "inherit" });
-const archive = run("tar", [
-  "-cf", "-", "-C", "dist", "index.html", "assets", "LICENSE", "NOTICE", ".nojekyll",
-], { maxBuffer: 20 * 1024 * 1024 });
-run("ssh", [
-  "-F", "/dev/null", "-T", "-i", values.KEY,
-  "-o", "IdentitiesOnly=yes", "-o", "BatchMode=yes",
-  "-o", "StrictHostKeyChecking=yes",
-  "-o", `UserKnownHostsFile=${values.KNOWN_HOSTS}`,
-  "-o", "ConnectTimeout=15", `${values.USER}@${values.HOST}`,
-], { input: archive, stdio: ["pipe", "inherit", "inherit"], timeout: 60000 });
+const archive = run(
+  "tar",
+  [
+    "-cf",
+    "-",
+    "-C",
+    "dist",
+    "index.html",
+    "assets",
+    "LICENSE",
+    "NOTICE",
+    ".nojekyll",
+  ],
+  { maxBuffer: 20 * 1024 * 1024 },
+);
+run(
+  "ssh",
+  [
+    "-F",
+    "/dev/null",
+    "-T",
+    "-i",
+    values.KEY,
+    "-o",
+    "IdentitiesOnly=yes",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    `UserKnownHostsFile=${values.KNOWN_HOSTS}`,
+    "-o",
+    "ConnectTimeout=15",
+    `${values.USER}@${values.HOST}`,
+  ],
+  { input: archive, stdio: ["pipe", "inherit", "inherit"], timeout: 60000 },
+);

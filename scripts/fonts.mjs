@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import subsetFont from "subset-font";
 import { create } from "fontkit";
-import { copy } from "../assets/js/config/copy.js";
+import { copy } from "../src/config/copy.ts";
 import { renameSubset } from "./font-name.mjs";
 
 const root = new URL("../", import.meta.url);
@@ -24,8 +24,11 @@ const fonts = [
 
 function verifyGlyphs(buffer, text, name) {
   const font = create(buffer);
-  const missing = [...text].filter((char) => !font.hasGlyphForCodePoint(char.codePointAt(0)));
-  if (missing.length) throw new Error(`${name}: missing glyphs ${missing.join("")}`);
+  const missing = [...text].filter(
+    (char) => !font.hasGlyphForCodePoint(char.codePointAt(0)),
+  );
+  if (missing.length)
+    throw new Error(`${name}: missing glyphs ${missing.join("")}`);
 }
 
 export async function buildFonts() {
@@ -38,8 +41,11 @@ export async function buildFonts() {
       source = await readFile(path);
     } catch (error) {
       if (error.code !== "ENOENT") throw error;
-      const response = await fetch(font.url, { signal: AbortSignal.timeout(60000) });
-      if (!response.ok) throw new Error(`Font download failed: ${response.status}`);
+      const response = await fetch(font.url, {
+        signal: AbortSignal.timeout(60000),
+      });
+      if (!response.ok)
+        throw new Error(`Font download failed: ${response.status}`);
       source = Buffer.from(await response.arrayBuffer());
     }
     if (createHash("sha256").update(source).digest("hex") !== font.hash)
@@ -53,10 +59,13 @@ export async function buildFonts() {
     // Avoid using upstream reserved family names for our modified web subset.
     const renamed = font.name === "wenkai" ? renameSubset(sfnt, "Boat") : sfnt;
     const subset = await subsetFont(renamed, text, {
-      targetFormat: "woff2", preserveNameIds: [0, 13, 14],
+      targetFormat: "woff2",
+      preserveNameIds: [0, 13, 14],
     });
     verifyGlyphs(subset, text, font.name);
     await writeFile(new URL(`assets/fonts/${font.name}.woff2`, root), subset);
-    console.log(`${font.name}: ${text.length} characters, ${subset.length} bytes`);
+    console.log(
+      `${font.name}: ${text.length} characters, ${subset.length} bytes`,
+    );
   }
 }

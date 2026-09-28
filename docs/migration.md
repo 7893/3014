@@ -10,12 +10,12 @@ Do not connect a weather service or redesign the artwork in this migration.
 ## Sequence
 
 - [x] Record architecture, boundaries, and acceptance criteria before implementation.
-- [ ] Establish TypeScript and Vite; retain font and static-copy generation.
-- [ ] Adapt one scene to PixiJS and verify coordinates, alpha, and composition.
-- [ ] Migrate all scenes and remove the old GL device/resource/target implementation.
-- [ ] Integrate Anime.js with the existing single-clock lifecycle.
-- [ ] Update tests, deployment output validation, and dependency license notices.
-- [ ] Verify desktop/mobile visuals, motion, interactions, fallback, and recovery.
+- [x] Establish TypeScript and Vite; retain font and static-copy generation.
+- [x] Adapt one scene to PixiJS and verify coordinates, alpha, and composition.
+- [x] Migrate all scenes and remove the old GL device/resource/target implementation.
+- [x] Integrate Anime.js with the existing single-clock lifecycle.
+- [x] Update tests, deployment output validation, and dependency license notices.
+- [x] Verify desktop/mobile visuals, motion, interactions, fallback, and recovery.
 - [ ] Sign commits, publish, and verify the deployed artifact.
 
 ## Acceptance
@@ -47,4 +47,41 @@ as a permanent workaround.
 
 ## Validation record
 
-Implementation and measured results are recorded here as each phase completes.
+Local validation: strict type/module checks, nine unit behaviors, two receiver
+tests, production output validation, and desktop/mobile browser regressions pass.
+The browser suite also checks resource plateaus over 48 simulated hours and 24
+resizes. A separate 120-second real-time rendering run passed. Neither test is a
+claim of 48 hours of real rendering or indefinite leak freedom.
+
+The six deterministic image comparisons use 960×640 and 390×844 at the same
+simulation time. Ink and coast differ only by isolated one-level channel rounding.
+City retains its composition, with small light-sampling differences: fewer than
+0.15% of pixels differ by more than eight channel levels; mean channel difference
+is below 0.06 on a 0–255 scale. Do not describe this as pixel-identical output.
+
+Runtime source went from 70 JavaScript modules / 3,583 lines to 75 TypeScript
+modules / 3,922 lines. The rendering adapter changed from 348 to 335 lines. Typed
+contracts, library integration, and recovery handling offset the removed GL
+implementation: this migration reduces custom infrastructure responsibilities,
+not overall source line count. Documentation and tests are excluded from those
+counts. No runtime module exceeds 180 lines.
+
+All generated JavaScript assets together grow from about 113 KB to 468 KB;
+the sum of individually gzipped files grows from about 48 KB to 142 KB. This
+includes optional library chunks, not just initial transfer. Runtime packages are
+bundled locally. The dependency bundle is a deliberate maintenance/size tradeoff.
+
+An isolated 360×240 software-Chromium sample measured median warm CPU submission
+around 0–0.1 ms before and 0.2–0.4 ms after migration. These short measurements and
+shader compilation times are noisy and cache-dependent; they do not establish a
+speedup or device FPS. GPU allocation counts are checked across repeated resize
+and transition cycles; final teardown releases the context and owned resources.
+
+Publication and live artifact verification follow the local acceptance checks.
+
+The final accelerated run retained 21 textures, 3 shared geometry buffers,
+2 framebuffers, 4 programs, and 1 vertex array after warmup and at 48 simulated
+hours. Retained JS heap after forced GC was about 3.62 MB at the warm sample and
+3.98 MB at the final sample; DOM nodes stayed at 27 and listeners at 3. This is
+bounded growth within the regression threshold, not proof of zero allocations.
+All tracked textures and buffers were released on renderer disposal.

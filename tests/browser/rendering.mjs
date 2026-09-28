@@ -2,13 +2,13 @@ import assert from "node:assert/strict";
 
 export async function checkRendering(page) {
   const result = await page.evaluate(async () => {
-    const { createScene } = await import("/assets/js/scenes/index.js");
-    const { createRenderer } = await import("/assets/js/rendering/renderer.js");
+    const { createScene } = await import("/__test/harness.js");
+    const { createRenderer } = await import("/__test/harness.js");
     const canvas = document.createElement("canvas");
     canvas.width = innerWidth;
     canvas.height = innerHeight;
     const painting = createScene(canvas.width, canvas.height);
-    const renderer = createRenderer(canvas),
+    const renderer = await createRenderer(canvas),
       gl = canvas.getContext("webgl2");
     let programs = 0;
     const createProgram = gl.createProgram.bind(gl);

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { copy, arrivalText } from "../../assets/js/config/copy.js";
+import { copy, arrivalText } from "../../src/config/copy.ts";
 
 export async function checkCopy(page, key) {
   const info = copy.scenes[key];

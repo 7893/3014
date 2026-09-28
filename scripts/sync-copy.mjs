@@ -1,5 +1,5 @@
 import { readFile, writeFile } from "node:fs/promises";
-import { copy } from "../assets/js/config/copy.js";
+import { copy } from "../src/config/copy.ts";
 
 const template = await readFile(
   new URL("../templates/index.html", import.meta.url),
@@ -29,7 +29,7 @@ const html = template
   })
   .replace(
     "<!doctype html>",
-    "<!doctype html>\n<!-- Generated from templates/index.html and assets/js/config/copy.js. Do not edit. -->",
+    "<!doctype html>\n<!-- Generated from templates/index.html and assets/js/config/copy.ts. Do not edit. -->",
   );
 
 if (process.argv.includes("--check")) {

@@ -1,9 +1,14 @@
+import { buildHarness } from "./build.mjs";
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { resolve, extname, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 export async function serve() {
+  await buildHarness();
+  const testRoot = fileURLToPath(
+    new URL("../../.cache/browser/", import.meta.url),
+  );
   const root = fileURLToPath(new URL("../../dist/", import.meta.url));
   const mime = {
     ".html": "text/html",
@@ -16,11 +21,18 @@ export async function serve() {
       const pathname = decodeURIComponent(
         new URL(request.url, "http://localhost").pathname,
       );
+      if (pathname === "/__test/blank.html") {
+        response.writeHead(200, { "Content-Type": "text/html" });
+        response.end("<!doctype html><title>Rendering test</title>");
+        return;
+      }
+      const base = pathname.startsWith("/__test/") ? testRoot : root;
+      const requested = base === testRoot ? pathname.slice(7) : pathname;
       const path = resolve(
-        root,
-        "." + (pathname === "/" ? "/index.html" : pathname),
+        base,
+        "." + (requested === "/" ? "/index.html" : requested),
       );
-      if (!path.startsWith(root.replace(/\/$/, "") + sep))
+      if (!path.startsWith(base.replace(/\/$/, "") + sep))
         throw new Error("Invalid path");
       const body = await readFile(path);
       response.writeHead(200, {

@@ -5,19 +5,24 @@ export function renameSubset(input, family) {
   const tables = new Map();
   for (let offset = 12; offset < 12 + font.readUInt16BE(4) * 16; offset += 16)
     tables.set(font.toString("ascii", offset, offset + 4), {
-      record: offset, start: font.readUInt32BE(offset + 8),
+      record: offset,
+      start: font.readUInt32BE(offset + 8),
       length: font.readUInt32BE(offset + 12),
     });
   const name = tables.get("name");
   const storage = name.start + font.readUInt16BE(name.start + 4);
   for (let i = 0; i < font.readUInt16BE(name.start + 2); i++) {
     const record = name.start + 6 + i * 12;
-    if (![1, 3, 4, 6, 16, 18, 21].includes(font.readUInt16BE(record + 6))) continue;
+    if (![1, 3, 4, 6, 16, 18, 21].includes(font.readUInt16BE(record + 6)))
+      continue;
     const platform = font.readUInt16BE(record);
-    const encoded = platform === 0 || platform === 3
-      ? Buffer.from(family, "utf16le").swap16() : Buffer.from(family, "ascii");
+    const encoded =
+      platform === 0 || platform === 3
+        ? Buffer.from(family, "utf16le").swap16()
+        : Buffer.from(family, "ascii");
     const length = font.readUInt16BE(record + 8);
-    if (encoded.length > length) throw new Error("Subset name exceeds reserved space");
+    if (encoded.length > length)
+      throw new Error("Subset name exceeds reserved space");
     const start = storage + font.readUInt16BE(record + 10);
     font.fill(0, start, start + length);
     encoded.copy(font, start);

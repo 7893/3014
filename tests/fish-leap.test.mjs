@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { fishState } from "../assets/js/motion/fish.js";
-import { LEAP_DURATION, leapingFish } from "../assets/js/motion/fish-leap.js";
+import { fishState } from "../src/motion/fish.ts";
+import { LEAP_DURATION, leapingFish } from "../src/motion/fish-leap.ts";
 
 test("a leap joins the swimming path without position or heading jumps", () => {
   for (const aspect of [390 / 844, 1.44]) {

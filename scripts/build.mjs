@@ -1,5 +1,7 @@
-import { cp, mkdir, rm } from "node:fs/promises";
+import { checkBuild } from "./check-build.mjs";
+import { cp, readFile, appendFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
+import { build } from "vite";
 import { buildFonts } from "./fonts.mjs";
 
 const root = new URL("../", import.meta.url);
@@ -10,11 +12,22 @@ const check = spawnSync(
 );
 if (check.status !== 0) process.exit(check.status || 1);
 await buildFonts();
+await build();
+await appendFile(
+  new URL("dist/assets/third-party.txt", root),
+  "\n## Colord upstream notice\n\n" +
+    (await readFile(new URL("licenses/colord-MIT.txt", root), "utf8")),
+);
 const destination = new URL("dist/", root);
-await rm(destination, { recursive: true, force: true });
-await mkdir(destination);
-for (const name of ["index.html", "assets", "LICENSE", "NOTICE", ".nojekyll"])
-  await cp(new URL(name, root), new URL(name, destination), {
-    recursive: true,
-  });
-console.log("Prepared dist/ with public website files only.");
+for (const name of ["LICENSE", "NOTICE", ".nojekyll"])
+  await cp(new URL(name, root), new URL(name, destination));
+for (const name of ["qiuhong-OFL.txt", "wenkai-OFL.txt"]) {
+  await cp(
+    new URL(`assets/fonts/${name}`, root),
+    new URL(`assets/${name}`, destination),
+  );
+}
+await checkBuild(destination);
+console.log(
+  "Built the public website without source or deployment configuration.",
+);

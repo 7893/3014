@@ -4,7 +4,7 @@ Follow the Boat is a static, procedural landscape artwork. Its three places are
 the Li River near Xingping, Shimei Bay, and Beijing's Liangma River. Geometry,
 palette, and composition express those places without claiming a surveyed view.
 
-## Target stack
+## Stack
 
 - TypeScript defines scene, animation, environment, and rendering contracts.
 - Vite provides development serving and produces the static deployment bundle.
@@ -47,7 +47,7 @@ and a complete static fallback. Shared actor geometry and water interactions
 remain common. Scenes prepare lazily, reuse compiled programs across resize,
 and release obsolete textures and targets.
 
-The first implementation uses Pixi's WebGL backend. Custom GLSL does not become
+The renderer uses Pixi's WebGL backend. Custom GLSL does not become
 WebGPU-compatible automatically. Texture orientation, straight/premultiplied
 alpha, framebuffer orientation, and pixel coordinates must be verified during
 migration. Preserve existing ink compositing rather than stacking generic filters.

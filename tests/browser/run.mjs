@@ -1,3 +1,4 @@
+import { checkSoak } from "./soak.mjs";
 import assert from "node:assert/strict";
 import { chromium } from "playwright";
 import { serve } from "./server.mjs";
@@ -6,12 +7,13 @@ import { checkRendering } from "./rendering.mjs";
 import { checkLifecycle } from "./lifecycle.mjs";
 import { checkFonts } from "./fonts.mjs";
 import { checkWaterInteraction } from "./water.mjs";
-import { copy } from "../../assets/js/config/copy.js";
+import { copy } from "../../src/config/copy.ts";
 
 const server = await serve();
 let browser;
 try {
   browser = await chromium.launch({ args: ["--enable-unsafe-swiftshader"] });
+  await checkSoak(browser, server.url);
   await checkLifecycle(browser, server.url);
   for (const viewport of [
     { width: 960, height: 640 },
@@ -35,11 +37,15 @@ try {
       // Advance the real application clock without rendering thousands of frames.
       await page.evaluate(() => {
         window.savedDraw = WebGL2RenderingContext.prototype.drawArrays;
-        WebGL2RenderingContext.prototype.drawArrays = function () {};
+        window.savedElements = WebGL2RenderingContext.prototype.drawElements;
+        WebGL2RenderingContext.prototype.drawElements = function () {};
+        WebGL2RenderingContext.prototype.drawElements =
+          WebGL2RenderingContext.prototype.drawArrays = function () {};
       });
       await page.clock.runFor(ms);
       await page.evaluate(() => {
         WebGL2RenderingContext.prototype.drawArrays = window.savedDraw;
+        WebGL2RenderingContext.prototype.drawElements = window.savedElements;
       });
       await page.clock.runFor(100);
     }
