@@ -5,6 +5,7 @@ export function paintBoat(
   y: number,
   scale: number,
   crew = true,
+  passenger = false,
 ) {
   const { ctx, ink, brush, line } = tools;
   ctx.save();
@@ -17,7 +18,7 @@ export function paintBoat(
   ctx.quadraticCurveTo(14, 8, -10, 6);
   ctx.closePath();
   ctx.fill();
-  brush(
+  if (!passenger) brush(
     [
       [-9, -2],
       [-8, -9],
@@ -28,6 +29,18 @@ export function paintBoat(
     0.65,
     1,
   );
+  if (passenger) {
+    // Seated profile: bun, neck, draped sleeves and a skirt resting inside the hull.
+    ctx.fillStyle = ink(.83);
+    ctx.beginPath(); ctx.ellipse(-6, -13.2, 1.7, 2.1, -.15, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(-7, -15.5, 1.25, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(-6.5, -11.5);
+    ctx.quadraticCurveTo(-10, -9, -10.5, -3);
+    ctx.quadraticCurveTo(-5, -1, 1, -2);
+    ctx.lineTo(-1, -4); ctx.lineTo(-5, -5);
+    ctx.quadraticCurveTo(-3.5, -8, -5, -11.5); ctx.fill();
+    line([[-5, -9], [-2, -6], [1, -6]], ink(.72), .85);
+  }
   if (crew) {
     ctx.fillStyle = ink(0.78);
     ctx.beginPath();

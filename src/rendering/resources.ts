@@ -25,7 +25,7 @@ function shared(): Record<string, UniformData> {
     u_actorScale: { value: [0, 0], type: "vec2<f32>" },
   };
 }
-export function createResources(geometry: MeshGeometry, boat: TextureSource) {
+export function createResources(geometry: MeshGeometry, boat: TextureSource, beach: TextureSource) {
   const passes = new Map<SceneName, Pass>();
   const textures = new Map<SceneName, CanvasSource[]>();
   let painting: Scene;
@@ -43,6 +43,7 @@ export function createResources(geometry: MeshGeometry, boat: TextureSource) {
     if (textures.has(name)) return passes.get(name)!;
     const definition = definitions[name];
     const sources: Record<string, TextureSource> = { u_boatLayer: boat };
+    if (name === "coast") sources.u_beachCrew = beach;
     const owned: CanvasSource[] = [];
     try {
       for (const [key, canvas] of Object.entries(painting.get(name).layers)) {

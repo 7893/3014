@@ -28,7 +28,7 @@ export async function checkPasses(browser, url) {
         return pixels;
       }
       const result = [];
-      for (const scene of ["city", "coast"]) {
+      for (const scene of ["city", "coast", "garden"]) {
         const direct = frame(scene, false),
           composed = frame(scene, true);
         result.push({

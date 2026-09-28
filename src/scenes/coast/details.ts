@@ -1,3 +1,4 @@
+import { drawBoardwalk } from "./boardwalk.ts";
 import type { Points } from "../../drawing/types.ts";
 import type { Random } from "../../drawing/types.ts";
 import { drawHeadland } from "./headland.ts";
@@ -66,28 +67,7 @@ export function drawCoastDetails(
     );
   }
   material = "#0000ff";
-  // A modest boardwalk descends toward the beach, kept below the boat's passage.
-  shape(
-    [
-      [W * 0.89, H],
-      [W * 0.995, H],
-      [W * 0.86, H * 0.87],
-      [W * 0.832, H * 0.87],
-    ],
-    "#91794f",
-  );
-  for (let i = 0; i < 17; i++) {
-    const t = i / 17,
-      y = H * (0.87 + t * 0.13),
-      left = W * (0.832 + t * 0.058),
-      right = W * (0.86 + t * 0.135);
-    ctx.beginPath();
-    ctx.moveTo(left, y);
-    ctx.lineTo(right, y);
-    ctx.strokeStyle = "rgba(62,57,37,.4)";
-    ctx.lineWidth = 0.8;
-    ctx.stroke();
-  }
+  drawBoardwalk(ctx, W, H, shape);
   function parasol(x: number, y: number, r: number) {
     ctx.fillStyle = "rgba(68,75,44,.13)";
     ctx.beginPath();

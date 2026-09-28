@@ -1,3 +1,4 @@
+import { paintLounger } from "./leisure.ts";
 import { beachPath } from "./shore.ts";
 import { seededRandom, canvasLayer } from "../../drawing/canvas.ts";
 import { drawCoastDetails } from "./details.ts";
@@ -36,6 +37,7 @@ export function createCoast(width: number, height: number) {
   ctx.restore();
   drawIslands(ctx, W, H, random);
   drawCoastDetails(ctx, W, H, random, material.ctx);
+  paintLounger(ctx, W, H);
   const palmLayers = [];
   for (const { root, crown } of palms)
     for (const foliage of [false, true]) {

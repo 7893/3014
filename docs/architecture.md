@@ -1,7 +1,8 @@
 # Architecture
 
-Follow the Boat is a static, procedural landscape artwork. Its three places are
-the Li River near Xingping, Shimei Bay, and Beijing's Liangma River. Geometry,
+Follow the Boat is a static, procedural landscape artwork. Its four settings are
+the Li River near Xingping, Shimei Bay, Beijing's Liangma River, and an imagined
+Suzhou courtyard. Geometry,
 palette, and composition express those places without claiming a surveyed view.
 
 ## Stack
@@ -47,7 +48,11 @@ Rain and daylight rendering remain separate future work.
 Graphics, a procedural hull Sprite, and an Anime rowing timeline. Its small local
 render texture supplies coverage and oar lighting masks to each scene's material;
 shader code no longer constructs the animated person's limbs. Reflection and
-foreground occlusion still use the scene's artistic material.
+foreground occlusion still use the scene's artistic material. The courtyard selects
+an open hull with a seated passenger; both variants share the rowing timeline.
+Each transition pass refreshes the shared actor texture for its own scene.
+Coastal children share a small Pixi pose atlas and Anime limb timelines; their
+path follows the shared shoreline on dry sand, beneath palm occlusion.
 
 ## Rendering contract
 
@@ -56,7 +61,7 @@ and a complete static fallback. Shared actor geometry and water interactions
 remain common. Scenes prepare lazily, reuse compiled programs across resize,
 and release obsolete textures and targets.
 
-City and coast render directly to the screen during normal playback. Ink keeps
+City, coast, and garden render directly to the screen during normal playback. Ink keeps
 its paper-compositing pass; transitions render both scenes and composite them.
 Fullscreen targets acquire viewport storage only when used. Uniform vectors
 are reused rather than allocated on each frame. City reflections reuse sampled

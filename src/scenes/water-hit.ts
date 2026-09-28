@@ -1,5 +1,6 @@
 import type { Scene, SceneName } from "./types.ts";
 const surfaces = {
+  garden: { top: 0.67, bottom: 1, solids: ["bank", "foliage"] },
   ink: { top: 0.745, bottom: 0.96, solids: ["near", "shore", "foliage"] },
   city: { top: 0.65, bottom: 1, solids: ["bank"] },
   coast: {

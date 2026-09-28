@@ -33,6 +33,16 @@ export function createBoat() {
     model = new Container();
   model.position.set(x, y);
   root.addChild(hull, model);
+  const companionCanvas = document.createElement("canvas");
+  companionCanvas.width = width * 4; companionCanvas.height = height * 4;
+  const companionContext = companionCanvas.getContext("2d")!;
+  companionContext.scale(4, 4);
+  paintBoat(createBrush(companionContext, 707), x, y, 1, false, true);
+  const companionTexture = new Texture({
+    source: new CanvasSource({ resource: companionCanvas, resolution: 4 }),
+  });
+  const companion = new Sprite({ texture: companionTexture, tint: 0 });
+  root.addChildAt(companion, 1);
   const body = new Container();
   body.position.set(12, -2);
   body.addChild(
@@ -88,7 +98,9 @@ export function createBoat() {
   });
   return {
     texture,
-    draw(renderer: WebGLRenderer, time: number) {
+    draw(renderer: WebGLRenderer, time: number, passenger = false) {
+      hull.visible = !passenger;
+      companion.visible = passenger;
       // Bound the timeline's position even after months of continuous display.
       motion.seek((time * 1000) % duration, true);
       body.toLocal(hand.position, model, grip);
@@ -107,6 +119,7 @@ export function createBoat() {
       motion.cancel();
       root.destroy({ children: true });
       hullTexture.destroy(true);
+      companionTexture.destroy(true);
       texture.destroy(true);
     },
   };

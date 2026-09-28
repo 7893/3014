@@ -33,12 +33,12 @@ export async function checkWaterInteraction(page) {
       a.reduce((sum, n, i) => sum + Math.abs(n - b[i]), 0);
     const results = [];
     try {
-      for (const scene of ["ink", "city", "coast"]) {
+      for (const scene of ["ink", "city", "coast", "garden"]) {
         const baseline = frame(scene, [0, 0, -100]);
         const layers = painting.get(scene).layers;
         const land =
           layers[
-            scene === "ink" ? "shore" : scene === "city" ? "bank" : "foreground"
+            scene === "ink" ? "shore" : scene === "coast" ? "foreground" : "bank"
           ];
         const pixels = land.getContext("2d").getImageData(0, 0, 800, 600).data;
         let solid;

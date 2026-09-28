@@ -1,3 +1,4 @@
+import { skyline } from "./composition.ts";
 import { createGlow } from "../../drawing/glow.ts";
 import { roomMarker } from "./windows.ts";
 import { seededRandom, canvasLayer } from "../../drawing/canvas.ts";
@@ -20,6 +21,7 @@ export function createCity(width: number, height: number) {
   const { buildings: b, lights: l, bank: k } = contexts;
   const markRoom = roomMarker(contexts.windows);
   const random = seededRandom(2873);
+  const landmark = skyline[portrait ? "portrait" : "landscape"].angled;
   b.save();
   l.save();
   b.globalAlpha = 0.78;
@@ -31,7 +33,10 @@ export function createCity(width: number, height: number) {
   for (let i = 0; i < 25; i++) {
     const x = (i * W) / 24 - 30,
       w = 24 + random() * 65,
-      h = H * (0.035 + random() * 0.14),
+      candidate = H * (0.035 + random() * 0.14),
+      nearLandmark = x + w > W * (landmark.x - landmark.width * .7) &&
+        x < W * (landmark.x + landmark.width * .7),
+      h = nearLandmark ? Math.min(candidate, H * (.59 - landmark.top - landmark.height * .8)) : candidate,
       y = H * 0.59 - h;
     const shade = b.createLinearGradient(x, y, x + w, H * 0.59);
     shade.addColorStop(0, "#26343c");

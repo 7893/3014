@@ -38,7 +38,7 @@ try {
     const painting = createScene(640, 400);
     renderer.upload(painting);
     const result = [];
-    for (const scene of ["ink", "city", "coast"]) {
+    for (const scene of ["ink", "city", "coast", "garden"]) {
       const state = {
         from: scene,
         to: scene,

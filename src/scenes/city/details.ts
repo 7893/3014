@@ -33,7 +33,7 @@ export function drawBeijingSkyline(
     top,
   );
   tower.closePath();
-  b.fillStyle = "#263d48";
+  b.fillStyle = "#304954";
   b.fill(tower);
   b.save();
   b.clip(tower);
@@ -50,14 +50,14 @@ export function drawBeijingSkyline(
       x + i * w * 0.1,
       base,
     );
-    b.strokeStyle = "rgba(164,179,175,.24)";
+    b.strokeStyle = "rgba(180,198,194,.38)";
     b.lineWidth = 0.7;
     b.stroke();
     for (let j = 1; j < 48; j++) {
       const t = j / 48,
         waist = 0.55 + 0.4 * Math.pow(2 * t - 1, 2);
       if ((i * 17 + j * 13) % 7 === 0) continue;
-      l.fillStyle = `rgba(217,194,147,${0.1 + (j % 4) * 0.045})`;
+      l.fillStyle = `rgba(217,194,147,${0.16 + (j % 4) * 0.05})`;
       l.fillRect(x + i * w * 0.095 * waist, top + t * h, 1.1, 1.8);
     }
   }
@@ -69,7 +69,7 @@ export function drawBeijingSkyline(
   l.moveTo(x - w * 0.6, top + 2);
   l.lineTo(x + w * 0.6, top + 2);
   l.stroke();
-  // A smaller angled silhouette sits below the Zun's crown.
+  // The inclined legs and cantilever enclose the recognizable open central void.
   const cx = W * layout.angled.x,
     cy = H * layout.angled.top,
     cw = W * layout.angled.width,
@@ -91,19 +91,23 @@ export function drawBeijingSkyline(
       : shape.moveTo(cx + px * cw, cy + py * ch),
   );
   shape.closePath();
-  b.fillStyle = "#2b4149";
+  b.fillStyle = "#3b5057";
   b.fill(shape);
-  b.strokeStyle = "rgba(166,175,158,.3)";
+  b.strokeStyle = "rgba(184,195,185,.5)";
   b.lineWidth = 0.8;
   b.stroke(shape);
   l.save();
   l.clip(shape);
-  l.strokeStyle = "rgba(215,189,135,.16)";
+  l.strokeStyle = "rgba(215,189,135,.27)";
   l.lineWidth = 0.7;
   for (let i = -ch; i < cw + ch; i += 10) {
     l.beginPath();
     l.moveTo(cx - cw + i, cy);
     l.lineTo(cx - cw + i + ch * 0.6, cy + ch);
+    l.stroke();
+    l.beginPath();
+    l.moveTo(cx - cw + i, cy);
+    l.lineTo(cx - cw + i - ch * .6, cy + ch);
     l.stroke();
   }
   l.restore();

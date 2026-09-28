@@ -43,7 +43,7 @@ export async function checkRendering(page) {
       return pixels;
     }
     const results = [];
-    for (const scene of ["ink", "city", "coast"]) {
+    for (const scene of ["ink", "city", "coast", "garden"]) {
       const first = frame(scene, 0),
         baseline = frame(scene, 3);
       if (scene === "coast") {

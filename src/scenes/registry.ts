@@ -1,3 +1,6 @@
+import { createGarden } from "./garden/painting.ts";
+import { drawStaticGarden } from "./garden/static.ts";
+import { fragment as garden } from "./garden/shader.ts";
 import { createInk } from "./ink/painting.ts";
 import { drawStaticInk } from "./ink/static.ts";
 import { fragment as ink } from "./ink/shaders/main.ts";
@@ -37,6 +40,7 @@ interface Definition {
   ) => void;
 }
 export const definitions: Record<SceneName, Definition> = {
+  garden: { create: createGarden, drawStatic: drawStaticGarden, fragment: garden },
   ink: {
     create: createInk,
     drawStatic: drawStaticInk,

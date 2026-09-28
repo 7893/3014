@@ -1,4 +1,4 @@
-export type SceneName = "ink" | "city" | "coast";
+export type SceneName = "ink" | "city" | "coast" | "garden";
 export type Layers = Record<string, HTMLCanvasElement>;
 export interface Painting {
   layers: Layers;

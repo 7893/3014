@@ -61,7 +61,7 @@ try {
     await advance(61000);
     assert.notEqual(
       await page.locator("canvas").getAttribute("data-scene"),
-      "coast",
+      "garden",
     );
     const scene = await page.locator("canvas").getAttribute("data-scene");
     await page.evaluate(() => {

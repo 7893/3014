@@ -1,3 +1,4 @@
+import { createBeachActors } from "../actors/beach.ts";
 import { createBoat } from "../actors/boat.ts";
 import { createGeometry } from "./pass.ts";
 import { Ticker, WebGLRenderer } from "pixi.js";
@@ -42,7 +43,8 @@ export async function createRenderer(canvas: HTMLCanvasElement) {
   const environment = createEnvironment();
   const geometry = createGeometry();
   const actor = createBoat();
-  const resources = createResources(geometry, actor.texture.source);
+  const beachActors = createBeachActors();
+  const resources = createResources(geometry, actor.texture.source, beachActors.texture.source);
   const targets = createTargets();
   const compositor = createCompositor(targets.textures, geometry);
   let scene: Scene;
@@ -61,6 +63,8 @@ export async function createRenderer(canvas: HTMLCanvasElement) {
     x: number,
     wind: ArrayLike<number>,
   ) {
+    actor.draw(renderer, time, key === "garden");
+    if (key === "coast") beachActors.draw(renderer, time);
     const pass = resources.prepare(key);
     const conditions = environment.sample(key, time, wind);
     const W = scene.portrait ? 760 : 1600;
@@ -97,7 +101,6 @@ export async function createRenderer(canvas: HTMLCanvasElement) {
       wind: ArrayLike<number> = [0, 0, time, 0.65],
     ) {
       Ticker.system.update(performance.now());
-      actor.draw(renderer, time);
       const composite = journey.transitioning || journey.from === "ink";
       drawScene(
         journey.from,
@@ -123,6 +126,7 @@ export async function createRenderer(canvas: HTMLCanvasElement) {
     dispose() {
       resources.dispose();
       actor.dispose();
+      beachActors.dispose();
       compositor.dispose();
       targets.dispose();
       geometry.destroy();

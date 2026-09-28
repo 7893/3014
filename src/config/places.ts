@@ -1,6 +1,13 @@
 // Representative landscape coordinates, not survey points or weather stations.
 // A future provider adapter reads these; painting modules never call a service.
 export const places = {
+  garden: {
+    name: "Suzhou · Imagined waterside courtyard",
+    latitude: 31.32,
+    longitude: 120.63,
+    timeZone: "Asia/Shanghai",
+    environment: { wind: 0.5, cloud: 0.3, haze: 0.4 },
+  },
   ink: {
     name: "Yangshuo · Xingping, Li River",
     latitude: 24.92,

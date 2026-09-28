@@ -125,3 +125,8 @@ body[data-view="coast"] button {
     gap: 4px;
   }
 }
+
+body[data-view="garden"] .scene-nav button,
+body[data-view="garden"] .work-mark {
+  color: #eee4c9;
+}

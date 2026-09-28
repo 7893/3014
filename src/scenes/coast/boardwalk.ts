@@ -1,0 +1,37 @@
+import { paintPierVisitor } from "./pier-visitor.ts";
+import { stroke } from "../../drawing/canvas.ts";
+import type { Points } from "../../drawing/types.ts";
+
+export function drawBoardwalk(
+  ctx: CanvasRenderingContext2D, W: number, H: number,
+  shape: (points: Points, fill: string) => void,
+) {
+  const edge = (t: number, right = false) => W * (right ? .86 + t * .135 : .832 + t * .058);
+  const level = (t: number) => H * (.87 + t * .13);
+  // Cast shadows, paired posts, and diagonal bracing beneath the deck.
+  for (let i = 0; i < 5; i++) {
+    const t = i / 5, y = level(t), drop = H * (.014 + t * .008);
+    for (const right of [false, true]) {
+      const x = edge(t, right), thick = 2 + t * 2;
+      ctx.fillStyle = "rgba(74,67,44,.18)";
+      ctx.beginPath(); ctx.ellipse(x + 5, y + drop, 8 + t * 6, 2, -.2, 0, Math.PI * 2); ctx.fill();
+      shape([[x - thick, y], [x + thick, y], [x + thick, y + drop], [x - thick, y + drop]], "#685a40");
+      stroke(ctx, [[x - thick, y], [x - thick, y + drop]], "#b3a079", .8);
+      if (i < 4) {
+        const nx = edge(t + .2, right), ny = level(t + .2);
+        stroke(ctx, [[x, y + drop * .85], [nx, ny + 2]], "#7f6d4b", 2);
+      }
+    }
+    stroke(ctx, [[edge(t), y + drop * .55], [edge(t, true), y + drop * .55]], "#685a40", 2.2);
+  }
+  shape([[edge(1), H], [edge(1, true), H], [edge(0, true), level(0)], [edge(0), level(0)]], "#a18b60");
+  // The darker fascia gives the planks physical thickness.
+  shape([[edge(0), level(0)], [edge(1), H], [edge(1) - 3, H], [edge(0) - 2, level(0) + 4]], "#65583e");
+  shape([[edge(0, true), level(0)], [edge(1, true), H], [edge(1, true) + 3, H], [edge(0, true) + 2, level(0) + 4]], "#7b6847");
+  for (let i = 0; i < 17; i++) {
+    const t = i / 17, y = level(t), left = edge(t), right = edge(t, true);
+    stroke(ctx, [[left, y], [right, y]], "rgba(62,57,37,.45)", .8);
+    stroke(ctx, [[left, y + 1], [right, y + 1]], "rgba(235,214,171,.22)", .7);
+  }
+  paintPierVisitor(ctx, W, H);
+}

@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createCadence, createAnimation } from "../src/app/animation.ts";
 import { createWind } from "../src/motion/wind.ts";
-import { createJourney } from "../src/motion/journey.ts";
+import { createJourney, scenes } from "../src/motion/journey.ts";
 
 test("cadence backs off under sustained pressure and recovers without oscillation", () => {
   const c = createCadence();
@@ -106,10 +106,10 @@ test("random scene rounds remain balanced without consecutive repeats", () => {
     }
     for (let i = 1; i < arrivals.length; i++)
       assert.notEqual(arrivals[i], arrivals[i - 1]);
-    for (let i = 0; i + 3 <= arrivals.length; i += 3)
-      assert.equal(new Set(arrivals.slice(i, i + 3)).size, 3);
+    for (let i = 0; i + scenes.length <= arrivals.length; i += scenes.length)
+      assert.equal(new Set(arrivals.slice(i, i + scenes.length)).size, scenes.length);
   }
-  assert.equal(starts.size, 3);
+  assert.equal(starts.size, scenes.length);
 });
 
 test("authored transitions preserve easing and can be interrupted", () => {

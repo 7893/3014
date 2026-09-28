@@ -3,7 +3,7 @@ import type { SceneName, JourneyState } from "../scenes/types.ts";
 
 engine.useDefaultMainLoop = false;
 const SPEED = 0.014;
-export const scenes: SceneName[] = ["ink", "city", "coast"];
+export const scenes: SceneName[] = ["ink", "city", "coast", "garden"];
 
 export function createJourney(initialX = 0.69, random = Math.random) {
   function shuffle() {
