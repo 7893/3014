@@ -1,10 +1,10 @@
 // All website copy lives here. Run `node scripts/sync-copy.mjs` after editing.
 export const copy = {
   site: {
-    title: "随舟 · 7893",
+    title: "随舟 · 3014",
     description: "一舟行过山海与灯火。",
     label: "随舟，一舟行过山海与灯火",
-    signature: "七八九三",
+    signature: "三零一四",
     navigation: "选择场景",
     noScript: "此卷由程序绘就，请启用 JavaScript 展卷。",
   },
