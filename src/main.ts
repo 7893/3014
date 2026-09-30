@@ -105,12 +105,15 @@ function resize() {
       scenes.filter((name) => !renderer!.preparedScenes.includes(name)),
     );
 }
-for (const control of sceneButtons)
+for (const control of sceneButtons) {
+  control.hidden = !scenes.includes(control.dataset.scene);
+  if (control.hidden) continue;
   control.addEventListener("click", () => {
     journey.select(control.dataset.scene, !renderer);
     draw();
     element("#status").textContent = arrivalText(control.dataset.scene);
   });
+}
 if (!renderer) fallback();
 function sync() {
   animation.sync();

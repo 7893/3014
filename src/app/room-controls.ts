@@ -1,10 +1,12 @@
 import { element } from "./dom.ts";
 import type { JourneyState, SceneName } from "../scenes/types.ts";
 import { arrivalText } from "../config/copy.ts";
+import { hiddenScenes } from "../config/scenes.ts";
 
 export function createRoomControls(select: (scene: SceneName) => void) {
   const entrance = element<HTMLButtonElement>("#sun-entry");
   const back = element<HTMLButtonElement>("#room-return");
+  const enabled = !hiddenScenes.has("room");
   const abort = new AbortController(), options = { signal: abort.signal };
   let current: SceneName = "ink", previous: SceneName = "ink";
   let transitioning = false, lastWidth = 0, lastHeight = 0, restoreFocus = false;
@@ -12,7 +14,7 @@ export function createRoomControls(select: (scene: SceneName) => void) {
     select(name); element("#status").textContent = arrivalText(name);
   };
   entrance.addEventListener("click", () => {
-    if (transitioning || (current !== "ink" && current !== "coast")) return;
+    if (!enabled || transitioning || (current !== "ink" && current !== "coast")) return;
     previous = current; choose("room");
   }, options);
   function leave() {
@@ -29,7 +31,7 @@ export function createRoomControls(select: (scene: SceneName) => void) {
       const changed = current !== state.scene;
       current = state.scene; transitioning = state.transitioning;
       lastWidth = innerWidth; lastHeight = innerHeight;
-      entrance.hidden = transitioning || (current !== "ink" && current !== "coast");
+      entrance.hidden = !enabled || transitioning || (current !== "ink" && current !== "coast");
       back.hidden = current !== "room";
       if (!entrance.hidden) {
         const portrait = innerWidth / innerHeight < .85;

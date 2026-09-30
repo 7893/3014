@@ -37,12 +37,9 @@ export async function checkFallback(browser, url) {
     await checkCopy(page, key);
     assert.equal(await page.locator("#status").textContent(), arrivalText(key));
   }
-  await page.getByRole("button", { name: copy.scenes.ink.label, exact: true }).click();
-  await page.getByRole("button", { name: copy.hidden.enter, exact: true }).click();
-  assert.equal(await page.locator("canvas").getAttribute("data-scene"), "room");
-  assert.equal(await page.locator(".scene-nav").isVisible(), false);
-  await page.getByRole("button", { name: copy.hidden.back, exact: true }).click();
-  assert.equal(await page.locator("canvas").getAttribute("data-scene"), "ink");
+  assert.equal(await page.locator('[data-scene="garden"]').isVisible(), false);
+  assert.equal(await page.locator("#sun-entry").isVisible(), false);
+  assert.equal(await page.locator("#room-return").isVisible(), false);
   await page.close();
   const noScript = await browser.newPage({ javaScriptEnabled: false });
   await noScript.goto(url);

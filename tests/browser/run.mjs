@@ -63,9 +63,9 @@ try {
       await checkFonts(page);
     }
     await advance(61000);
-    assert.notEqual(
+    assert.equal(
       await page.locator("canvas").getAttribute("data-scene"),
-      "garden",
+      "ink",
     );
     const scene = await page.locator("canvas").getAttribute("data-scene");
     await page.evaluate(() => {

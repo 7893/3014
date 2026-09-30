@@ -85,7 +85,7 @@ export async function checkLifecycle(browser, url) {
     });
     assert.equal(
       prepared,
-      3,
+      2,
       "all remaining scenes prepare after restoration",
     );
     assert.equal(

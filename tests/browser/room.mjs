@@ -26,27 +26,23 @@ export async function checkRoom(browser, url) {
       await page.getByRole("button", { name: copy.scenes[scene].label, exact: true }).click();
       await advance();
       const entry = page.getByRole("button", { name: copy.hidden.enter, exact: true });
-      assert(await entry.isVisible());
-      const bounds = await entry.boundingBox();
-      await page.mouse.click(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
-      await advance();
-      assert.equal(await page.locator("canvas").getAttribute("data-scene"), "room");
-      assert.equal(await page.locator(".scene-nav").isVisible(), false);
-      assert.equal(await page.locator("#sun-entry").isVisible(), false);
-      assert(await page.locator(".inscription").isVisible());
-      assert.equal(await page.locator("h1").textContent(), copy.scenes.room.title);
-      await page.clock.fastForward(90000);
-      assert.equal(await page.locator("canvas").getAttribute("data-scene"), "room");
-      if (scene === "ink") await page.keyboard.press("Escape");
-      else await page.getByRole("button", { name: copy.hidden.back, exact: true }).click();
+      assert.equal(await entry.isVisible(), false);
+      assert.equal(await page.locator('[data-scene="garden"]').isVisible(), false);
+      assert.equal(await page.locator('.scene-nav button:visible').count(), 3);
+      const portrait = width / 844 < .85;
+      const x = scene === "coast" || portrait ? .32 : .72;
+      const y = scene === "coast" ? .28 : portrait ? .12 : .205;
+      await page.mouse.click(x * width, y * 844);
+      await page.locator("#sun-entry").evaluate(button => button.click());
+      await page.locator('[data-scene="garden"]').evaluate(button => button.click());
+      await page.keyboard.press("Escape");
       await advance();
       assert.equal(await page.locator("canvas").getAttribute("data-scene"), scene);
-      assert(await page.locator(".scene-nav").isVisible());
       assert.equal(await page.locator("#room-return").isVisible(), false);
-      assert(await page.locator("#sun-entry").evaluate(node => node === document.activeElement));
+      assert(await page.locator(".scene-nav").isVisible());
     }
     assert.deepEqual(errors, []);
     await page.close();
   }
-  console.log("Hidden entry, held scene, menu visibility, return and focus passed.");
+  console.log("Hidden scenes have no public entry on desktop or mobile.");
 }

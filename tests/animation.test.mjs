@@ -88,12 +88,15 @@ test("wind inertia stays stable and nearly identical at 30 and 60 fps", () => {
   assert(a.value[2] > 30);
 });
 
-test("random scene rounds remain balanced without consecutive repeats", () => {
+test("only startup is random; subsequent scenes follow the visible order", () => {
   const starts = new Set();
   for (let seed = 1; seed <= 30; seed++) {
     let n = Math.imul(seed, 2654435761) >>> 0;
-    const random = () =>
-      (n = (Math.imul(n, 1664525) + 1013904223) >>> 0) / 4294967296;
+    let calls = 0;
+    const random = () => {
+      calls++;
+      return (n = (Math.imul(n, 1664525) + 1013904223) >>> 0) / 4294967296;
+    };
     const j = createJourney(0.69, random),
       arrivals = [j.state().scene];
     starts.add(j.state().scene);
@@ -105,7 +108,10 @@ test("random scene rounds remain balanced without consecutive repeats", () => {
       moving = s.transitioning;
     }
     for (let i = 1; i < arrivals.length; i++)
-      assert.notEqual(arrivals[i], arrivals[i - 1]);
+      assert.equal(arrivals[i], scenes[(scenes.indexOf(arrivals[i - 1]) + 1) % scenes.length]);
+    assert.equal(calls, 1, "randomness is consumed only on startup");
+    assert(!arrivals.includes("garden") && !arrivals.includes("room"));
+    j.dispose();
     for (let i = 0; i + scenes.length <= arrivals.length; i += scenes.length)
       assert.equal(new Set(arrivals.slice(i, i + scenes.length)).size, scenes.length);
   }
@@ -113,7 +119,7 @@ test("random scene rounds remain balanced without consecutive repeats", () => {
 });
 
 test("authored transitions preserve easing and can be interrupted", () => {
-  const journey = createJourney(0.69, () => 0.9);
+  const journey = createJourney(0.69, () => 0);
   journey.select("city");
   journey.advance(2.5);
   let state = journey.state();
@@ -139,4 +145,16 @@ test("hidden scene stays outside the public journey until returned", () => {
   journey.select("coast"); journey.advance(5);
   assert.equal(journey.state().scene, "coast");
   journey.dispose();
+});
+
+test("manual selection resumes the fixed cycle from the selected scene", () => {
+  for (const scene of scenes) {
+    const journey = createJourney(.69, () => 0);
+    journey.select(scene, true);
+    journey.advance(22);
+    assert.equal(journey.state().to, scenes[(scenes.indexOf(scene) + 1) % scenes.length]);
+    journey.advance(5);
+    assert.equal(journey.state().transitioning, false);
+    journey.dispose();
+  }
 });
