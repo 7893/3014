@@ -57,10 +57,23 @@ function fallback() {
   preparation.stop();
   renderer?.dispose();
   renderer = null;
-  const replacement = canvas.cloneNode(false) as HTMLCanvasElement;
-  canvas.replaceWith(replacement);
-  canvas = replacement;
-  context = canvas.getContext("2d");
+  canvas.style.opacity = "0";
+  canvas.style.pointerEvents = "none";
+  let fallbackCanvas = document.getElementById("fallback-canvas") as HTMLCanvasElement;
+  if (!fallbackCanvas) {
+    fallbackCanvas = document.createElement("canvas");
+    fallbackCanvas.id = "fallback-canvas";
+    fallbackCanvas.style.position = "absolute";
+    fallbackCanvas.style.top = "0";
+    fallbackCanvas.style.left = "0";
+    fallbackCanvas.style.width = "100%";
+    fallbackCanvas.style.height = "100%";
+    fallbackCanvas.style.zIndex = "-1";
+    canvas.parentElement?.appendChild(fallbackCanvas);
+  }
+  fallbackCanvas.width = canvas.width;
+  fallbackCanvas.height = canvas.height;
+  context = fallbackCanvas.getContext("2d");
   canvas.dataset.renderer = "canvas2d";
   if (painting) drawStatic(journey.state().scene);
 }
@@ -164,6 +177,10 @@ canvas.addEventListener("webglcontextlost", (event) => {
 });
 canvas.addEventListener("webglcontextrestored", () => {
   lost = false;
+  canvas.style.opacity = "1";
+  canvas.style.pointerEvents = "auto";
+  const fallbackCanvas = document.getElementById("fallback-canvas");
+  if (fallbackCanvas) fallbackCanvas.style.display = "none";
   try {
     renderer?.restore();
     dimensions = "";
