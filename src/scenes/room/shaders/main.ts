@@ -1,5 +1,5 @@
-import { night } from "./night.ts";
 import { noise } from "../../../rendering/shaders/common.ts";
+import { night } from "./night.ts";
 export const fragment = `#version 300 es
 precision highp float;
 in vec2 v_uv;

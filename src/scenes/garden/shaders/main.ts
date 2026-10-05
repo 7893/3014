@@ -1,7 +1,7 @@
-import { noise } from "../../../rendering/shaders/common.ts";
 import { boat } from "../../../rendering/shaders/boat.ts";
-import { surface } from "../../../rendering/shaders/surface.ts";
+import { noise } from "../../../rendering/shaders/common.ts";
 import { ripples } from "../../../rendering/shaders/ripples.ts";
+import { surface } from "../../../rendering/shaders/surface.ts";
 export const fragment = `#version 300 es
 precision highp float;
 in vec2 v_uv;

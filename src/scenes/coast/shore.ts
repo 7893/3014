@@ -1,37 +1,37 @@
 // Both the painting and the GPU use the same cubic shoreline geometry.
 const curves = [
-  [
-    [0, 0.855],
-    [0.14, 0.88],
-    [0.36, 0.995],
-    [0.57, 0.995],
-  ],
-  [
-    [1, 0.855],
-    [0.9, 0.86],
-    [0.72, 0.995],
-    [0.57, 0.995],
-  ],
+	[
+		[0, 0.855],
+		[0.14, 0.88],
+		[0.36, 0.995],
+		[0.57, 0.995],
+	],
+	[
+		[1, 0.855],
+		[0.9, 0.86],
+		[0.72, 0.995],
+		[0.57, 0.995],
+	],
 ];
 export function beachPath(W: number, H: number, side: number) {
-  const [a, b, c, d] = curves[side],
-    path = new Path2D();
-  path.moveTo(a[0] * W, a[1] * H);
-  path.bezierCurveTo(
-    b[0] * W,
-    b[1] * H,
-    c[0] * W,
-    c[1] * H,
-    d[0] * W,
-    d[1] * H,
-  );
-  path.lineTo(d[0] * W, H);
-  path.lineTo(a[0] * W, H);
-  path.closePath();
-  return path;
+	const [a, b, c, d] = curves[side],
+		path = new Path2D();
+	path.moveTo(a[0] * W, a[1] * H);
+	path.bezierCurveTo(
+		b[0] * W,
+		b[1] * H,
+		c[0] * W,
+		c[1] * H,
+		d[0] * W,
+		d[1] * H,
+	);
+	path.lineTo(d[0] * W, H);
+	path.lineTo(a[0] * W, H);
+	path.closePath();
+	return path;
 }
 const vectors = curves.map((curve) =>
-  curve.map((p) => `vec2(${p.map((n) => n.toFixed(3)).join(",")})`),
+	curve.map((p) => `vec2(${p.map((n) => n.toFixed(3)).join(",")})`),
 );
 export const shoreline = `
 vec2 beachCurve(float t,vec2 a,vec2 b,vec2 c,vec2 d){

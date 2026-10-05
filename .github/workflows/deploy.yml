@@ -23,5 +23,5 @@ jobs:
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
-          rsync -avz --delete dist/ $SSH_USER@$SSH_HOST:~/files/
+          mkdir -p ~/.ssh
+          rsync -avz -e "ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15" --delete dist/ $SSH_USER@$SSH_HOST:~/files/

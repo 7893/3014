@@ -1,9 +1,9 @@
+import { boat } from "../../../rendering/shaders/boat.ts";
+import { noise } from "../../../rendering/shaders/common.ts";
+import { ripples } from "../../../rendering/shaders/ripples.ts";
 import { skyEffects } from "../../../rendering/shaders/sky.ts";
 import { surface } from "../../../rendering/shaders/surface.ts";
 import { lights } from "./lights.ts";
-import { noise } from "../../../rendering/shaders/common.ts";
-import { boat } from "../../../rendering/shaders/boat.ts";
-import { ripples } from "../../../rendering/shaders/ripples.ts";
 export const fragment = `#version 300 es
 precision highp float;
 in vec2 v_uv;

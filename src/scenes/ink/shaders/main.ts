@@ -1,12 +1,12 @@
-import { surface } from "../../../rendering/shaders/surface.ts";
+import { boat } from "../../../rendering/shaders/boat.ts";
 import { noise } from "../../../rendering/shaders/common.ts";
+import { ripples } from "../../../rendering/shaders/ripples.ts";
+import { surface } from "../../../rendering/shaders/surface.ts";
+import { birds } from "./birds.ts";
 import { mist } from "./mist.ts";
+import { sky } from "./sky.ts";
 import { water } from "./water.ts";
 import { wildlife } from "./wildlife.ts";
-import { sky } from "./sky.ts";
-import { birds } from "./birds.ts";
-import { boat } from "../../../rendering/shaders/boat.ts";
-import { ripples } from "../../../rendering/shaders/ripples.ts";
 export const fragment = `#version 300 es
 precision highp float;
 in vec2 v_uv;

@@ -1,12 +1,11 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
 	"vcs": {
 		"enabled": true,
 		"clientKind": "git",
 		"useIgnoreFile": true
 	},
 	"files": {
-		"includes": ["**", "!!**/dist"]
+		"ignoreUnknown": false
 	},
 	"formatter": {
 		"enabled": true,
@@ -15,19 +14,25 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"preset": "recommended"
-		}
-	},
-	"javascript": {
-		"formatter": {
-			"quoteStyle": "double"
-		}
-	},
-	"assist": {
-		"enabled": true,
-		"actions": {
-			"source": {
-				"organizeImports": "on"
+			"style": {
+				"noDescendingSpecificity": "off",
+				"noParameterAssign": "off",
+				"useNodeAssertStrict": "off",
+				"useNumberNamespace": "off",
+				"noNonNullAssertion": "off"
+			},
+			"complexity": {
+				"noImportantStyles": "off",
+				"noForEach": "off"
+			},
+			"suspicious": {
+				"noShadowRestrictedNames": "off",
+				"useIterableCallbackReturn": "off",
+				"noAssignInExpressions": "off",
+				"noArrayIndexKey": "off",
+				"noExplicitAny": "off",
+				"noGlobalIsNan": "off",
+				"noGlobalAssign": "off"
 			}
 		}
 	}

@@ -1,4 +1,5 @@
 import { BOAT_FRAME, BOAT_LANTERN } from "../../config/actors.ts";
+
 const { x, y, width, height } = BOAT_FRAME;
 // Pixi renders actor coverage and an oar mask into a small shared texture.
 export const boat = `

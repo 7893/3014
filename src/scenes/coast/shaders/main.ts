@@ -1,12 +1,12 @@
+import { boat } from "../../../rendering/shaders/boat.ts";
+import { noise } from "../../../rendering/shaders/common.ts";
+import { ripples } from "../../../rendering/shaders/ripples.ts";
+import { surface } from "../../../rendering/shaders/surface.ts";
+import { palmAnchors } from "../composition.ts";
 import { people } from "./people.ts";
 import { sails } from "./sails.ts";
-import { palmAnchors } from "../composition.ts";
 import { surf } from "./surf.ts";
 import { wind } from "./wind.ts";
-import { surface } from "../../../rendering/shaders/surface.ts";
-import { noise } from "../../../rendering/shaders/common.ts";
-import { boat } from "../../../rendering/shaders/boat.ts";
-import { ripples } from "../../../rendering/shaders/ripples.ts";
 export const fragment = `#version 300 es
 precision highp float;
 in vec2 v_uv;
